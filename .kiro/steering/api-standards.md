@@ -204,3 +204,15 @@ El dominio y la ruta del ejemplo son ilustrativos. Los valores definitivos deben
 - [RFC 9110 — HTTP Semantics](https://www.rfc-editor.org/rfc/rfc9110.html)
 - [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
 - [OWASP REST Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/REST_Security_Cheat_Sheet.html)
+
+## Lenguaje y estilo
+
+Toda la documentación de este proyecto debe seguir las convenciones establecidas en `lenguaje.md`:
+
+- **Documentación y specs:** escritos en español, con términos técnicos y acrónimos en inglés
+- **Código:** nombres en inglés siguiendo convenciones de Go, TypeScript y React
+- **Comentarios en código:** en inglés (estándar Go)
+- **Mensajes de error al usuario:** en español
+- **Logs de producción:** en inglés (compatibilidad con herramientas de monitoreo)
+
+Ver el documento completo en `.kiro/steering/lenguaje.md`.

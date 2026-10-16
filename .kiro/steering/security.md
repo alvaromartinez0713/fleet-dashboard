@@ -154,3 +154,15 @@ Las decisiones de seguridad deben considerar el contexto de la aplicación, los 
 - [CWE](https://cwe.mitre.org/)
 
 Estas referencias sirven como guías para seleccionar controles aplicables; no implican que todos los requisitos de cada estándar deban adoptarse sin evaluar el contexto del proyecto.
+
+## Lenguaje y estilo
+
+Toda la documentación de este proyecto debe seguir las convenciones establecidas en `lenguaje.md`:
+
+- **Documentación y specs:** escritos en español, con términos técnicos y acrónimos en inglés
+- **Código:** nombres en inglés siguiendo convenciones de Go, TypeScript y React
+- **Comentarios en código:** en inglés (estándar Go)
+- **Mensajes de error al usuario:** en español
+- **Logs de producción:** en inglés (compatibilidad con herramientas de monitoreo)
+
+Ver el documento completo en `.kiro/steering/lenguaje.md`.

@@ -292,3 +292,15 @@ Los cambios de estructura deberán:
 - Mantener una complejidad proporcional a las necesidades del MVP.
 
 Si una modificación afecta significativamente los límites arquitectónicos o introduce un patrón nuevo, deberá justificarse en la Spec correspondiente y documentarse mediante ADR cuando corresponda.
+
+## Lenguaje y estilo
+
+Toda la documentación de este proyecto debe seguir las convenciones establecidas en `lenguaje.md`:
+
+- **Documentación y specs:** escritos en español, con términos técnicos y acrónimos en inglés
+- **Código:** nombres en inglés siguiendo convenciones de Go, TypeScript y React
+- **Comentarios en código:** en inglés (estándar Go)
+- **Mensajes de error al usuario:** en español
+- **Logs de producción:** en inglés (compatibilidad con herramientas de monitoreo)
+
+Ver el documento completo en `.kiro/steering/lenguaje.md`.
