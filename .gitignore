@@ -1,0 +1,115 @@
+# ============================================================================
+# Fleet Platform - Root .gitignore
+# ============================================================================
+# This file contains general patterns for the entire monorepo.
+# Project-specific patterns are in each subdirectory's .gitignore.
+# ============================================================================
+
+# ----------------------------------------------------------------------------
+# Environment and Secrets
+# ----------------------------------------------------------------------------
+# NEVER commit environment files with real secrets
+.env
+.env.local
+.env.*.local
+*.env
+
+# ----------------------------------------------------------------------------
+# IDE and Editor
+# ----------------------------------------------------------------------------
+# VS Code
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# JetBrains IDEs (IntelliJ, GoLand, WebStorm, etc.)
+.idea/
+*.iml
+*.iws
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+.\#*
+
+# Sublime Text
+*.sublime-workspace
+*.sublime-project
+
+# ----------------------------------------------------------------------------
+# Operating System
+# ----------------------------------------------------------------------------
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Linux
+*~
+.directory
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# ----------------------------------------------------------------------------
+# Logs and Temporary Files
+# ----------------------------------------------------------------------------
+*.log
+logs/
+*.tmp
+*.temp
+tmp/
+temp/
+
+# ----------------------------------------------------------------------------
+# Docker
+# ----------------------------------------------------------------------------
+# Do NOT ignore docker-compose.yml (it's infrastructure as code)
+# Ignore override files for local development only
+docker-compose.override.yml
+.dockerignore.local
+
+# ----------------------------------------------------------------------------
+# Terraform (when added)
+# ----------------------------------------------------------------------------
+# infrastructure/terraform/.gitignore will handle Terraform-specific patterns
+
+# ----------------------------------------------------------------------------
+# Testing and Coverage
+# ----------------------------------------------------------------------------
+coverage/
+*.coverage
+.nyc_output/
+test-results/
+.pytest_cache/
+
+# ----------------------------------------------------------------------------
+# Build Artifacts (general)
+# ----------------------------------------------------------------------------
+dist/
+build/
+out/
+
+# ----------------------------------------------------------------------------
+# Dependencies (general - specific patterns in project .gitignore)
+# ----------------------------------------------------------------------------
+node_modules/
+
+# ============================================================================
+# Note: Project-specific patterns (Go binaries, frontend builds, mobile cache)
+# are handled in their respective .gitignore files:
+# - backend/go/.gitignore
+# - frontend/.gitignore (when created)
+# - mobile/.gitignore (when created)
+# ============================================================================

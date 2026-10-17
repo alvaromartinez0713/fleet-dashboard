@@ -1,0 +1,74 @@
+# ============================================================================
+# Backend Go - .gitignore
+# ============================================================================
+# Go-specific patterns for backend microservices
+# ============================================================================
+
+# ----------------------------------------------------------------------------
+# Go Build Artifacts
+# ----------------------------------------------------------------------------
+# Binaries
+bin/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Compiled binaries for all services
+ingestion
+worker
+cmd/ingestion/ingestion
+cmd/worker/worker
+
+# Test binaries
+*.test
+
+# Output of the go coverage tool
+*.out
+coverage.txt
+coverage.html
+
+# ----------------------------------------------------------------------------
+# Go Dependencies
+# ----------------------------------------------------------------------------
+# Dependency directories (use go mod instead)
+vendor/
+
+# ----------------------------------------------------------------------------
+# Go Testing
+# ----------------------------------------------------------------------------
+# Property-based testing artifacts (when added)
+.rapid_test_cache/
+
+# Mutation testing reports (when added)
+mutation-report/
+gremlins-report/
+
+# ----------------------------------------------------------------------------
+# Go Development
+# ----------------------------------------------------------------------------
+# Air live reload tool config (if used)
+.air.toml
+tmp/
+
+# Delve debugger
+__debug_bin
+
+# ----------------------------------------------------------------------------
+# Environment
+# ----------------------------------------------------------------------------
+# Keep .env.example (it's documentation), ignore actual .env
+.env
+.env.local
+.env.*.local
+
+# ----------------------------------------------------------------------------
+# Docker
+# ----------------------------------------------------------------------------
+# Ignore locally built images metadata
+.docker/
+
+# ============================================================================
+# Note: General patterns (OS files, IDE files, logs) are in root .gitignore
+# ============================================================================
