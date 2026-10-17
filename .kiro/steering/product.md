@@ -286,3 +286,15 @@ Las siguientes decisiones deberán resolverse progresivamente antes o durante la
 7. **Circuit Breaker:** dependencias protegidas, condiciones de apertura y recuperación.
 8. **Pruebas de carga y caos:** escenarios, métricas y criterios para interpretar resultados.
 9. **Infraestructura y CI/CD:** componentes desplegados, secretos, configuración y alcance de la automatización.
+
+## Lenguaje y estilo
+
+Toda la documentación de este proyecto debe seguir las convenciones establecidas en `lenguaje.md`:
+
+- **Documentación y specs:** escritos en español, con términos técnicos y acrónimos en inglés
+- **Código:** nombres en inglés siguiendo convenciones de Go, TypeScript y React
+- **Comentarios en código:** en inglés (estándar Go)
+- **Mensajes de error al usuario:** en español
+- **Logs de producción:** en inglés (compatibilidad con herramientas de monitoreo)
+
+Ver el documento completo en `.kiro/steering/lenguaje.md`.

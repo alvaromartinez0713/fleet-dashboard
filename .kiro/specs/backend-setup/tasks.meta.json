@@ -1,0 +1,455 @@
+{
+  "pbtResults": {},
+  "executionHistory": {
+    "1.1 Crear `backend/go/go.mod` con `module` path, versión `go 1.26.0` y dependencias directas: `github.com/gin-gonic/gin v1.9.1`, `go.uber.org/zap v1.27.0`, `github.com/google/uuid v1.6.0`; ejecutar `go mod tidy` para generar `go.sum`": [
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792266525541
+      },
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792266540455
+      },
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792266726005
+      }
+    ],
+    "1.2 Crear los directorios de los dos slices bajo `backend/go/internal/`: `ingestion/domain`, `ingestion/ports`, `ingestion/http/middleware`, `ingestion/http/health`, `ingestion/config`, `worker/domain`, `worker/ports`, `worker/config`; y `cmd/ingestion`, `cmd/worker`": [
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792266525673
+      },
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792266731684
+      },
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792266802689
+      }
+    ],
+    "2.1 Crear `internal/ingestion/domain/errors.go` — `package domain`; `AppError` con campos `Code string`, `Message string`, `Inner error`, `IsRecoverable bool`; funciones `NewAppError` y `NewRecoverableError`; implementar `Error()` y `Unwrap()`; sin imports de Gin, Kafka ni drivers SQL": [
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792266525728
+      },
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792266807729
+      },
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792266978268
+      }
+    ],
+    "2.2 Crear `internal/ingestion/domain/trace.go` — `package domain`; tipo `TraceID string`; `NewTraceID()` usando `github.com/google/uuid` (UUID v4); `ContextWithTraceID(ctx, tid)`; `TraceIDFromContext(ctx)` devuelve `(\"\", false)` si no existe; sin imports de Gin ni zap": [
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792266525778
+      },
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792266997393
+      },
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792267087218
+      }
+    ],
+    "2.3 Crear `internal/ingestion/ports/config.go` — `package ports`; `Config{HTTP{Port int, ReadTimeout, WriteTimeout, ShutdownTimeout time.Duration}, Logging{Level, Format string}}`; sin campos Kafka ni PostgreSQL; `ConfigLoader`; `Validator`; `ValidationError{Field, Rule, Message string}`": [
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792266525906
+      },
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792266809957
+      },
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792266980761
+      }
+    ],
+    "2.4 Crear `internal/ingestion/ports/logging.go` — `package ports`; interfaz `Logger` con métodos `Info`, `Warn`, `Error`, `Fatal`, `DPanic`, `Panic`, `WithTraceID(ctx, domain.TraceID)`, `GetTraceID(ctx)`, `WithFields(...Field)`; `Field{Key string; Value interface{}}`; función `BuildFields(pairs ...interface{}) []Field`": [
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792266525961
+      },
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792266811615
+      },
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792266976950
+      }
+    ],
+    "2.5 Crear `internal/ingestion/ports/server.go` — `package ports`; `HTTPServer` con `Start() error` y `Stop(ctx context.Context) error`; y `internal/ingestion/ports/health.go` — `HealthChecker` con `Check(ctx context.Context) (bool, error)`": [
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792266526010
+      },
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792266812533
+      },
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792266979670
+      }
+    ],
+    "3.1 Crear `internal/ingestion/http/router.go` — `package ingestionhttp`; `NewRouter(cfg ports.Config, logger ports.Logger, healthChecker ports.HealthChecker) *Router`; `gin.New()`; `HandleMethodNotAllowed=true`; `ReadTimeout` y `WriteTimeout` de `cfg.HTTP`; cadena de middleware en orden: `trace_id → logging → recovery/error`; handlers `NoRoute` (404) y `NoMethod` (405) con Problem Details; `Start()` vincula el puerto e inicia en goroutine; `Stop(ctx)` llama a `http.Server.Shutdown`; `registerRoutes()` registra solo `GET /health`": [
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792266526061
+      },
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792267093083
+      },
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792267317625
+      }
+    ],
+    "3.2 Crear `internal/ingestion/http/middleware/trace_id.go` — middleware Gin que extrae `X-Trace-ID`; si es UUID v4 válido (36 chars, formato `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`) lo reutiliza; en cualquier otro caso genera uno nuevo con `domain.NewTraceID()`; almacena en contexto con `domain.ContextWithTraceID`; escribe header de respuesta `X-Trace-ID` antes de `c.Next()`": [
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792266526125
+      },
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792267094621
+      },
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792267309233
+      }
+    ],
+    "3.3 Crear `internal/ingestion/http/middleware/logging.go` — middleware Gin que registra método, path, status, `latency_ms`, `trace_id` por solicitud; lee TraceID del contexto con `domain.TraceIDFromContext` después de `c.Next()`; no registra query string, `Authorization`, `Cookie` ni cuerpo": [
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792266526177
+      },
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792267095841
+      },
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792267313353
+      }
+    ],
+    "3.4 Crear `internal/ingestion/http/middleware/error.go` — struct `ProblemDetails` con campos `Type string`, `Title string`, `Status int`, `Detail string`, `Instance string` y tags JSON en inglés (`json:\"type\"` etc.); recovery de panic → 500 Problem Details (stack trace solo en logs, nunca en respuesta); `NoRoute` → 404; `NoMethod` → 405; `Content-Type: application/problem+json` en todas las respuestas de error": [
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792266526237
+      },
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792267103659
+      },
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792267311674
+      }
+    ],
+    "3.5 Crear `internal/ingestion/http/health/handler.go` — `HealthHandler` con `NewHealthHandler(checker ports.HealthChecker)`; `Handle(c *gin.Context)` llama a `checker.Check` con timeout de 1 segundo; responde 200 `{\"status\":\"healthy\"}` si `true`; 503 `{\"status\":\"unhealthy\"}` si `false` o error; sin incluir el texto del error en la respuesta": [
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792266526289
+      },
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792267105162
+      },
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792267315731
+      }
+    ],
+    "4.1 Crear `internal/ingestion/config/loader.go` — `package config`; `EnvConfigLoader`; lee con `os.LookupEnv` únicamente `HTTP_PORT`, `HTTP_READ_TIMEOUT`, `HTTP_WRITE_TIMEOUT`, `HTTP_SHUTDOWN_TIMEOUT`, `LOG_LEVEL`, `LOG_FORMAT`; sin campos Kafka ni PostgreSQL; `getEnvRequired` falla con nombre del campo si la variable no está definida; `parseInt`/`parseDuration` fallan con nombre del campo si el formato es incorrecto; el error identifica el campo sin incluir su valor": [
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792266526363
+      },
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792267324545
+      },
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792267572090
+      }
+    ],
+    "4.2 Crear `internal/ingestion/config/validator.go` — `package config`; `ConfigValidator` con `Validate(cfg ports.Config) []ports.ValidationError`; valida `HTTP.Port` en rango 1–65535; `HTTP.ReadTimeout` y `HTTP.WriteTimeout` ≥ 1s; `HTTP.ShutdownTimeout` entre 1s y 300s; cada `ValidationError` incluye `Field` y `Message` sin el valor del campo": [
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792266526426
+      },
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792267326182
+      },
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792267574172
+      }
+    ],
+    "4.3 Crear `internal/ingestion/config/logger.go` — `package config`; `NewLogger(cfg ports.Config) (ports.Logger, func(), error)`; `ZapLogger` que envuelve `*zap.Logger` con codificación JSON y campos base `timestamp`, `level`, `message`; `WithTraceID` guarda TraceID en contexto; `GetTraceID` lo recupera e inyecta como campo `trace_id` en logs; cleanup llama `logger.Sync()`; sin tokens ni secretos en logs": [
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792266526493
+      },
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792267327592
+      },
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792267577308
+      }
+    ],
+    "4.4 Crear `internal/ingestion/config/composer.go` — `package config`; `DependencyComposer`; `NewDependencyComposer(cfg ports.Config, logger ports.Logger)`; `ComposeAPI() (ports.HTTPServer, error)` instancia `HealthHandler`, los middleware y el `Router` y los conecta; si la construcción de una dependencia falla libera los recursos ya inicializados y retorna error": [
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792266526558
+      },
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792267328963
+      },
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792267579700
+      }
+    ],
+    "5.1 Crear `internal/worker/domain/errors.go` y `internal/worker/domain/trace.go` — `package domain`; copias independientes de `AppError` y `TraceID` del slice ingestion; el paquete no importa ni referencia `internal/ingestion`": [
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792266526612
+      },
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792267330113
+      },
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792267581281
+      }
+    ],
+    "5.2 Crear `internal/worker/ports/config.go` — `package ports`; `Config{Worker{ShutdownTimeout time.Duration}, Logging{Level, Format string}}`; sin campos HTTP, Kafka ni PostgreSQL; `ConfigLoader`; `Validator`; `ValidationError`; y `internal/worker/ports/logging.go` — copia independiente de `Logger`, `Field`, `BuildFields`": [
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792266526674
+      },
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792267587230
+      },
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792267774569
+      }
+    ],
+    "5.3 Crear `internal/worker/config/loader.go`, `validator.go` y `logger.go` — `package config`; loader lee únicamente `WORKER_SHUTDOWN_TIMEOUT`, `LOG_LEVEL`, `LOG_FORMAT`; validator valida `Worker.ShutdownTimeout` en rango 1–300s; logger idéntico a `internal/ingestion/config/logger.go` pero copia independiente; ningún archivo importa `internal/ingestion`": [
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792266526741
+      },
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792267588373
+      },
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792267779097
+      }
+    ],
+    "5.4 Crear `internal/worker/config/composer.go` — `package config`; `DependencyComposer`; `NewDependencyComposer(cfg ports.Config, logger ports.Logger)`; `ComposeWorker() (func(), error)` devuelve función de limpieza de recursos (esqueleto); incluir comentario en inglés indicando que la lógica de consumo de mensajes se implementa en la Spec de ingesta": [
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792266526909
+      },
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792267589989
+      },
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792267776578
+      }
+    ],
+    "6.1 Crear `backend/go/cmd/ingestion/main.go` — importa solo `internal/ingestion/...`; flujo: `EnvConfigLoader + ConfigValidator` → error a stderr + `os.Exit(1)` sin abrir puertos → `NewLogger` → `DependencyComposer.ComposeAPI` → `server.Start()` en goroutine → `SIGINT`/`SIGTERM` → `server.Stop(ctx)` con `HTTP.ShutdownTimeout` → segunda señal durante apagado → `os.Exit(1)` inmediato; sin reglas de negocio ni handlers en `main.go`": [
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792266526972
+      },
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792267789467
+      },
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792268306183
+      }
+    ],
+    "6.2 Crear `backend/go/cmd/worker/main.go` — importa solo `internal/worker/...`; flujo: cargar config → error a stderr + `os.Exit(1)` → `NewLogger` → `DependencyComposer.ComposeWorker` → `SIGINT`/`SIGTERM` → `cleanup()` → `os.Exit(0)` en ≤ 10s → segunda señal → `os.Exit(1)` inmediato; comentario en inglés indicando que la lógica de consumo de mensajes se implementa en la Spec de ingesta": [
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792266527027
+      },
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792267785816
+      },
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792268304421
+      }
+    ],
+    "6.3 Crear `backend/go/Makefile` — `build-ingestion` compila `cmd/ingestion` a `bin/ingestion` con `-mod=readonly`; `build-worker` compila `cmd/worker` a `bin/worker` con `-mod=readonly`; `run` levanta `docker compose up -d --build --wait`; `clean` elimina `bin/`": [
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792266527077
+      },
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792267790791
+      },
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792268298658
+      }
+    ],
+    "6.4 Crear `docker-compose.yml` en la raíz del repositorio con solo el servicio `ingestion` (`build.context: ./backend/go`, puerto publicado `${HTTP_PORT:-8080}:8080`, configuración desde variables de entorno; comentario en inglés indicando que Kafka y TimescaleDB no se inician en este compose porque sus adaptadores se implementan en la Spec de ingesta); crear `.env.example` en la raíz con `HTTP_PORT`, `HTTP_READ_TIMEOUT`, `HTTP_WRITE_TIMEOUT`, `HTTP_SHUTDOWN_TIMEOUT`, `WORKER_SHUTDOWN_TIMEOUT`, `LOG_LEVEL`, `LOG_FORMAT` y valores de marcador de posición; sin secretos reales; comentario indicando que el archivo es solo de referencia": [
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792266527140
+      },
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792267787809
+      },
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792268302000
+      }
+    ],
+    "1. Inicializar el módulo Go y crear la estructura de directorios": [
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792266802783
+      }
+    ],
+    "2. Definir dominio y ports del slice ingestion": [
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792267087284
+      }
+    ],
+    "3. Implementar los adaptadores de entrada HTTP del slice ingestion": [
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792267317704
+      }
+    ],
+    "4. Implementar la infraestructura de configuración del slice ingestion": [
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792267579778
+      }
+    ],
+    "5. Implementar el slice worker con copias independientes de dominio, ports e infraestructura": [
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792267779178
+      }
+    ],
+    "6. Crear los puntos de entrada y la configuración de ejecución local": [
+      {
+        "executionId": "e8792769-3ce8-46f7-88cd-48dbc929ec9b",
+        "chatSessionId": "sess_9d3856f2-f2db-4d42-8b46-c35c3738f44e",
+        "timestamp": 1792268306288
+      }
+    ]
+  }
+}

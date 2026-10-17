@@ -32,7 +32,7 @@ Las tecnologías descritas representan la selección inicial del proyecto. Cualq
 | CI/CD | GitHub Actions | Automatización de validaciones y flujos de integración |
 | Automatización móvil | Fastlane | Automatización de tareas de construcción y distribución móvil |
 
-La elección de bibliotecas auxiliares, versiones, gestores de paquetes y herramientas de pruebas se concretará durante las Specs de cada funcionalidad.
+La elección de bibliotecas auxiliares, versiones y gestores de paquetes se concretará durante las Specs de cada funcionalidad. Las herramientas de pruebas siguen `testing.md`.
 
 ## 3. Backend
 
@@ -151,17 +151,7 @@ El Circuit Breaker no reemplaza la idempotencia, la recuperación de consumidore
 
 ## 9. Pruebas
 
-La solución deberá incorporar pruebas en los niveles apropiados:
-
-- **Unitarias:** reglas de dominio y casos de uso.
-- **Integración:** adaptadores, persistencia y mensajería.
-- **Contrato o API:** validación de entradas y respuestas.
-- **Extremo a extremo:** recorridos prioritarios del MVP.
-- **Carga y resiliencia:** scripts de k6 con los escenarios definidos en `product.md`.
-
-Las pruebas deberán poder ejecutarse de forma reproducible y documentar sus dependencias.
-
-Los resultados de rendimiento deberán proceder de ejecuciones reales. No se deberán inventar métricas ni presentar objetivos como resultados alcanzados.
+La estrategia, los tipos de prueba, las herramientas de referencia y las reglas de escritura se definen en `testing.md`, que es el estándar único de pruebas del proyecto.
 
 ## 10. Contenedores e infraestructura
 
@@ -200,3 +190,15 @@ Cuando una decisión afecte significativamente la arquitectura, la seguridad, el
 Cada ADR deberá explicar el contexto, las opciones consideradas, la decisión adoptada y sus consecuencias.
 
 Los cambios deberán mantener coherencia con los requisitos definidos en `product.md` y con los límites arquitectónicos de `structure.md`.
+
+## Lenguaje y estilo
+
+Toda la documentación de este proyecto debe seguir las convenciones establecidas en `lenguaje.md`:
+
+- **Documentación y specs:** escritos en español, con términos técnicos y acrónimos en inglés
+- **Código:** nombres en inglés siguiendo convenciones de Go, TypeScript y React
+- **Comentarios en código:** en inglés (estándar Go)
+- **Mensajes de error al usuario:** en español
+- **Logs de producción:** en inglés (compatibilidad con herramientas de monitoreo)
+
+Ver el documento completo en `.kiro/steering/lenguaje.md`.

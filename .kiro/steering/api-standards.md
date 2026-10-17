@@ -188,13 +188,12 @@ El dominio y la ruta del ejemplo son ilustrativos. Los valores definitivos deben
 - Mantener alineados el contrato, la implementación, las pruebas y la documentación.
 - No incrementar la versión por cambios internos que no alteren el contrato público.
 
-## 13. Documentación y pruebas de contrato
+## 13. Documentación del contrato
 
 - Documentar rutas, métodos, parámetros, esquemas, códigos de estado, errores y requisitos de seguridad.
 - Utilizar OpenAPI cuando el proyecto lo adopte.
 - Representar las respuestas de error con el esquema de Problem Details y el tipo de contenido correspondiente.
-- Probar contratos exitosos y fallidos.
-- Verificar que los consumidores manejen correctamente los códigos HTTP y los tipos de problema.
+- Las pruebas de contrato siguen `testing.md` (sección 9).
 - Mantener ejemplos coherentes con la implementación real.
 - Evitar que la documentación prometa comportamientos que no estén implementados o probados.
 
@@ -204,3 +203,15 @@ El dominio y la ruta del ejemplo son ilustrativos. Los valores definitivos deben
 - [RFC 9110 — HTTP Semantics](https://www.rfc-editor.org/rfc/rfc9110.html)
 - [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
 - [OWASP REST Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/REST_Security_Cheat_Sheet.html)
+
+## Lenguaje y estilo
+
+Toda la documentación de este proyecto debe seguir las convenciones establecidas en `lenguaje.md`:
+
+- **Documentación y specs:** escritos en español, con términos técnicos y acrónimos en inglés
+- **Código:** nombres en inglés siguiendo convenciones de Go, TypeScript y React
+- **Comentarios en código:** en inglés (estándar Go)
+- **Mensajes de error al usuario:** en español
+- **Logs de producción:** en inglés (compatibilidad con herramientas de monitoreo)
+
+Ver el documento completo en `.kiro/steering/lenguaje.md`.
