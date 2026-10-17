@@ -16,8 +16,7 @@ bin/
 *.dylib
 
 # Compiled binaries for all services
-ingestion
-worker
+/worker
 cmd/ingestion/ingestion
 cmd/worker/worker
 
