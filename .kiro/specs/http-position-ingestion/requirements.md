@@ -31,11 +31,11 @@ Este requisito es fundamental para RF-04 (Ingesta asincrónica de telemetría) y
 
 #### Acceptance Criteria
 
-1. CUANDO se recibe una solicitud HTTP POST válida en el endpoint `/api/v1/positions`, EL servicio DEBE aceptar la solicitud y procesarla.
-2. CUANDO una solicitud HTTP POST llega sin el encabezado `Content-Type: application/json`, EL servicio DEBE rechazar la solicitud con código de estado 415.
-3. DONDE el cliente desea enviar una sola posición (no un lote), EL servicio DEBE permitir enviar una posición individual en el body de la solicitud como un objeto JSON único.
-4. CUANDO el cliente envía un lote de posiciones (array JSON) en lugar de una posición individual, EL servicio DEBE rechazar la solicitud con código de estado 422 (Unprocessable Content).
-5. CUANDO un evento está encolado esperando publicación, EL servicio DEBE responder al cliente con HTTP 202 (Accepted) antes de intentar publicar en Kafka.
+1. WHEN a valid HTTP POST request is received at endpoint `/api/v1/positions`, THE service SHALL accept the request and process it.
+2. WHEN an HTTP POST request arrives without the `Content-Type: application/json` header, THE service SHALL reject the request with status code 415.
+3. WHERE the client wants to send a single position (not a batch), THE service SHALL allow sending a single position in the request body as a unique JSON object.
+4. WHEN the client sends a batch of positions (JSON array) instead of a single position, THE service SHALL reject the request with status code 422 (Unprocessable Content).
+5. WHEN an event is queued waiting for publication, THE service SHALL respond to the client with HTTP 202 (Accepted) before attempting to publish to Kafka.
 
 ### Requirement 2: Validar el contrato de entrada explícitamente
 
@@ -43,15 +43,15 @@ Este requisito es fundamental para RF-04 (Ingesta asincrónica de telemetría) y
 
 #### Acceptance Criteria
 
-1. EL servicio DEBE validar que el body contiene un objeto JSON único con la estructura esperada.
-2. CUANDO falta un campo obligatorio (vehicle_id, latitude, longitude, captured_at), EL servicio DEBE rechazar la solicitud con código de estado 422 y devolver un Problem Details indicando el campo faltante según RFC 9457.
-3. CUANDO el campo `vehicle_id` está vacío o es nulo, EL servicio DEBE rechazar la solicitud con código de estado 422.
-4. CUANDO el campo `latitude` no es un número o está fuera del rango [-90.0, 90.0] (precisión IEEE 754 de 64 bits), EL servicio DEBE rechazar la solicitud con código de estado 422.
-5. CUANDO el campo `longitude` no es un número o está fuera del rango [-180.0, 180.0] (precisión IEEE 754 de 64 bits), EL servicio DEBE rechazar la solicitud con código de estado 422.
-6. CUANDO el campo `captured_at` no es una cadena ISO 8601 válida con zona horaria UTC (formato: YYYY-MM-DDTHH:MM:SS.sssZ o YYYY-MM-DDTHH:MM:SS+00:00), EL servicio DEBE rechazar la solicitud con código de estado 422.
-7. CUANDO la solicitud contiene campos JSON adicionales desconocidos, EL servicio DEBE procesarla ignorando los campos adicionales (permisivo en la entrada).
-8. CUANDO la solicitud supera el tamaño máximo permitido (10 KB, medido en bytes UTF-8 del body HTTP), EL servicio DEBE rechazar la solicitud con código de estado 413 (Content Too Large).
-9. CUANDO el body JSON es malformado (sintaxis JSON inválida), EL servicio DEBE rechazar la solicitud con código de estado 400 (Bad Request).
+1. THE service SHALL validate that the body contains a unique JSON object with the expected structure.
+2. WHEN a required field is missing (vehicle_id, latitude, longitude, captured_at), THE service SHALL reject the request with status code 422 and return a Problem Details indicating the missing field according to RFC 9457.
+3. WHEN the `vehicle_id` field is empty or null, THE service SHALL reject the request with status code 422.
+4. WHEN the `latitude` field is not a number or is outside the range [-90.0, 90.0] (IEEE 754 64-bit precision), THE service SHALL reject the request with status code 422.
+5. WHEN the `longitude` field is not a number or is outside the range [-180.0, 180.0] (IEEE 754 64-bit precision), THE service SHALL reject the request with status code 422.
+6. WHEN the `captured_at` field is not a valid ISO 8601 string with UTC timezone (format: YYYY-MM-DDTHH:MM:SS.sssZ or YYYY-MM-DDTHH:MM:SS+00:00), THE service SHALL reject the request with status code 422.
+7. WHEN the request contains unknown additional JSON fields, THE service SHALL process it while ignoring the additional fields (permissive on input).
+8. WHEN the request exceeds the maximum allowed size (10 KB, measured in UTF-8 bytes of the HTTP body), THE service SHALL reject the request with status code 413 (Content Too Large).
+9. WHEN the JSON body is malformed (invalid JSON syntax), THE service SHALL reject the request with status code 400 (Bad Request).
 
 ### Requirement 3: Publicar posiciones en Kafka de forma asincrónica
 
@@ -59,14 +59,14 @@ Este requisito es fundamental para RF-04 (Ingesta asincrónica de telemetría) y
 
 #### Acceptance Criteria
 
-1. CUANDO se recibe una solicitud de posición válida, EL servicio DEBE publicar el evento en positions_topic de Kafka de forma asincrónica (sin esperar la confirmación de Kafka antes de responder al cliente).
-2. EL servicio DEBE mantener una cola interna de hasta 10,000 eventos para encolar publicaciones y procesarlas en background.
-3. CUANDO se publica en Kafka, EL servicio DEBE usar:
-   - Clave de partición: `vehicle_id` (garantiza orden por vehículo)
-   - Formato: JSON con campos: event_id, vehicle_id, latitude, longitude, accuracy, captured_at, received_at, processed_at
-   - Confirmación Kafka: `acks=1` (ACK de 1 replica como mínimo)
-4. CUANDO se publica con éxito en Kafka, EL servicio DEBE registrar un mensaje de nivel INFO indicando el trace_id y el vehicle_id.
-5. DONDE el tiempo es crítico, EL servicio DEBE garantizar latencia p95 ≤ 500ms entre recepción HTTP y confirmación de Kafka.
+1. WHEN a valid position request is received, THE service SHALL publish the event to positions_topic in Kafka asynchronously (without waiting for Kafka confirmation before responding to the client).
+2. THE service SHALL maintain an internal queue of up to 10,000 events to queue publications and process them in the background.
+3. WHEN publishing to Kafka, THE service SHALL use:
+   - Partition key: `vehicle_id` (ensures order per vehicle)
+   - Format: JSON with fields: event_id, vehicle_id, latitude, longitude, accuracy, captured_at, received_at, processed_at
+   - Kafka confirmation: `acks=1` (ACK from at least 1 replica)
+4. WHEN successfully published to Kafka, THE service SHALL log an INFO level message indicating the trace_id and vehicle_id.
+5. WHERE time is critical, THE service SHALL guarantee p95 latency ≤ 500ms between HTTP reception and Kafka confirmation.
 
 ### Requirement 4: Responder rápidamente al cliente con HTTP 202 Accepted
 
@@ -74,15 +74,15 @@ Este requisito es fundamental para RF-04 (Ingesta asincrónica de telemetría) y
 
 #### Acceptance Criteria
 
-1. CUANDO se recibe una solicitud de posición válida, EL servicio DEBE responder con HTTP 202 (Accepted) en menos de 100 milisegundos (p99, medido desde el primer byte del socket hasta el último byte de respuesta).
-2. CUANDO responde con HTTP 202, EL servicio DEBE incluir un body JSON con los datos de aceptación (y solo estos campos):
-   - `status`: cadena con valor "accepted"
-   - `trace_id`: identificador único de la solicitud (UUID v4)
-   - `vehicle_id`: identificador del vehículo (eco de la solicitud)
-   - `received_at`: marca de tiempo de recepción en formato ISO 8601 con milisegundos
-3. CUANDO responde con HTTP 202, EL servicio DEBE incluir el encabezado `X-Trace-ID` con el trace_id.
-4. CUANDO responde con error de validación (códigos 400, 413, 415, 422), EL servicio DEBE responder con JSON Problem Details según RFC 9457 en menos de 50 milisegundos (p99).
-5. CUANDO ocurre un error inesperado del servidor (código 500), EL servicio DEBE devolver un Problem Details genérico sin exponer stack traces, SQL queries, rutas internas, nombres de configuración ni detalles técnicos.
+1. WHEN a valid position request is received, THE service SHALL respond with HTTP 202 (Accepted) in less than 100 milliseconds (p99, measured from the first byte of the socket to the last byte of response).
+2. WHEN responding with HTTP 202, THE service SHALL include a JSON body with acceptance data (and only these fields):
+   - `status`: string with value "accepted"
+   - `trace_id`: unique request identifier (UUID v4)
+   - `vehicle_id`: vehicle identifier (echo of the request)
+   - `received_at`: reception timestamp in ISO 8601 format with milliseconds
+3. WHEN responding with HTTP 202, THE service SHALL include the `X-Trace-ID` header with the trace_id.
+4. WHEN responding with validation error (status codes 400, 413, 415, 422), THE service SHALL respond with JSON Problem Details according to RFC 9457 in less than 50 milliseconds (p99).
+5. WHEN an unexpected server error occurs (status code 500), THE service SHALL return a generic Problem Details without exposing stack traces, SQL queries, internal paths, configuration names, or technical details.
 
 ### Requirement 5: Implementar reintentos y manejo de fallos de Kafka
 
@@ -90,24 +90,24 @@ Este requisito es fundamental para RF-04 (Ingesta asincrónica de telemetría) y
 
 #### Acceptance Criteria
 
-1. CUANDO Kafka no es accesible o rechaza la publicación, EL servicio DEBE reintentar la publicación hasta 3 veces con backoff exponencial:
-   - 1er reintento: 100ms después del fallo inicial
-   - 2do reintento: 200ms después del 1er fallo
-   - 3er reintento: 400ms después del 2do fallo
-2. EL servicio DEBE clasificar errores de Kafka en dos categorías:
-   - Errores retryables (transitorios): timeout, conexión rechazada, broker no disponible
-   - Errores no retryables: mensaje malformado, esquema inválido, topic no existe
-3. CUANDO falla el reintento final (3 intentos agotados), EL servicio DEBE:
-   - Registrar un mensaje de nivel ERROR con trace_id, tipo de error y razón del fallo
-   - Escribir el evento en un dead-letter log estructurado para recuperación posterior
-   - Descartar el evento de la cola para evitar bloquear solicitudes futuras
-4. CUANDO la conexión con Kafka falla repetidamente (5 fallos consecutivos en ventana de 60 segundos), EL servicio DEBE aplicar el Circuit Breaker y transicionar a estado OPEN.
-5. SI el Circuit Breaker está en estado OPEN y se recibe una nueva solicitud HTTP, ENTONCES EL servicio DEBE responder al cliente con HTTP 503 (Service Unavailable) indicando que la dependencia no está disponible.
-6. CUANDO el Circuit Breaker está en estado OPEN, EL servicio DEBE:
-   - Intentar recuperación periódicamente (cada 30 segundos) sin bloquear solicitudes nuevas
-   - Enviar un mensaje de prueba sintetizado con timeout de 5 segundos
-   - Transicionar a estado HALF_OPEN para permitir recuperación gradual
-   - Transicionar a estado CLOSED cuando se confirme la recuperación de Kafka
+1. WHEN Kafka is not accessible or rejects the publish, THE service SHALL retry the publication up to 3 times with exponential backoff:
+   - 1st retry: 100ms after initial failure
+   - 2nd retry: 200ms after 1st failure
+   - 3rd retry: 400ms after 2nd failure
+2. THE service SHALL classify Kafka errors into two categories:
+   - Retryable errors (transient): timeout, connection refused, broker unavailable
+   - Non-retryable errors: malformed message, invalid schema, topic does not exist
+3. WHEN the final retry fails (3 attempts exhausted), THE service SHALL:
+   - Log an ERROR level message with trace_id, error type, and failure reason
+   - Write the event to a structured dead-letter log for later recovery
+   - Discard the event from the queue to avoid blocking future requests
+4. WHEN the connection with Kafka fails repeatedly (5 consecutive failures in 60-second window), THE service SHALL apply the Circuit Breaker and transition to OPEN state.
+5. IF the Circuit Breaker is in OPEN state and a new HTTP request is received, THEN THE service SHALL respond to the client with HTTP 503 (Service Unavailable) indicating that the dependency is unavailable.
+6. WHEN the Circuit Breaker is in OPEN state, THE service SHALL:
+   - Attempt recovery periodically (every 30 seconds) without blocking new requests
+   - Send a synthesized probe message with 5-second timeout
+   - Transition to HALF_OPEN state to allow gradual recovery
+   - Transition to CLOSED state when Kafka recovery is confirmed
 
 ### Requirement 6: Distinguir entre confirmación de aceptación y persistencia definitiva
 
@@ -115,13 +115,13 @@ Este requisito es fundamental para RF-04 (Ingesta asincrónica de telemetría) y
 
 #### Acceptance Criteria
 
-1. CUANDO el cliente recibe HTTP 202, EL body de respuesta DEBE indicar explícitamente que el evento fue aceptado para procesamiento asincrónico, NO que está definitivamente persistido.
-2. EL servicio DEBE documentar en el contrato OpenAPI que HTTP 202 garantiza SOLO que el evento fue publicado en Kafka. NO garantiza:
-   - Validación del evento
-   - Procesamiento por el worker
-   - Persistencia en TimescaleDB
-3. DONDE el cliente requiera confirmar persistencia definitiva, EL servicio DEBE proporcionar un endpoint separado de consulta de estado (fuera del alcance de este requisito).
-4. CUANDO un evento se pierde después de publicarse en Kafka (por fallo del worker o TimescaleDB), EL cliente NO recibirá notificación automática; la responsabilidad es del worker y del sistema de monitoreo.
+1. WHEN the client receives HTTP 202, THE response body SHALL explicitly indicate that the event was accepted for asynchronous processing, NOT that it is definitively persisted.
+2. THE service SHALL document in the OpenAPI contract that HTTP 202 guarantees ONLY that the event was published to Kafka. It does NOT guarantee:
+   - Event validation
+   - Processing by the worker
+   - Persistence to TimescaleDB
+3. WHERE the client requires confirmation of final persistence, THE service SHALL provide a separate status query endpoint (outside the scope of this requirement).
+4. WHEN an event is lost after being published to Kafka (due to worker or TimescaleDB failure), THE client SHALL NOT receive automatic notification; responsibility lies with the worker and monitoring system.
 
 ### Requirement 7: Registrar cuatro timestamps de auditoría y rastreo
 
@@ -129,33 +129,33 @@ Este requisito es fundamental para RF-04 (Ingesta asincrónica de telemetría) y
 
 #### Acceptance Criteria
 
-1. CADA evento DEBE incluir EXACTAMENTE CUATRO timestamps UTC en formato ISO 8601 con milisegundos (YYYY-MM-DDTHH:MM:SS.sssZ):
+1. EACH event SHALL include EXACTLY FOUR UTC timestamps in ISO 8601 format with milliseconds (YYYY-MM-DDTHH:MM:SS.sssZ):
 
-   a. **captured_at** (obligatorio, cliente)
-      - CUÁNDO: Cuándo fue capturada la ubicación en el dispositivo móvil
-      - ORIGEN: Enviado por el cliente en la solicitud HTTP
-      - RESPONSABILIDAD: Cliente garantiza captura en UTC
-      - VALIDACIÓN: No puede ser más de 1 hora en el futuro ni más de 24 horas en el pasado
+   a. **captured_at** (mandatory, client)
+      - WHEN: When the location was captured on the mobile device
+      - SOURCE: Sent by the client in the HTTP request
+      - RESPONSIBILITY: Client guarantees capture in UTC
+      - VALIDATION: Cannot be more than 1 hour in the future or more than 24 hours in the past
 
-   b. **received_at** (obligatorio, servidor HTTP)
-      - CUÁNDO: Cuándo el servidor HTTP recibió completamente la solicitud (último byte del body)
-      - ORIGEN: Generado automáticamente por el servidor al recibir la solicitud
-      - PRECISIÓN: Milisegundos exactos desde el reloj del servidor
-      - CÁLCULO: timestamp_recepción = ahora_servidor_al_recibir_último_byte
+   b. **received_at** (mandatory, HTTP server)
+      - WHEN: When the HTTP server completely received the request (last byte of body)
+      - SOURCE: Automatically generated by the server when receiving the request
+      - PRECISION: Exact milliseconds from the server clock
+      - CALCULATION: timestamp_reception = now_server_at_receiving_last_byte
 
-   c. **processed_at** (obligatorio, servidor HTTP)
-      - CUÁNDO: Cuándo completó validación de contrato y fue encolado para Kafka
-      - ORIGEN: Generado automáticamente después de validación exitosa
-      - MARCA: Inicio del procesamiento asincrónico
-      - CÁLCULO: timestamp_procesamiento = ahora_servidor_después_validación_exitosa
+   c. **processed_at** (mandatory, HTTP server)
+      - WHEN: When contract validation completed and was queued for Kafka
+      - SOURCE: Automatically generated after successful validation
+      - MARK: Start of asynchronous processing
+      - CALCULATION: timestamp_processing = now_server_after_successful_validation
 
-   d. **stored_at** (obligatorio, worker)
-      - CUÁNDO: Cuándo fue persistido en TimescaleDB (INSERT completado)
-      - ORIGEN: Generado por worker después de INSERT exitoso
-      - CONFIRMACIÓN: Confirma persistencia definitiva
-      - CÁLCULO: timestamp_almacenamiento = ahora_servidor_después_INSERT_exitoso
+   d. **stored_at** (mandatory, worker)
+      - WHEN: When persisted to TimescaleDB (INSERT completed)
+      - SOURCE: Generated by worker after successful INSERT
+      - CONFIRMATION: Confirms final persistence
+      - CALCULATION: timestamp_storage = now_server_after_successful_INSERT
 
-2. CADA evento publicado en Kafka DEBE incluir estos cuatro timestamps en el payload JSON con los tres primeros campos completados:
+2. EACH event published to Kafka SHALL include these four timestamps in the JSON payload with the first three fields completed:
    ```json
    {
      "event_id": "uuid",
@@ -170,36 +170,36 @@ Este requisito es fundamental para RF-04 (Ingesta asincrónica de telemetría) y
    }
    ```
 
-3. CUANDO el evento es recibido por HTTP, EL servicio DEBE validar que `captured_at`:
-   - Es un timestamp ISO 8601 válido con zona horaria UTC
-   - No está más de 1 hora en el futuro (reloj del cliente desincronizado)
-   - No está más de 24 horas en el pasado (eventos obsoletos)
-   - Si falla validación: rechazar con código 422 y motivo específico
+3. WHEN the event is received via HTTP, THE service SHALL validate that `captured_at`:
+   - Is a valid ISO 8601 timestamp with UTC timezone
+   - Is not more than 1 hour in the future (client clock skew)
+   - Is not more than 24 hours in the past (stale events)
+   - If validation fails: reject with status code 422 and specific reason
 
-4. CUANDO el evento llega al worker desde Kafka, EL worker DEBE:
-   - Recibir los tres primeros timestamps (captured_at, received_at, processed_at) inalterados
-   - Agregar automáticamente stored_at = ahora_servidor cuando el INSERT sea exitoso
-   - Persistir todos cuatro timestamps en TimescaleDB sin modificación
-   - Usar estos timestamps para auditoría y detección de retrasos
+4. WHEN the event arrives at the worker from Kafka, THE worker SHALL:
+   - Receive the first three timestamps (captured_at, received_at, processed_at) unchanged
+   - Automatically add stored_at = now_server when INSERT is successful
+   - Persist all four timestamps to TimescaleDB without modification
+   - Use these timestamps for audit and latency detection
 
-5. CUANDO se persiste en TimescaleDB, LA tabla DEBE incluir columnas separadas para cada timestamp:
+5. WHEN persisting to TimescaleDB, THE table SHALL include separate columns for each timestamp:
    - `captured_at` (timestamp with timezone, NOT NULL)
    - `received_at` (timestamp with timezone, NOT NULL)
    - `processed_at` (timestamp with timezone, NOT NULL)
    - `stored_at` (timestamp with timezone, NOT NULL)
-   - Todas con zona horaria UTC (AT TIME ZONE 'UTC')
+   - All with UTC timezone (AT TIME ZONE 'UTC')
 
-6. LOS timestamps DEBEN permitir cálculos de latencia para diagnóstico:
-   - Latencia cliente-servidor: `received_at - captured_at`
-   - Latencia de validación: `processed_at - received_at`
-   - Latencia de ingesta: `processed_at - captured_at`
-   - Latencia de persistencia: `stored_at - processed_at`
+6. THE timestamps SHALL enable latency calculations for diagnosis:
+   - Client-to-server latency: `received_at - captured_at`
+   - Validation latency: `processed_at - received_at`
+   - Ingestion latency: `processed_at - captured_at`
+   - Persistence latency: `stored_at - processed_at`
 
-7. EL servicio DEBE rechazar timestamps que:
-   - No sean ISO 8601 válido
-   - Tengan zona horaria distinta de UTC
-   - Tengan precisión menor a milisegundos
-   - Causen que captured_at sea posterior a received_at o processed_at
+7. THE service SHALL reject timestamps that:
+   - Are not valid ISO 8601
+   - Have timezone other than UTC
+   - Have precision less than milliseconds
+   - Cause captured_at to be after received_at or processed_at
 
 ### Requirement 8: Registrar y monitorear cada solicitud
 
@@ -207,23 +207,23 @@ Este requisito es fundamental para RF-04 (Ingesta asincrónica de telemetría) y
 
 #### Acceptance Criteria
 
-1. PARA cada solicitud recibida, EL servicio DEBE registrar (en logs JSON):
-   - trace_id: único (generado o extraído del encabezado `X-Trace-ID` si lo proporciona el cliente)
-   - vehicle_id: identificador del vehículo
-   - http_status: código de estado HTTP de respuesta
-   - duration_ms: duración de la solicitud en milisegundos (desde primer byte recibido hasta último byte enviado)
-   - operation_status: "accepted", "rejected_validation" o "rejected_kafka"
-   - log_level: según la gravedad
+1. FOR each request received, THE service SHALL log (in JSON):
+   - trace_id: unique (generated or extracted from `X-Trace-ID` header if provided by the client)
+   - vehicle_id: vehicle identifier
+   - http_status: HTTP response status code
+   - duration_ms: request duration in milliseconds (from first byte received to last byte sent)
+   - operation_status: "accepted", "rejected_validation", or "rejected_kafka"
+   - log_level: according to severity
 
-2. CUANDO se publica en Kafka, EL servicio DEBE registrar (nivel INFO):
+2. WHEN published to Kafka, THE service SHALL log (INFO level):
    - trace_id, vehicle_id, timestamps (captured_at, received_at, processed_at)
-   - Sin incluir datos sensibles (coordenadas NO se registran completas; solo accuracy)
+   - Without sensitive data (coordinates NOT logged completely; only accuracy)
 
-3. CUANDO ocurre un error, EL servicio DEBE registrar (nivel ERROR):
+3. WHEN an error occurs, THE service SHALL log (ERROR level):
    - trace_id, error_type, error_message
-   - Sin exponer: stack traces, SQL queries, rutas internas, nombres de configuración, tokens
+   - Without exposing: stack traces, SQL queries, internal paths, configuration names, tokens
 
-4. LOS logs DEBEN ser estructurados en formato JSON e incluir timestamp en ISO 8601:
+4. THE logs SHALL be structured in JSON format and include timestamp in ISO 8601:
    ```json
    {
      "timestamp": "2024-10-17T14:30:45.123Z",
@@ -237,23 +237,23 @@ Este requisito es fundamental para RF-04 (Ingesta asincrónica de telemetría) y
    }
    ```
 
-5. EL servicio DEBE aplicar límite de cardinality: máximo 1000 logs por segundo por nivel, con sampling adaptativo para prevenir explosión de logs.
+5. THE service SHALL apply cardinality limit: maximum 1000 logs per second per level, with adaptive sampling to prevent log explosion.
 
-### Requirement 9: Soportar idempotencia mediante Idempotency-Key
+### Requirement 9: Idempotencia mediante X-Idempotency-Key obligatorio
 
 **Historia de usuario:** Como desarrollador del cliente, quiero que el cliente maneje reintentos de solicitud de forma segura usando un identificador idempotente.
 
 #### Acceptance Criteria
 
-1. EL encabezado `X-Idempotency-Key` es OBLIGATORIO en toda solicitud HTTP POST a `/api/v1/positions`.
-2. CUANDO el encabezado `X-Idempotency-Key` está ausente, EL servicio DEBE rechazar la solicitud con código de estado 400 (Bad Request).
-3. CUANDO el encabezado `X-Idempotency-Key` no es un UUID v4 válido, EL servicio DEBE rechazar la solicitud con código de estado 400 (Bad Request).
-4. EL servicio DEBE almacenar en base de datos cada `X-Idempotency-Key` procesado durante 24 horas para durabilidad.
-5. CUANDO se recibe una solicitud con la misma `X-Idempotency-Key` dentro de la ventana de 24 horas, EL servicio DEBE:
-   - Si el payload es idéntico: responder con la misma respuesta HTTP 202 (sin duplicar la publicación en Kafka) y usar el mismo trace_id
-   - Si el payload es diferente: rechazar con código de estado 409 (Conflict)
-6. CUANDO el cliente reutiliza un `X-Idempotency-Key` después de 24 horas (TTL expirado) o genera uno nuevo, EL servicio DEBE tratarlo como una nueva solicitud.
-7. ES responsabilidad del cliente generar un UUID v4 único para cada solicitud nueva; no reutilizar claves para solicitudes distintas.
+1. THE `X-Idempotency-Key` header is MANDATORY in all HTTP POST requests to `/api/v1/positions`.
+2. WHEN the `X-Idempotency-Key` header is absent, THE service SHALL reject the request with status code 400 (Bad Request).
+3. WHEN the `X-Idempotency-Key` header is not a valid UUID v4, THE service SHALL reject the request with status code 400 (Bad Request).
+4. THE service SHALL store in database each `X-Idempotency-Key` processed for 24 hours for durability.
+5. WHEN a request is received with the same `X-Idempotency-Key` within the 24-hour window, THE service SHALL:
+   - If the payload is identical: respond with the same HTTP 202 response (without duplicating the publication to Kafka) and use the same trace_id
+   - If the payload is different: reject with status code 409 (Conflict)
+6. WHEN the client reuses an `X-Idempotency-Key` after 24 hours (TTL expired) or generates a new one, THE service SHALL treat it as a new request.
+7. IT IS the client's responsibility to generate a unique UUID v4 for each new request; do not reuse keys for different requests.
 
 ### Requirement 10: Contrato OpenAPI explícito
 
@@ -261,13 +261,13 @@ Este requisito es fundamental para RF-04 (Ingesta asincrónica de telemetría) y
 
 #### Acceptance Criteria
 
-1. EL servicio DEBE incluir un archivo `openapi.yaml` (OpenAPI 3.1.0) que documente:
+1. THE service SHALL include an `openapi.yaml` file (OpenAPI 3.1.0) that documents:
    - Endpoint: POST /api/v1/positions
-   - Esquema de solicitud con campos, validaciones y restricciones
-   - Esquemas de respuesta para códigos 202, 400, 409, 413, 415, 422, 500, 503
-   - Encabezados de solicitud (Content-Type, X-Trace-ID, X-Idempotency-Key)
-2. CUANDO se publica la API, EL contrato OpenAPI DEBE estar disponible en `/api/v1/openapi.yaml`.
-3. LAS respuestas de Problem Details DEBEN seguir RFC 9457 con campos obligatorios: type, title, status, detail, instance.
+   - Request schema with fields, validations, and constraints
+   - Response schemas for status codes 202, 400, 409, 413, 415, 422, 500, 503
+   - Request headers (Content-Type, X-Trace-ID, X-Idempotency-Key)
+2. WHEN the API is published, THE OpenAPI contract SHALL be available at `/api/v1/openapi.yaml`.
+3. THE Problem Details responses SHALL follow RFC 9457 with mandatory fields: type, title, status, detail, instance.
 
 ## Correctness Properties
 
