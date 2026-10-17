@@ -53,7 +53,6 @@ Las decisiones de seguridad deben considerar el contexto de la aplicación, los 
 - Evitar accesos horizontales o verticales no autorizados a recursos.
 - Aplicar controles consistentes en todas las rutas y servicios que accedan a información protegida.
 - Denegar la operación cuando no sea posible verificar de forma fiable los permisos.
-- Probar tanto los accesos permitidos como los denegados.
 
 ## 6. Validación de entradas y tratamiento de datos
 
@@ -135,11 +134,10 @@ Las decisiones de seguridad deben considerar el contexto de la aplicación, los 
 - Evitar que las tareas automatizadas puedan modificar entornos críticos sin los controles de autorización correspondientes.
 - Mantener procedimientos de actualización, recuperación y respuesta a incidentes.
 
-## 13. Pruebas y revisión de seguridad
+## 13. Revisión de seguridad
 
 - Incorporar la seguridad en los criterios de aceptación de las funcionalidades relevantes.
-- Probar validaciones, autenticación, autorización y manejo de errores.
-- Incluir pruebas de accesos no autorizados y entradas maliciosas.
+- Las pruebas de seguridad siguen `testing.md` (sección 20).
 - Realizar revisiones de código enfocadas en los riesgos de seguridad.
 - Utilizar análisis estático, análisis de dependencias y otras herramientas adecuadas al contexto.
 - Revisar los resultados de las herramientas en lugar de ignorarlos automáticamente.

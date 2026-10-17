@@ -61,27 +61,28 @@ Ambos podrán compartir dominio, casos de uso y adaptadores comunes sin acoplar 
 ### 3.1 Estructura propuesta
 
 ```text
-backend/
-├── cmd/
-│   ├── api/
-│   │   └── main.go
-│   └── worker/
-│       └── main.go
-├── internal/
-│   ├── domain/
-│   ├── application/
-│   │   ├── ports/
-│   │   └── usecases/
-│   ├── adapters/
-│   │   ├── inbound/
-│   │   │   └── http/
-│   │   └── outbound/
-│   │       ├── messaging/
-│   │       └── persistence/
-│   └── infrastructure/
-│       └── config/
-├── migrations/
-└── tests/
+backend/                  # directorio padre para los servicios de backend
+└── go/                   # implementación del servicio en Go
+    ├── cmd/
+    │   ├── api/
+    │   │   └── main.go
+    │   └── worker/
+    │       └── main.go
+    ├── internal/
+    │   ├── domain/
+    │   ├── application/
+    │   │   ├── ports/
+    │   │   └── usecases/
+    │   ├── adapters/
+    │   │   ├── inbound/
+    │   │   │   └── http/
+    │   │   └── outbound/
+    │   │       ├── messaging/
+    │   │       └── persistence/
+    │   └── infrastructure/
+    │       └── config/
+    ├── migrations/
+    └── tests/
 ```
 
 Los nombres concretos podrán adaptarse si una organización diferente mejora la claridad sin romper las reglas de dependencia.
@@ -232,9 +233,7 @@ Los pipelines deberán reutilizar comandos documentados y evitar duplicar la ló
 
 ### 6.3 Pruebas de carga
 
-`load-tests/` contendrá los escenarios y scripts de k6.
-
-Los escenarios deberán documentar la forma de ejecutarlos, los parámetros relevantes y las condiciones necesarias para interpretar sus resultados.
+`load-tests/` contendrá los escenarios y scripts de k6. Su diseño y documentación siguen `testing.md`.
 
 ## 7. Specs y documentación
 
@@ -245,6 +244,7 @@ Los escenarios deberán documentar la forma de ejecutarlos, los parámetros rele
 - `product.md`: propósito, alcance y requisitos del producto.
 - `tech.md`: stack tecnológico y restricciones técnicas.
 - `structure.md`: organización y dependencias arquitectónicas.
+- `testing.md`: estándar único de pruebas.
 - `git-workflow.md`: convenciones de ramas, commits y colaboración.
 
 Estos documentos deberán mantener responsabilidades diferenciadas y evitar duplicaciones extensas.
