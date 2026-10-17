@@ -241,17 +241,19 @@ Este requisito es fundamental para RF-04 (Ingesta asincrónica de telemetría) y
 
 ### Requirement 9: Soportar idempotencia mediante Idempotency-Key
 
-**Historia de usuario:** Como desarrollador del cliente, quiero que el cliente maneje reintentos de solicitud de forma segura.
+**Historia de usuario:** Como desarrollador del cliente, quiero que el cliente maneje reintentos de solicitud de forma segura usando un identificador idempotente.
 
 #### Acceptance Criteria
 
-1. CUANDO el cliente reintenta una solicitud (ej. timeout), EL cliente DEBE incluir un encabezado `Idempotency-Key` con un identificador único UUID v4 de la operación.
-2. CUANDO el servidor recibe una solicitud con la misma `Idempotency-Key`, EL servicio DEBE:
-   - Responder con la misma respuesta HTTP 202 (sin duplicar la publicación en Kafka)
-   - Usar el mismo trace_id de la solicitud anterior
-3. EL servicio DEBE mantener un cache de Idempotency-Key con duración limitada (24 horas).
-4. CUANDO el cache expira, EL servicio DEBE permitir reintentos sin deduplicación (responsabilidad del worker detectar duplicados por event_id).
-5. SI se recibe una solicitud con mismo Idempotency-Key pero distinto vehicle_id, ENTONCES EL servicio DEBE rechazarla con código 422 (Unprocessable Content, "idempotency error: vehicle_id mismatch").
+1. EL encabezado `X-Idempotency-Key` es OBLIGATORIO en toda solicitud HTTP POST a `/api/v1/positions`.
+2. CUANDO el encabezado `X-Idempotency-Key` está ausente, EL servicio DEBE rechazar la solicitud con código de estado 400 (Bad Request).
+3. CUANDO el encabezado `X-Idempotency-Key` no es un UUID v4 válido, EL servicio DEBE rechazar la solicitud con código de estado 400 (Bad Request).
+4. EL servicio DEBE almacenar en base de datos cada `X-Idempotency-Key` procesado durante 24 horas para durabilidad.
+5. CUANDO se recibe una solicitud con la misma `X-Idempotency-Key` dentro de la ventana de 24 horas, EL servicio DEBE:
+   - Si el payload es idéntico: responder con la misma respuesta HTTP 202 (sin duplicar la publicación en Kafka) y usar el mismo trace_id
+   - Si el payload es diferente: rechazar con código de estado 409 (Conflict)
+6. CUANDO el cliente reutiliza un `X-Idempotency-Key` después de 24 horas (TTL expirado) o genera uno nuevo, EL servicio DEBE tratarlo como una nueva solicitud.
+7. ES responsabilidad del cliente generar un UUID v4 único para cada solicitud nueva; no reutilizar claves para solicitudes distintas.
 
 ### Requirement 10: Contrato OpenAPI explícito
 
@@ -262,8 +264,8 @@ Este requisito es fundamental para RF-04 (Ingesta asincrónica de telemetría) y
 1. EL servicio DEBE incluir un archivo `openapi.yaml` (OpenAPI 3.1.0) que documente:
    - Endpoint: POST /api/v1/positions
    - Esquema de solicitud con campos, validaciones y restricciones
-   - Esquemas de respuesta para códigos 202, 400, 413, 415, 422, 500, 503
-   - Encabezados de solicitud (Content-Type, X-Trace-ID, Idempotency-Key)
+   - Esquemas de respuesta para códigos 202, 400, 409, 413, 415, 422, 500, 503
+   - Encabezados de solicitud (Content-Type, X-Trace-ID, X-Idempotency-Key)
 2. CUANDO se publica la API, EL contrato OpenAPI DEBE estar disponible en `/api/v1/openapi.yaml`.
 3. LAS respuestas de Problem Details DEBEN seguir RFC 9457 con campos obligatorios: type, title, status, detail, instance.
 
@@ -275,7 +277,7 @@ Las siguientes propiedades DEBEN verificarse mediante testing:
 
 2. **Contrato de Publicación Asincrónica**: HTTP 202 se envía antes de intentar publicar en Kafka; si Kafka falla, el cliente NUNCA recibe notificación de ese fallo (por Requisito 5).
 
-3. **Idempotencia**: Dos solicitudes idénticas con la misma Idempotency-Key dentro de 24 horas DEBEN resultar en la misma respuesta y una sola publicación en Kafka.
+3. **Idempotencia**: Dos solicitudes idénticas con la misma X-Idempotency-Key dentro de 24 horas DEBEN resultar en la misma respuesta y una sola publicación en Kafka.
 
 4. **Recuperación del Circuit Breaker**: Después de que Circuit Breaker se abre por fallos repetidos de Kafka, intentos de recuperación DEBEN ocurrir cada 30 segundos sin bloquear respuestas HTTP.
 
