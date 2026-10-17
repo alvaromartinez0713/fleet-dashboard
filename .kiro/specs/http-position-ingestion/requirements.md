@@ -2,167 +2,285 @@
 
 ## Introduction
 
-The HTTP ingestion service receives individual vehicle positions from mobile or external clients, validates them against an explicit contract, and publishes them asynchronously to Kafka. The service responds quickly to the client after confirming acceptance of the request for processing, without waiting for final persistence in TimescaleDB.
+El servicio HTTP de ingesta recibe posiciones individuales de vehículos desde clientes móviles o externos, las valida contra un contrato explícito y las publica de forma asincrónica en Kafka. El servicio responde rápidamente al cliente después de confirmar la aceptación de la solicitud para procesamiento, sin esperar a que la persistencia definitiva en TimescaleDB sea completada.
 
-This requirement is fundamental to RF-04 (Ingesta asincrónica de telemetría) and RNF-03 (Desacoplamiento del procesamiento) from product.md.
+Este requisito es fundamental para RF-04 (Ingesta asincrónica de telemetría) y RNF-03 (Desacoplamiento del procesamiento) de product.md.
 
 ## Glossary
 
 - **Posición**: Coordenadas de ubicación (latitud, longitud) de un vehículo en un momento específico, acompañadas de metadatos identificadores.
-- **Vehículo**: Entidad identificada unívocamente por un identificador del dominio (Vehicle_ID). Es responsabilidad del cliente proporcionar este identificador.
+- **Vehículo**: Entidad identificada unívocamente por un identificador del dominio (ID_Vehículo). Es responsabilidad del cliente proporcionar este identificador.
 - **Cliente**: Sistema que envía solicitudes HTTP. Puede ser la aplicación móvil, un simulador de carga o un servicio externo.
 - **Validación de contrato**: Verificación de que la solicitud HTTP cumple el esquema esperado (tipos, formatos, campos obligatorios, límites).
 - **Publicación asincrónica**: La solicitud HTTP se acepta y se publica en Kafka sin esperar a que el worker procese el evento.
 - **Confirmación de aceptación**: Respuesta HTTP que indica que la solicitud fue recibida correctamente y publicada en el tópico de Kafka, sin garantizar persistencia definitiva.
-- **Position_Topic**: Canal de mensajería donde se publican los eventos de posición en Kafka.
-- **Worker**: Consumidor de Kafka que procesa eventos de Position_Topic y los persiste en TimescaleDB.
+- **Tópico_Posiciones**: Canal de mensajería donde se publican los eventos de posición en Kafka.
+- **Worker**: Consumidor de Kafka que procesa eventos de Tópico_Posiciones y los persiste en TimescaleDB.
 - **Circuit Breaker**: Mecanismo de resiliencia que gestiona fallos en la comunicación con Kafka.
 - **Reintentos**: Estrategia para reintentar la publicación en Kafka ante fallos transitorios.
 - **Fallo transitorio**: Error temporal (timeout, conexión rechazada) que potencialmente puede resolverse con un reintento.
 - **Fallo permanente**: Error irrecuperable (validación fallida, payload malformado en Kafka) que no debe reintentarse.
 - **Alerta**: Notificación de un fallo crítico que requiere atención operativa.
-- **HTTP 202 Accepted**: Código de estado HTTP que indica que la solicitud fue aceptada para procesamiento asincrónico.
-- **Idempotency-Key**: Header HTTP que permite al cliente indicar que una solicitud debe ser tratada idempotentemente.
-- **trace_id**: Identificador único (UUID) asignado a cada solicitud para rastreabilidad en logs.
+- **HTTP 202 Aceptado**: Código de estado HTTP que indica que la solicitud fue aceptada para procesamiento asincrónico.
+- **Clave-Idempotencia**: Encabezado HTTP que permite al cliente indicar que una solicitud debe ser tratada idempotentemente.
+- **ID_Rastreo**: Identificador único (UUID) asignado a cada solicitud para rastreabilidad en logs.
 
 ## Requirements
 
-### Requirement 1: Receive individual positions via HTTP POST
+### Requirement 1: Recibir posiciones individuales mediante HTTP POST
 
-**User Story:** As an API client, I want to send an individual vehicle position via HTTP POST, so that the system records the vehicle's location.
-
-#### Acceptance Criteria
-
-1. WHEN a valid HTTP POST request is received at endpoint `/api/v1/positions`, THE Ingestion_Service SHALL accept the request and process it.
-2. WHEN an HTTP POST request arrives without the `Content-Type: application/json` header, THE Ingestion_Service SHALL reject the request with status code 415.
-3. WHERE the client wants to send a single position (not a batch), THE Ingestion_Service SHALL allow sending an individual position in the request body.
-4. WHEN the client sends a batch of positions instead of an individual position, THE Ingestion_Service SHALL reject the request or process only the first position according to the contract.
-
-### Requirement 2: Validate input contract explicitly
-
-**User Story:** As an API owner, I want to validate explicitly the contract of each position request, so that only well-formed and secure data is accepted.
+**Historia de usuario:** Como cliente de la API, quiero enviar una posición individual de un vehículo mediante HTTP POST, de modo que el sistema registre la ubicación del vehículo.
 
 #### Acceptance Criteria
 
-1. THE Ingestion_Service SHALL validate that the body contains a JSON object with the expected structure.
-2. WHEN a required field is missing (vehicle_id, latitude, longitude, timestamp), THE Ingestion_Service SHALL reject the request with status code 422 and return a Problem Details indicating the missing field.
-3. WHEN the `vehicle_id` field is empty or null, THE Ingestion_Service SHALL reject the request with status code 422.
-4. WHEN the `latitude` field is not a number or is outside the range [-90, 90], THE Ingestion_Service SHALL reject the request with status code 422.
-5. WHEN the `longitude` field is not a number or is outside the range [-180, 180], THE Ingestion_Service SHALL reject the request with status code 422.
-6. WHEN the `timestamp` field is not a valid ISO 8601 string, THE Ingestion_Service SHALL reject the request with status code 422.
-7. WHEN the request contains unknown additional fields, THE Ingestion_Service SHALL process it while ignoring the additional fields (be permissive on input).
-8. WHEN the request exceeds the maximum allowed size (10 KB), THE Ingestion_Service SHALL reject the request with status code 413.
+1. CUANDO se recibe una solicitud HTTP POST válida en el endpoint `/api/v1/posiciones`, EL Servicio_Ingesta DEBE aceptar la solicitud y procesarla.
+2. CUANDO una solicitud HTTP POST llega sin el encabezado `Content-Type: application/json`, EL Servicio_Ingesta DEBE rechazar la solicitud con código de estado 415.
+3. DONDE el cliente desea enviar una sola posición (no un lote), EL Servicio_Ingesta DEBE permitir enviar una posición individual en el cuerpo de la solicitud como un objeto JSON único.
+4. CUANDO el cliente envía un lote de posiciones (array JSON) en lugar de una posición individual, EL Servicio_Ingesta DEBE rechazar la solicitud con código de estado 422 (Contenido No Procesable).
+5. CUANDO un evento está encolado esperando publicación, EL Servicio_Ingesta DEBE responder al cliente con HTTP 202 (Aceptado) antes de intentar publicar en Kafka.
 
-### Requirement 3: Publish positions to Kafka asynchronously
+### Requirement 2: Validar el contrato de entrada explícitamente
 
-**User Story:** As a system owner, I want the HTTP service to publish positions to Kafka without blocking the response to the client, so that the service is fast and resilient to failures in processing.
+**Historia de usuario:** Como responsable de la API, quiero validar explícitamente el contrato de cada solicitud de posición, de modo que solo se acepten datos bien formados y seguros.
 
 #### Acceptance Criteria
 
-1. WHEN a valid position request is received, THE Ingestion_Service SHALL publish the event to Position_Topic in Kafka asynchronously (without waiting for Kafka confirmation).
-2. WHEN an event is published to Kafka, THE Ingestion_Service SHALL generate a unique trace_id for the event and log it.
-3. THE Ingestion_Service SHALL maintain an internal queue or use Go channels to enqueue publishing events and process them in the background.
-4. WHEN an event is queued waiting for publication, THE Ingestion_Service SHALL respond to the client with HTTP 202 before attempting to publish.
-5. WHEN successfully published to Kafka, THE Ingestion_Service SHALL log an INFO level message indicating the trace_id and vehicle_id.
-6. WHERE timing is critical, THE Ingestion_Service SHALL document the expected latency between HTTP reception and Kafka publication confirmation.
+1. EL Servicio_Ingesta DEBE validar que el cuerpo contiene un objeto JSON único con la estructura esperada.
+2. CUANDO falta un campo obligatorio (id_vehiculo, latitud, longitud, capturado_en), EL Servicio_Ingesta DEBE rechazar la solicitud con código de estado 422 y devolver un Detalle_Problema indicando el campo faltante según RFC 9457.
+3. CUANDO el campo `id_vehiculo` está vacío o es nulo, EL Servicio_Ingesta DEBE rechazar la solicitud con código de estado 422.
+4. CUANDO el campo `latitud` no es un número o está fuera del rango [-90.0, 90.0] (precisión IEEE 754 de 64 bits), EL Servicio_Ingesta DEBE rechazar la solicitud con código de estado 422.
+5. CUANDO el campo `longitud` no es un número o está fuera del rango [-180.0, 180.0] (precisión IEEE 754 de 64 bits), EL Servicio_Ingesta DEBE rechazar la solicitud con código de estado 422.
+6. CUANDO el campo `capturado_en` no es una cadena ISO 8601 válida con zona horaria UTC (formato: YYYY-MM-DDTHH:MM:SS.sssZ o YYYY-MM-DDTHH:MM:SS+00:00), EL Servicio_Ingesta DEBE rechazar la solicitud con código de estado 422.
+7. CUANDO la solicitud contiene campos JSON adicionales desconocidos, EL Servicio_Ingesta DEBE procesarla ignorando los campos adicionales (permisivo en la entrada).
+8. CUANDO la solicitud supera el tamaño máximo permitido (10 KB, medido en bytes UTF-8 del cuerpo HTTP), EL Servicio_Ingesta DEBE rechazar la solicitud con código de estado 413 (Contenido Demasiado Grande).
+9. CUANDO el cuerpo JSON es malformado (sintaxis JSON inválida), EL Servicio_Ingesta DEBE rechazar la solicitud con código de estado 400 (Solicitud Malformada).
 
-### Requirement 4: Respond quickly to client with HTTP 202 Accepted
+### Requirement 3: Publicar posiciones en Kafka de forma asincrónica
 
-**User Story:** As an API client, I want to receive a quick HTTP response after my request is confirmed as accepted, without waiting for remote processing to complete.
-
-#### Acceptance Criteria
-
-1. WHEN a valid position request is received, THE Ingestion_Service SHALL respond with HTTP 202 Accepted in less than 100 milliseconds.
-2. WHEN responding with HTTP 202, THE Ingestion_Service SHALL include a JSON body with acceptance data, including:
-   - `status`: string with value "accepted"
-   - `trace_id`: unique identifier of the request (UUID)
-   - `vehicle_id`: vehicle identifier (echo of the request)
-   - `timestamp_received`: reception timestamp in ISO 8601 format
-3. WHEN responding with HTTP 202, THE Ingestion_Service SHALL include the `X-Trace-ID` header with the trace_id.
-4. WHEN responding with a validation failure (status 400-422), THE Ingestion_Service SHALL respond with a JSON Problem Details according to RFC 9457.
-5. WHEN an unexpected server error occurs (status 500), THE Ingestion_Service SHALL return a generic Problem Details without exposing technical details.
-
-### Requirement 5: Implement retries and Kafka failure handling
-
-**User Story:** As a system reliability owner, I want the service to explicitly handle Kafka failures with limited retries and alerts, so that events are not lost silently.
+**Historia de usuario:** Como responsable del sistema, quiero que el servicio HTTP publique posiciones en Kafka sin bloquear la respuesta al cliente, de modo que el servicio sea rápido y resiliente ante fallos en el procesamiento.
 
 #### Acceptance Criteria
 
-1. WHEN Kafka is not accessible or rejects the publish, THE Ingestion_Service SHALL retry the publication up to 3 times with exponential backoff (100ms, 200ms, 400ms).
-2. WHEN the final retry fails, THE Ingestion_Service SHALL:
-   - Log an ERROR level message with the trace_id and failure reason.
-   - Generate an alert (send to alerting system or structured log with ALERT level).
-   - Discard the event from the queue to avoid blocking future requests.
-3. WHEN publication is successful on any retry, THE Ingestion_Service SHALL consider the operation completed.
-4. WHEN the connection with Kafka fails repeatedly, THE Ingestion_Service SHALL apply Circuit Breaker to avoid continuous attempts.
-5. IF the Circuit Breaker is open and a new request is received, THEN THE Ingestion_Service SHALL respond to the client with HTTP 503 Service Unavailable indicating the dependency is not available.
-6. WHEN the Circuit Breaker is open, THE Ingestion_Service SHALL attempt to recover periodically (every 30 seconds) without blocking new requests.
+1. CUANDO se recibe una solicitud de posición válida, EL Servicio_Ingesta DEBE publicar el evento en Tópico_Posiciones de Kafka de forma asincrónica (sin esperar la confirmación de Kafka antes de responder al cliente).
+2. EL Servicio_Ingesta DEBE mantener una cola interna de hasta 10,000 eventos para encolar publicaciones y procesarlas en background.
+3. CUANDO se publica en Kafka, EL Servicio_Ingesta DEBE usar:
+   - Clave de partición: `id_vehiculo` (garantiza orden por vehículo)
+   - Formato: JSON con campos: id_evento, id_vehiculo, latitud, longitud, precisión, capturado_en, recibido_en, procesado_en
+   - Confirmación Kafka: `acks=1` (ACK de 1 replica como mínimo)
+4. CUANDO se publica con éxito en Kafka, EL Servicio_Ingesta DEBE registrar un mensaje de nivel INFO indicando el id_rastreo y el id_vehiculo.
+5. DONDE el tiempo es crítico, EL Servicio_Ingesta DEBE garantizar latencia p95 ≤ 500ms entre recepción HTTP y confirmación de Kafka.
 
-### Requirement 6: Distinguish between acceptance confirmation and final persistence
+### Requirement 4: Responder rápidamente al cliente con HTTP 202 Aceptado
 
-**User Story:** As a contract designer, I want the client to clearly understand that HTTP 202 confirms only Kafka acceptance, not persistence in TimescaleDB.
-
-#### Acceptance Criteria
-
-1. WHEN the client receives HTTP 202, THE response body SHALL explicitly indicate that the event was accepted for processing, not that it is definitively persisted.
-2. THE Ingestion_Service SHALL document in the OpenAPI contract that HTTP 202 does not guarantee final persistence.
-3. WHERE the client requires confirmation of final persistence, THE Ingestion_Service SHALL provide a separate status query endpoint (outside the scope of this requirement).
-4. WHEN the event is lost after being published to Kafka (due to worker or TimescaleDB failure), THE client SHALL NOT receive automatic notification; responsibility lies with the worker and monitoring system.
-
-### Requirement 7: Observability and logging
-
-**User Story:** As a system operator, I want to log and monitor each request to diagnose problems and trace events.
+**Historia de usuario:** Como cliente de la API, quiero recibir una respuesta HTTP rápida después de confirmar que mi solicitud fue aceptada, sin esperar a que se complete el procesamiento remoto.
 
 #### Acceptance Criteria
 
-1. FOR each request received, THE Ingestion_Service SHALL log:
-   - trace_id unique (generated or extracted from `X-Trace-ID` header if provided by the client).
-   - vehicle_id.
-   - HTTP response code.
-   - Request duration in milliseconds.
-   - Operation status: accepted, rejected_validation, rejected_kafka.
-2. WHEN published to Kafka, THE Ingestion_Service SHALL log the trace_id and event published (without sensitive data).
-3. WHEN an error occurs, THE Ingestion_Service SHALL log:
-   - trace_id.
-   - Error type.
-   - Error message (without exposing internal technical details, stack traces, SQL queries, or internal paths).
-4. THE logs SHALL be structured in JSON format and include timestamp in ISO 8601 format.
+1. CUANDO se recibe una solicitud de posición válida, EL Servicio_Ingesta DEBE responder con HTTP 202 (Aceptado) en menos de 100 milisegundos (p99, medido desde el primer byte del socket hasta el último byte de respuesta).
+2. CUANDO responde con HTTP 202, EL Servicio_Ingesta DEBE incluir un cuerpo JSON con los datos de aceptación (y solo estos campos):
+   - `estado`: cadena con valor "aceptado"
+   - `id_rastreo`: identificador único de la solicitud (UUID v4)
+   - `id_vehiculo`: identificador del vehículo (eco de la solicitud)
+   - `recibido_en`: marca de tiempo de recepción en formato ISO 8601 con milisegundos
+3. CUANDO responde con HTTP 202, EL Servicio_Ingesta DEBE incluir el encabezado `X-ID-Rastreo` con el id_rastreo.
+4. CUANDO responde con error de validación (códigos 400, 413, 415, 422), EL Servicio_Ingesta DEBE responder con JSON Detalle_Problema según RFC 9457 en menos de 50 milisegundos (p99).
+5. CUANDO ocurre un error inesperado del servidor (código 500), EL Servicio_Ingesta DEBE devolver un Detalle_Problema genérico sin exponer trazas de stack, consultas SQL, rutas internas, nombres de configuración ni detalles técnicos.
 
-### Requirement 8: Idempotency and deduplication on client
+### Requirement 5: Implementar reintentos y manejo de fallos de Kafka
 
-**User Story:** As a client developer, I want to safely handle request retries.
+**Historia de usuario:** Como responsable de la confiabilidad del sistema, quiero que el servicio maneje explícitamente los fallos de Kafka con reintentos limitados y alertas, de modo que los eventos no se pierdan silenciosamente.
 
 #### Acceptance Criteria
 
-1. WHEN the client retries a request (e.g., timeout), THE client SHOULD include an `Idempotency-Key` header with a unique operation identifier.
-2. WHEN the server receives a request with the same `Idempotency-Key`, THE Ingestion_Service SHALL respond with the same response (HTTP 202) without duplicating the publication to Kafka.
-3. THE Ingestion_Service SHALL maintain a cache of Idempotency-Keys with limited duration (24 hours).
-4. WHEN the cache expires, THE Ingestion_Service SHALL allow retries without deduplication (responsibility of the worker to detect duplicates by event_id).
+1. CUANDO Kafka no es accesible o rechaza la publicación, EL Servicio_Ingesta DEBE reintentar la publicación hasta 3 veces con backoff exponencial:
+   - 1er reintento: 100ms después del fallo inicial
+   - 2do reintento: 200ms después del 1er fallo
+   - 3er reintento: 400ms después del 2do fallo
+2. EL Servicio_Ingesta DEBE clasificar errores de Kafka en dos categorías:
+   - Errores retryables (transitorios): timeout, conexión rechazada, broker no disponible
+   - Errores no retryables: mensaje malformado, esquema inválido, topic no existe
+3. CUANDO falla el reintento final (3 intentos agotados), EL Servicio_Ingesta DEBE:
+   - Registrar un mensaje de nivel ERROR con id_rastreo, tipo de error y razón del fallo
+   - Escribir el evento en un dead-letter log estructurado para recuperación posterior
+   - Descartar el evento de la cola para evitar bloquear solicitudes futuras
+4. CUANDO la conexión con Kafka falla repetidamente (5 fallos consecutivos en ventana de 60 segundos), EL Servicio_Ingesta DEBE aplicar el Circuit Breaker y transicionar a estado ABIERTO.
+5. SI el Circuit Breaker está en estado ABIERTO y se recibe una nueva solicitud HTTP, ENTONCES EL Servicio_Ingesta DEBE responder al cliente con HTTP 503 (Servicio No Disponible) indicando que la dependencia no está disponible.
+6. CUANDO el Circuit Breaker está en estado ABIERTO, EL Servicio_Ingesta DEBE:
+   - Intentar recuperación periódicamente (cada 30 segundos) sin bloquear solicitudes nuevas
+   - Enviar un mensaje de prueba sintetizado con timeout de 5 segundos
+   - Transicionar a estado SEMI_ABIERTO para permitir recuperación gradual
+   - Transicionar a estado CERRADO cuando se confirme la recuperación de Kafka
 
-### Requirement 9: Explicit OpenAPI contract
+### Requirement 6: Distinguir entre confirmación de aceptación y persistencia definitiva
 
-**User Story:** As an API consumer, I want a clear OpenAPI specification of the ingestion endpoint.
+**Historia de usuario:** Como diseñador del contrato, quiero que el cliente entienda claramente que HTTP 202 confirma solo aceptación en Kafka, no persistencia en TimescaleDB.
 
 #### Acceptance Criteria
 
-1. THE Ingestion_Service SHALL include an `openapi.yaml` file (or `openapi.json`) that documents:
-   - Endpoint: POST /api/v1/positions
-   - Request schema with fields and validations.
-   - Response schemas for 202, 400, 413, 415, 422, 500, 503.
-   - Header fields (Content-Type, X-Trace-ID, Idempotency-Key).
-2. WHEN the API is published, THE OpenAPI contract SHALL be available at `/api/v1/openapi.json` or similar.
-3. THE Problem Details responses SHALL follow RFC 9457 with type, title, status, detail, and instance.
+1. CUANDO el cliente recibe HTTP 202, EL cuerpo de respuesta DEBE indicar explícitamente que el evento fue aceptado para procesamiento asincrónico, NO que está definitivamente persistido.
+2. EL Servicio_Ingesta DEBE documentar en el contrato OpenAPI que HTTP 202 garantiza SOLO que el evento fue publicado en Kafka. NO garantiza:
+   - Validación del evento
+   - Procesamiento por el worker
+   - Persistencia en TimescaleDB
+3. DONDE el cliente requiera confirmar persistencia definitiva, EL Servicio_Ingesta DEBE proporcionar un endpoint separado de consulta de estado (fuera del alcance de este requisito).
+4. CUANDO un evento se pierde después de publicarse en Kafka (por fallo del worker o TimescaleDB), EL cliente NO recibirá notificación automática; la responsabilidad es del worker y del sistema de monitoreo.
+
+### Requirement 7: Registrar cuatro timestamps de auditoría y rastreo
+
+**Historia de usuario:** Como operador del sistema, quiero rastrear exactamente cuándo ocurre cada etapa del procesamiento de la posición, de modo que pueda diagnosticar cuellos de botella y garantizar integridad.
+
+#### Acceptance Criteria
+
+1. CADA evento DEBE incluir EXACTAMENTE CUATRO timestamps UTC en formato ISO 8601 con milisegundos (YYYY-MM-DDTHH:MM:SS.sssZ):
+
+   a. **capturado_en** (obligatorio, cliente)
+      - CUÁNDO: Cuándo fue capturada la ubicación en el dispositivo móvil
+      - ORIGEN: Enviado por el cliente en la solicitud HTTP
+      - RESPONSABILIDAD: Cliente garantiza captura en UTC
+      - VALIDACIÓN: No puede ser más de 1 hora en el futuro ni más de 24 horas en el pasado
+
+   b. **recibido_en** (obligatorio, servidor HTTP)
+      - CUÁNDO: Cuándo el servidor HTTP recibió completamente la solicitud (último byte del cuerpo)
+      - ORIGEN: Generado automáticamente por el servidor al recibir la solicitud
+      - PRECISIÓN: Milisegundos exactos desde el reloj del servidor
+      - CÁLCULO: timestamp_recepción = ahora_servidor_al_recibir_último_byte
+
+   c. **procesado_en** (obligatorio, servidor HTTP)
+      - CUÁNDO: Cuándo completó validación de contrato y fue encolado para Kafka
+      - ORIGEN: Generado automáticamente después de validación exitosa
+      - MARCA: Inicio del procesamiento asincrónico
+      - CÁLCULO: timestamp_procesamiento = ahora_servidor_después_validación_exitosa
+
+   d. **almacenado_en** (obligatorio, worker)
+      - CUÁNDO: Cuándo fue persistido en TimescaleDB (INSERT completado)
+      - ORIGEN: Generado por worker después de INSERT exitoso
+      - CONFIRMACIÓN: Confirma persistencia definitiva
+      - CÁLCULO: timestamp_almacenamiento = ahora_servidor_después_INSERT_exitoso
+
+2. CADA evento publicado en Kafka DEBE incluir estos cuatro timestamps en el payload JSON con los tres primeros campos completados:
+   ```json
+   {
+     "id_evento": "uuid",
+     "id_vehiculo": "id",
+     "latitud": 40.7128,
+     "longitud": -74.0060,
+     "precisión": 5.0,
+     "capturado_en": "2024-10-17T14:30:45.123Z",
+     "recibido_en": "2024-10-17T14:30:45.456Z",
+     "procesado_en": "2024-10-17T14:30:45.467Z",
+     "almacenado_en": null
+   }
+   ```
+
+3. CUANDO el evento es recibido por HTTP, EL Servicio_Ingesta DEBE validar que `capturado_en`:
+   - Es un timestamp ISO 8601 válido con zona horaria UTC
+   - No está más de 1 hora en el futuro (reloj del cliente desincronizado)
+   - No está más de 24 horas en el pasado (eventos obsoletos)
+   - Si falla validación: rechazar con código 422 y motivo específico
+
+4. CUANDO el evento llega al worker desde Kafka, EL worker DEBE:
+   - Recibir los tres primeros timestamps (capturado_en, recibido_en, procesado_en) inalterados
+   - Agregar automáticamente almacenado_en = ahora_servidor cuando el INSERT sea exitoso
+   - Persistir todos cuatro timestamps en TimescaleDB sin modificación
+   - Usar estos timestamps para auditoría y detección de retrasos
+
+5. CUANDO se persiste en TimescaleDB, LA tabla DEBE incluir columnas separadas para cada timestamp:
+   - `captured_at` (timestamp with timezone, NOT NULL)
+   - `received_at` (timestamp with timezone, NOT NULL)
+   - `processed_at` (timestamp with timezone, NOT NULL)
+   - `stored_at` (timestamp with timezone, NOT NULL)
+   - Todas con zona horaria UTC (AT TIME ZONE 'UTC')
+
+6. LOS timestamps DEBEN permitir cálculos de latencia para diagnóstico:
+   - Latencia cliente-servidor: `recibido_en - capturado_en`
+   - Latencia de validación: `procesado_en - recibido_en`
+   - Latencia de ingesta: `procesado_en - capturado_en`
+   - Latencia de persistencia: `almacenado_en - procesado_en`
+
+7. EL Servicio_Ingesta DEBE rechazar timestamps que:
+   - No sean ISO 8601 válido
+   - Tengan zona horaria distinta de UTC
+   - Tengan precisión menor a milisegundos
+   - Causen que capturado_en sea posterior a recibido_en o procesado_en
+
+### Requirement 8: Registrar y monitorear cada solicitud
+
+**Historia de usuario:** Como operador del sistema, quiero registrar y monitorear cada solicitud para diagnosticar problemas y rastrear eventos.
+
+#### Acceptance Criteria
+
+1. PARA cada solicitud recibida, EL Servicio_Ingesta DEBE registrar (en logs JSON):
+   - id_rastreo: único (generado o extraído del encabezado `X-ID-Rastreo` si lo proporciona el cliente)
+   - id_vehiculo: identificador del vehículo
+   - código_http: código de estado HTTP de respuesta
+   - duracion_ms: duración de la solicitud en milisegundos (desde primer byte recibido hasta último byte enviado)
+   - estado_operacion: "aceptado", "rechazado_validacion" o "rechazado_kafka"
+   - nivel_log: según la gravedad
+
+2. CUANDO se publica en Kafka, EL Servicio_Ingesta DEBE registrar (nivel INFO):
+   - id_rastreo, id_vehiculo, timestamps (capturado_en, recibido_en, procesado_en)
+   - Sin incluir datos sensibles (coordenadas NO se registran completas; solo precisión)
+
+3. CUANDO ocurre un error, EL Servicio_Ingesta DEBE registrar (nivel ERROR):
+   - id_rastreo, tipo_error, mensaje_error
+   - Sin exponer: trazas de stack, consultas SQL, rutas internas, nombres de configuración, tokens
+
+4. LOS logs DEBEN ser estructurados en formato JSON e incluir timestamp en ISO 8601:
+   ```json
+   {
+     "timestamp": "2024-10-17T14:30:45.123Z",
+     "nivel": "INFO",
+     "id_rastreo": "550e8400-e29b-41d4-a716-446655440000",
+     "id_vehiculo": "VH-001",
+     "evento": "solicitud_recibida",
+     "codigo_http": 202,
+     "duracion_ms": 45,
+     "estado_operacion": "aceptado"
+   }
+   ```
+
+5. EL Servicio_Ingesta DEBE aplicar límite de cardinality: máximo 1000 logs por segundo por nivel, con sampling adaptativo para prevenir explosión de logs.
+
+### Requirement 9: Soportar idempotencia mediante Clave-Idempotencia
+
+**Historia de usuario:** Como desarrollador del cliente, quiero que el cliente maneje reintentos de solicitud de forma segura.
+
+#### Acceptance Criteria
+
+1. CUANDO el cliente reintenta una solicitud (ej. timeout), EL cliente DEBE incluir un encabezado `Clave-Idempotencia` con un identificador único UUID v4 de la operación.
+2. CUANDO el servidor recibe una solicitud con la misma `Clave-Idempotencia`, EL Servicio_Ingesta DEBE:
+   - Responder con la misma respuesta HTTP 202 (sin duplicar la publicación en Kafka)
+   - Usar el mismo id_rastreo de la solicitud anterior
+3. EL Servicio_Ingesta DEBE mantener un cache de Clave-Idempotencia con duración limitada (24 horas).
+4. CUANDO el cache expira, EL Servicio_Ingesta DEBE permitir reintentos sin deduplicación (responsabilidad del worker detectar duplicados por id_evento).
+5. SI se recibe una solicitud con mismo Clave-Idempotencia pero distinto id_vehiculo, ENTONCES EL Servicio_Ingesta DEBE rechazarla con código 422 (Contenido No Procesable, "error de idempotencia: id_vehiculo inconsistente").
+
+### Requirement 10: Contrato OpenAPI explícito
+
+**Historia de usuario:** Como consumidor de la API, quiero disponer de una especificación OpenAPI clara del endpoint de ingesta.
+
+#### Acceptance Criteria
+
+1. EL Servicio_Ingesta DEBE incluir un archivo `openapi.yaml` (OpenAPI 3.1.0) que documente:
+   - Endpoint: POST /api/v1/posiciones
+   - Esquema de solicitud con campos, validaciones y restricciones
+   - Esquemas de respuesta para códigos 202, 400, 413, 415, 422, 500, 503
+   - Encabezados de solicitud (Content-Type, X-ID-Rastreo, Clave-Idempotencia)
+2. CUANDO se publica la API, EL contrato OpenAPI DEBE estar disponible en `/api/v1/openapi.yaml`.
+3. LAS respuestas de Detalle_Problema DEBEN seguir RFC 9457 con campos obligatorios: tipo, título, estado, detalle, instancia.
 
 ## Correctness Properties
 
-The following properties must be verified through testing:
+Las siguientes propiedades DEBEN verificarse mediante testing:
 
-1. **Validation Rejection**: Any request that violates validation criteria in Requirement 2 must be rejected with the appropriate status code (422 for semantic, 415 for media type, 413 for size).
+1. **Rechazo de Validación**: Cualquier solicitud que viole criterios en Requisito 2 DEBE ser rechazada con el código de estado correcto (422 para semántica, 415 para media type, 413 para tamaño).
 
-2. **Async Publish Contract**: HTTP 202 is sent before Kafka publication attempts; if Kafka fails, the client never receives notification of that failure (per Requirement 5).
+2. **Contrato de Publicación Asincrónica**: HTTP 202 se envía antes de intentar publicar en Kafka; si Kafka falla, el cliente NUNCA recibe notificación de ese fallo (por Requisito 5).
 
-3. **Idempotency**: Two identical requests with the same Idempotency-Key within 24 hours must result in the same response and a single publication to Kafka.
+3. **Idempotencia**: Dos solicitudes idénticas con la misma Clave-Idempotencia dentro de 24 horas DEBEN resultar en la misma respuesta y una sola publicación en Kafka.
 
-4. **Circuit Breaker Recovery**: After Circuit Breaker opens due to repeated Kafka failures, recovery attempts must occur every 30 seconds without blocking HTTP responses.
+4. **Recuperación del Circuit Breaker**: Después de que Circuit Breaker se abre por fallos repetidos de Kafka, intentos de recuperación DEBEN ocurrir cada 30 segundos sin bloquear respuestas HTTP.
 
-5. **Trace Continuity**: Every log entry and error response must reference the same trace_id throughout the request lifecycle.
+5. **Continuidad de Rastreo**: Cada entrada de log y respuesta de error DEBE referenciar el mismo id_rastreo durante todo el ciclo de vida de la solicitud.
+
+6. **Integridad de Timestamps**: Los cuatro timestamps DEBEN estar presentes en cada evento, en orden cronológico estricto (capturado_en ≤ recibido_en ≤ procesado_en ≤ almacenado_en), y permanecer inalterados desde cliente hasta persistencia final.
