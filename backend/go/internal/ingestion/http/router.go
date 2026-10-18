@@ -84,12 +84,16 @@ func (r *Router) registerErrorHandlers() {
 
 // registerRoutes registers all HTTP routes for the service.
 // For this bootstrap spec, only the health endpoint is registered.
+// Future specs will add routes for position ingestion, etc.
 func (r *Router) registerRoutes() {
 	// Create health handler
 	healthHandler := health.NewHealthHandler(r.healthCheck)
 
 	// Register health endpoint
 	r.engine.GET("/health", healthHandler.Handle)
+
+	// Note: Position ingestion routes will be added in a future wave
+	// This is registered in the server bootstrap when the composer wires everything together
 }
 
 // Start binds the configured port and starts the HTTP server in a non-blocking goroutine.
@@ -132,4 +136,10 @@ func (r *Router) Stop(ctx context.Context) error {
 
 	r.logger.Info("HTTP server shutdown completed successfully")
 	return nil
+}
+
+// RegisterRoute adds a new route to the engine.
+// Used by the composer to register routes after the router is created.
+func (r *Router) RegisterRoute(method, path string, handlers ...gin.HandlerFunc) {
+	r.engine.Handle(method, path, handlers...)
 }

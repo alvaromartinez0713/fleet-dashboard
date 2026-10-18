@@ -13,143 +13,200 @@ La implementación se verifica mediante:
 - Suite Rápida: 17 pruebas de comportamiento de caja negra, <1s total, con fakes inyectados
 - Suite Integración: 8 pruebas con Testcontainers (Kafka real) y Toxiproxy (inyección de fallos)
 
+### ⚠️ ESTRATEGIA DE TESTING: Crítico
+
+**NO crear archivos `*_test.go` en las Ondas 0-6 (domain, ports, adapters, middleware)**
+
+Según `testing.md` (secciones 3, 5, 10):
+- Las pruebas entran **únicamente** por casos de uso (`internal/application/usecases/`)
+- Los Value Objects, entidades, puertos y adaptadores NO se testean de forma aislada
+- La validación de VOs se verifica **indirectamente** a través de tests de comportamiento de Suite Rápida que ejercen los casos de uso
+- Crear tests unitarios por archivo viola "resistencia al refactoring": las pruebas fallan sin cambio de comportamiento
+
+**Estructura correcta de tests:**
+- `tests/suite_rapida/` → 17 pruebas que entran por casos de uso con fakes
+- `tests/suite_integracion/` → 8 pruebas con Kafka real + Toxiproxy
+- `tests/support/mothers/` → Object Mothers (datos de prueba)
+- `tests/support/fakes/` → Fakes inyectables (KafkaPublisher, Clock, IDGenerator, RateLimiter)
+
+**Ondas 0-2:** Solo código de dominio, SIN pruebas
+**Ondas 3-6:** Solo adaptadores/middleware/handler, SIN pruebas
+**Ondas 7-11:** TODAS las pruebas (Suite Rápida), entrando por casos de uso
+**Ondas 12-13:** TODAS las pruebas (Suite Integración), con contenedores reales
+
+---
+
 ## Tasks
 
 ### Onda 0: Domain Value Objects part 1
 
-- [-] 1.1 Implementar VehicleID VO: no vacío, alphanumeric, máx 50 caracteres, constructor valida invariantes
+⚠️ **Nota:** Estas tareas crean solo archivos `.go` (sin `_test.go`). Las VOs se testean indirectamente en Suite Rápida (Onda 7+).
+
+- [x] 1.1 Implementar VehicleID VO: no vacío, alphanumeric, máx 50 caracteres, constructor valida invariantes
   - _Correctness Property: P1 (Validation)_
   - _RF: RF-02_
   - _Location: internal/ingestion/domain/vehicle_id.go_
+  - **Nota:** No crear vehicle_id_test.go. Validación se verifica en Suite Rápida.
 
-- [-] 1.2 Implementar GeoPosition VO: latitud -90 a 90, longitud -180 a 180, constructor valida invariantes
+- [x] 1.2 Implementar GeoPosition VO: latitud -90 a 90, longitud -180 a 180, constructor valida invariantes
   - _Correctness Property: P1 (Validation)_
   - _RF: RF-02_
   - _Location: internal/ingestion/domain/geo_position.go_
+  - **Nota:** No crear geo_position_test.go. Validación se verifica en Suite Rápida.
 
-- [-] 1.3 Implementar Timestamp VOs: CapturedTimestamp, ReceivedTimestamp, ProcessedTimestamp con validación de ordenamiento capturedAt ≤ receivedAt ≤ processedAt
+- [x] 1.3 Implementar Timestamp VOs: CapturedTimestamp, ReceivedTimestamp, ProcessedTimestamp con validación de ordenamiento capturedAt ≤ receivedAt ≤ processedAt
   - _Correctness Property: P1 (Validation), P5 (Future-Validation)_
   - _RF: RF-02, RF-07_
   - _Location: internal/ingestion/domain/timestamps.go_
+  - **Nota:** No crear timestamps_test.go. Validación se verifica en Suite Rápida.
 
-- [-] 1.4 Implementar EventID VO: UUID v4 generado por IDGenerator, inmodificable tras creación
+- [x] 1.4 Implementar EventID VO: UUID v4 generado por IDGenerator, inmodificable tras creación
   - _Correctness Property: P1 (Validation)_
   - _RF: RF-03_
   - _Location: internal/ingestion/domain/event_id.go_
+  - **Nota:** No crear event_id_test.go. Validación se verifica en Suite Rápida.
 
 ### Onda 1: Domain Value Objects part 2
 
-- [~] 1.5 Implementar TraceID VO: UUID v4 validado de encabezado X-Trace-ID, generado si ausente
+⚠️ **Nota:** Continuación de Onda 0. Solo `.go`, sin `_test.go`. Validación en Suite Rápida.
+
+- [x] 1.5 Implementar TraceID VO: UUID v4 validado de encabezado X-Trace-ID, generado si ausente
   - _Correctness Property: P1 (Validation), P9 (Trace-ID)_
   - _RF: RF-08_
   - _Location: internal/ingestion/domain/trace_id.go_
+  - **Nota:** No crear trace_id_test.go.
 
-- [~] 1.6 Implementar IdempotencyKey VO: UUID v4 validado de encabezado X-Idempotency-Key, formato obligatorio si presente
+- [x] 1.6 Implementar IdempotencyKey VO: UUID v4 validado de encabezado X-Idempotency-Key, formato obligatorio si presente
   - _Correctness Property: P1 (Validation)_
   - _RF: RF-07_
   - _Location: internal/ingestion/domain/idempotency_key.go_
+  - **Nota:** No crear idempotency_key_test.go.
 
-- [~] 1.7 Implementar RateLimitConfig VO: requestsPerWindow (12), windowSize (60s), inmodificable
+- [x] 1.7 Implementar RateLimitConfig VO: requestsPerWindow (12), windowSize (60s), inmodificable
   - _Correctness Property: P6 (Rate-Limit)_
   - _RF: RF-13_
   - _Location: internal/ingestion/domain/rate_limit_config.go_
+  - **Nota:** No crear rate_limit_config_test.go.
 
-- [~] 1.8 Implementar Clock interface + RealClock adapter: inyectable para determinismo de pruebas, RealClock retorna time.Now()
+- [x] 1.8 Implementar Clock interface + RealClock adapter: inyectable para determinismo de pruebas, RealClock retorna time.Now()
   - _Correctness Property: P6 (Rate-Limit)_
   - _RF: RF-13_
   - _Location: internal/ingestion/ports/clock.go, adapters/outbound/infrastructure/clock.go_
+  - **Nota:** No crear clock_test.go. Comportamiento se verifica en Suite Rápida.
 
 ### Onda 2: Domain errors + Entity + Event + Ports
 
-- [~] 1.9 Implementar dominio errors: FutureTimestampError, InvalidVehicleIDError, InvalidGeoPositionError, InvalidEventIDError, InvalidTraceIDError, RateLimitExceededError, CircuitBreakerOpenError
+⚠️ **Nota:** Última onda de dominio. Solo `.go`. Tests en Ondas 7+.
+
+- [x] 1.9 Implementar dominio errors: FutureTimestampError, InvalidVehicleIDError, InvalidGeoPositionError, InvalidEventIDError, InvalidTraceIDError, RateLimitExceededError, CircuitBreakerOpenError
   - _Correctness Property: P1 (Validation)_
   - _RF: RF-02, RF-12_
   - _Location: internal/ingestion/domain/errors.go_
+  - **Nota:** No crear errors_test.go.
 
-- [~] 2.1 Implementar PositionReceivedEvent VO: 7 campos (eventID, vehicleID, geoPosition, capturedAt, receivedAt, traceID, idempotencyKey), Value Object immutable
+- [x] 2.1 Implementar PositionReceivedEvent VO: 7 campos (eventID, vehicleID, geoPosition, capturedAt, receivedAt, traceID, idempotencyKey), Value Object immutable
   - _Correctness Property: P12 (Domain-Events)_
   - _RF: RF-03_
   - _Location: internal/ingestion/domain/position_received_event.go_
+  - **Nota:** No crear position_received_event_test.go.
 
-- [~] 2.2 Implementar VehiclePosition Entity: encapsula 5 timestamps + métodos de dominio (ReceptionLatency, ProcessingLatency, TotalLatency, ToKafkaPayload), NO anémica
+- [x] 2.2 Implementar VehiclePosition Entity: encapsula 5 timestamps + métodos de dominio (ReceptionLatency, ProcessingLatency, TotalLatency, ToKafkaPayload), NO anémica
   - _Correctness Property: P4 (4-Timestamps), P7 (RFC9457)_
   - _RF: RF-07_
   - _Location: internal/ingestion/domain/vehicle_position.go_
+  - **Nota:** No crear vehicle_position_test.go.
 
-- [~] 3.1 Definir 6 puertos: KafkaPublisher, CircuitBreakerManager, RateLimiter, Logger, Clock, IDGenerator como interfaces sin dependencias de frameworks
+- [x] 3.1 Definir 6 puertos: KafkaPublisher, CircuitBreakerManager, RateLimiter, Logger, Clock, IDGenerator como interfaces sin dependencias de frameworks
   - _Correctness Property: P13 (Domain-Event-Decoupling)_
   - _RF: RF-03, RF-10, RF-13_
   - _Location: internal/ingestion/ports/*.go_
+  - **Nota:** No crear tests en ports/. Solo interfaces.
 
 ### Onda 3: Clock port + Outbound Adapters part 1
 
-- [~] 3.2 Definir Clock puerto: interfaz Now() time.Time inyectable
+⚠️ **Nota:** Adaptadores. Solo `.go`, sin `_test.go`. Tests en Ondas 7-13.
+
+- [x] 3.2 Definir Clock puerto: interfaz Now() time.Time inyectable
   - _Correctness Property: P6 (Rate-Limit)_
   - _RF: RF-13_
   - _Location: internal/ingestion/ports/clock.go_
+  - **Nota:** No crear puerto_test.go.
 
-- [~] 4.1 Implementar KafkaPublisher adapter: 3 reintentos con backoff exponencial, partición por vehicle_id, dead-letter queue para fallos definitivos
+- [x] 4.1 Implementar KafkaPublisher adapter: 3 reintentos con backoff exponencial, partición por vehicle_id, dead-letter queue para fallos definitivos
   - _Correctness Property: P2 (Async+202), P3 (CB-Recovery)_
   - _RF: RF-03, RF-05_
   - _Location: adapters/outbound/messaging/kafka_publisher.go_
+  - **Nota:** No crear kafka_publisher_test.go. Comportamiento se verifica en Suite Integración (Onda 12).
 
-- [~] 4.2 Implementar CircuitBreaker adaptador: máquina de estados CLOSED → OPEN (5 fallos) → HALF_OPEN (30s timeout) → CLOSED (2 éxitos), thread-safe con sync.RWMutex
+- [x] 4.2 Implementar CircuitBreaker adaptador: máquina de estados CLOSED → OPEN (5 fallos) → HALF_OPEN (30s timeout) → CLOSED (2 éxitos), thread-safe con sync.RWMutex
   - _Correctness Property: P3 (CB-Recovery)_
   - _RF: RF-10, RF-11_
   - _Location: adapters/outbound/resilience/circuit_breaker.go_
+  - **Nota:** No crear circuit_breaker_test.go. Comportamiento se verifica en Suite Rápida (Onda 10).
 
-- [~] 4.3 Implementar RateLimiter adapter: ventana deslizante en memoria, 12/60s por defecto, aislamiento por vehicle_id, thread-safe
+- [x] 4.3 Implementar RateLimiter adapter: ventana deslizante en memoria, 12/60s por defecto, aislamiento por vehicle_id, thread-safe
   - _Correctness Property: P6 (Rate-Limit)_
   - _RF: RF-13_
   - _Location: adapters/outbound/resilience/rate_limiter.go_
+  - **Nota:** No crear rate_limiter_test.go. Comportamiento se verifica en Suite Rápida (Onda 9).
 
 ### Onda 4: Adapters part 2 + DTOs + Middleware part 1
 
-- [~] 4.4 Implementar Clock e IDGenerator adapters (reales para producción, inyectables para pruebas): RealClock retorna time.Now(), RealIDGenerator retorna UUID v4
+⚠️ **Nota:** Adaptadores, DTOs, middleware. Solo `.go`. Tests en Ondas 7-13.
+
+- [x] 4.4 Implementar Clock e IDGenerator adapters (reales para producción, inyectables para pruebas): RealClock retorna time.Now(), RealIDGenerator retorna UUID v4
   - _Correctness Property: P6 (Rate-Limit)_
   - _RF: RF-13_
   - _Location: adapters/outbound/infrastructure/clock.go, adapters/outbound/infrastructure/id_generator.go_
+  - **Nota:** No crear adapters_test.go.
 
-- [~] 5.1 Implementar DTOs: PositionRequest (vehicle_id, latitude, longitude, captured_at), PositionResponse (event_id, status, timestamp), ProblemDetails (RFC 9457)
+- [x] 5.1 Implementar DTOs: PositionRequest (vehicle_id, latitude, longitude, captured_at), PositionResponse (event_id, status, timestamp), ProblemDetails (RFC 9457)
   - _Correctness Property: P7 (RFC9457)_
   - _RF: RF-01, RF-04, RF-12_
   - _Location: adapters/inbound/http/dto/*.go_
+  - **Nota:** No crear dto_test.go. DTOs se verifican indirectamente en tests de respuesta.
 
-- [~] 5.2 Implementar mappers: PositionMapper (FromRequest → ReceivePositionCommand, FromEntity → PositionResponse), ErrorMapper (DomainError → ProblemDetails)
+- [x] 5.2 Implementar mappers: PositionMapper (FromRequest → ReceivePositionCommand, FromEntity → PositionResponse), ErrorMapper (DomainError → ProblemDetails)
   - _Correctness Property: P7 (RFC9457), P10 (Error-Mapping)_
   - _RF: RF-04, RF-12_
   - _Location: adapters/inbound/http/mapper/*.go_
+  - **Nota:** No crear mapper_test.go. Mapeos se verifican en Suite Rápida (Ondas 8-11).
 
-- [~] 6.1 Implementar TraceIDMiddleware: generar o validar UUID v4 de X-Trace-ID, almacenar en gin.Context, escribir respuesta header X-Trace-ID antes de c.Next()
+- [x] 6.1 Implementar TraceIDMiddleware: generar o validar UUID v4 de X-Trace-ID, almacenar en gin.Context, escribir respuesta header X-Trace-ID antes de c.Next()
   - _Correctness Property: P9 (Trace-ID)_
   - _RF: RF-08_
   - _Location: adapters/inbound/http/middleware/trace_id.go_
+  - **Nota:** No crear middleware_test.go. Comportamiento se verifica en Suite Rápida (Onda 9).
 
 ### Onda 5: Middleware part 2 + part 3
 
-- [~] 6.2 Implementar IdempotencyKeyMiddleware: validar X-Idempotency-Key si presente (UUID v4), almacenar en Context, no blockear si ausente
+⚠️ **Nota:** Middleware. Solo `.go`. Tests en Ondas 9-11.
+
+- [x] 6.2 Implementar IdempotencyKeyMiddleware: validar X-Idempotency-Key si presente (UUID v4), almacenar en Context, no blockear si ausente
   - _Correctness Property: P1 (Validation)_
   - _RF: RF-07_
   - _Location: adapters/inbound/http/middleware/idempotency_key.go_
 
-- [~] 6.3 Implementar ContentTypeMiddleware: validar Content-Type: application/json, rechazar con 415 si diferente
+- [x] 6.3 Implementar ContentTypeMiddleware: validar Content-Type: application/json, rechazar con 415 si diferente
   - _Correctness Property: P7 (RFC9457)_
   - _RF: RF-08_
   - _Location: adapters/inbound/http/middleware/content_type.go_
 
-- [~] 6.4 Implementar RateLimitMiddleware: extraer vehicle_id del cuerpo vía gin.GetRawData(), verificar RateLimiter, rechazar con 429 si límite excedido
+- [x] 6.4 Implementar RateLimitMiddleware: extraer vehicle_id del cuerpo vía gin.GetRawData(), verificar RateLimiter, rechazar con 429 si límite excedido
   - _Correctness Property: P6 (Rate-Limit)_
   - _RF: RF-13_
   - _Location: adapters/inbound/http/middleware/rate_limit.go_
 
-- [~] 6.5 Implementar ErrorHandlerMiddleware: capturar c.Error() y panic, convertir dominio errors a ProblemDetails con trace_id, responder RFC 9457
+- [x] 6.5 Implementar ErrorHandlerMiddleware: capturar c.Error() y panic, convertir dominio errors a ProblemDetails con trace_id, responder RFC 9457
   - _Correctness Property: P7 (RFC9457), P11 (Error-Propagation)_
   - _RF: RF-12_
   - _Location: adapters/inbound/http/middleware/error_handler.go_
 
 ### Onda 6: Handler + Composer + Test Support part 1
 
-- [~] 6.6 Implementar PositionHandler: ~15 líneas, deserializar request → mapper.FromRequest → useCase.Execute → mapper.FromEntity → responder 202
+⚠️ **Nota:** Onda de transición. Handler y Composer son `.go`. Test support son herramientas (sin `_test.go`).
+
+- [x] 6.6 Implementar PositionHandler: ~15 líneas, deserializar request → mapper.FromRequest → useCase.Execute → mapper.FromEntity → responder 202
   - _Correctness Property: P2 (Async+202)_
   - _RF: RF-01, RF-04_
   - _Location: adapters/inbound/http/handler/position_handler.go_
@@ -163,18 +220,23 @@ La implementación se verifica mediante:
   - _Test Coverage: Suite Rápida + Suite Integración_
   - _RF: RF-02_
   - _Location: tests/support/mothers/position_mother.go_
+  - **Nota:** PositionMother es herramienta de prueba, no test. No es `*_test.go`.
 
 - [~] 8.2 Implementar Fakes: FakeKafkaPublisher (state tracking), FakeClock (controllable time), FakeIDGenerator (deterministic UUIDs), FakeRateLimiter (configurable limits)
   - _Test Coverage: Suite Rápida_
   - _RF: (all)_
   - _Location: tests/support/fakes/*.go_
+  - **Nota:** Fakes son herramientas de prueba, no tests. No son `*_test.go`.
 
 ### Onda 7: Test Support part 2 + UseCase + Suite Rápida part 1
+
+✅ **Nota:** PRIMERA onda con `_test.go`. Entradas: Solo a través de casos de uso. Fakes inyectados.
 
 - [~] 8.3 Implementar TestHTTPServer: harness Gin con fakes inyectados, expone puerto para pruebas, detiene limpiamente
   - _Test Coverage: Suite Rápida_
   - _RF: (all)_
-  - _Location: tests/support/http_server_test.go_
+  - _Location: tests/support/http_server.go_
+  - **Nota:** Herramienta, no test. No es `_test.go`.
 
 - [~] 8.4 Implementar Router HTTP: pila de middleware en orden correcto (TraceID → Idempotency → ContentType → RateLimit → ErrorHandler, evaluados en reverso)
   - _Correctness Property: (all)_
@@ -185,14 +247,18 @@ La implementación se verifica mediante:
   - _Correctness Property: P2 (Async+202), P3 (CB-Recovery), P12 (Domain-Events), P13 (Domain-Event-Decoupling)_
   - _RF: RF-01, RF-03, RF-04, RF-06_
   - _Location: application/usecases/receive_position.go_
+  - **Nota:** UseCase es código de producción, no test.
 
 - [~] 9.1 Prueba: valid_position_returns_202 (verifica: entrada válida retorna 202, estructura response correcta, trace_id header presente)
   - _Correctness Property: P2 (Async+202), P4 (4-Timestamps), P9 (Trace-ID)_
   - _RF: RF-01, RF-02, RF-04, RF-07_
   - _Test Suite: Suite Rápida_
   - _Test File: tests/suite_rapida/valid_position_test.go_
+  - **✅ Primer archivo `_test.go` legítimo aquí.**
 
 ### Onda 8: Suite Rápida part 2
+
+✅ **Nota:** Tests Suite Rápida. Entradas por casos de uso. Fakes inyectados.
 
 - [~] 9.2 Prueba: future_captured_at_returns_422 (verifica: captured_at > now rechaza con 422, ProblemDetails con tipo correcto)
   - _Correctness Property: P5 (Future-Validation)_
@@ -220,6 +286,8 @@ La implementación se verifica mediante:
 
 ### Onda 9: Suite Rápida part 3
 
+✅ **Nota:** Tests Suite Rápida. Middleware + Rate Limit.
+
 - [~] 9.6 Prueba: invalid_content_type_returns_415 (verifica: Content-Type != application/json rechaza con 415)
   - _Correctness Property: P7 (RFC9457)_
   - _RF: RF-01, RF-08_
@@ -245,6 +313,8 @@ La implementación se verifica mediante:
   - _Test File: tests/suite_rapida/rate_limit_test.go_
 
 ### Onda 10: Suite Rápida part 4
+
+✅ **Nota:** Tests Suite Rápida. Circuit Breaker.
 
 - [~] 9.10 Prueba: circuit_breaker_opens_on_repeated_failures (verifica: 5 fallos consecutivos → CircuitBreaker abre, 6ª solicitud retorna 503)
   - _Correctness Property: P3 (CB-Recovery)_
@@ -272,6 +342,8 @@ La implementación se verifica mediante:
 
 ### Onda 11: Suite Rápida part 5
 
+✅ **Nota:** Tests Suite Rápida. Últimas pruebas.
+
 - [~] 9.14 Prueba: invalid_trace_id_header_returns_400 (verifica: X-Trace-ID inválido rechaza con 400)
   - _Correctness Property: P9 (Trace-ID)_
   - _RF: RF-08_
@@ -298,6 +370,8 @@ La implementación se verifica mediante:
 
 ### Onda 12: Suite Integración part 1
 
+✅ **Nota:** Tests Suite Integración. Kafka real + Testcontainers.
+
 - [~] 10.1 Prueba: position_published_to_kafka_with_correct_schema (verifica: evento persistido en Kafka con schema correcto: partición=vehicle_id, offset avanzado)
   - _Correctness Property: P2 (Async+202), P12 (Domain-Events)_
   - _RF: RF-03, RF-02_
@@ -323,6 +397,8 @@ La implementación se verifica mediante:
   - _Test File: tests/suite_integracion/idempotency_test.go_
 
 ### Onda 13: Suite Integración part 2
+
+✅ **Nota:** Tests Suite Integración. Concurrencia + Async.
 
 - [~] 10.5 Prueba: rate_limiter_window_reset_real_clock (verifica: reloj real, ventana se desliza tras 60s, cuota se regenera)
   - _Correctness Property: P6 (Rate-Limit)_
@@ -397,14 +473,14 @@ PositionMother genera datos válidos/inválidos determinísticos:
 ```json
 {
   "waves": [
-    { "id": 0, "tasks": ["1.1", "1.2", "1.3", "1.4"], "label": "Domain VOs part 1" },
-    { "id": 1, "tasks": ["1.5", "1.6", "1.7", "1.8"], "label": "Domain VOs part 2" },
-    { "id": 2, "tasks": ["1.9", "2.1", "2.2", "3.1"], "label": "Domain errors/entity/event + Ports" },
-    { "id": 3, "tasks": ["3.2", "4.1", "4.2", "4.3"], "label": "Clock port + Adapters part 1" },
-    { "id": 4, "tasks": ["4.4", "5.1", "5.2", "6.1"], "label": "Adapters part 2 + DTOs + Middleware part 1" },
-    { "id": 5, "tasks": ["6.2", "6.3", "6.4", "6.5"], "label": "Middleware part 2-3" },
-    { "id": 6, "tasks": ["6.6", "7.1", "8.1", "8.2"], "label": "Handler + Composer + Test support part 1" },
-    { "id": 7, "tasks": ["8.3", "8.4", "8.5", "9.1"], "label": "Test support part 2 + UseCase + Suite Rápida part 1" },
+    { "id": 0, "tasks": ["1.1", "1.2", "1.3", "1.4"], "label": "Domain VOs part 1 (no tests)" },
+    { "id": 1, "tasks": ["1.5", "1.6", "1.7", "1.8"], "label": "Domain VOs part 2 (no tests)" },
+    { "id": 2, "tasks": ["1.9", "2.1", "2.2", "3.1"], "label": "Domain errors/entity/event + Ports (no tests)" },
+    { "id": 3, "tasks": ["3.2", "4.1", "4.2", "4.3"], "label": "Clock port + Adapters part 1 (no tests)" },
+    { "id": 4, "tasks": ["4.4", "5.1", "5.2", "6.1"], "label": "Adapters part 2 + DTOs + Middleware part 1 (no tests)" },
+    { "id": 5, "tasks": ["6.2", "6.3", "6.4", "6.5"], "label": "Middleware part 2-3 (no tests)" },
+    { "id": 6, "tasks": ["6.6", "7.1", "8.1", "8.2"], "label": "Handler + Composer + Test support part 1 (no tests)" },
+    { "id": 7, "tasks": ["8.3", "8.4", "8.5", "9.1"], "label": "Test support part 2 + UseCase + Suite Rápida part 1 (FIRST *_test.go)" },
     { "id": 8, "tasks": ["9.2", "9.3", "9.4", "9.5"], "label": "Suite Rápida part 2" },
     { "id": 9, "tasks": ["9.6", "9.7", "9.8", "9.9"], "label": "Suite Rápida part 3" },
     { "id": 10, "tasks": ["9.10", "9.11", "9.12", "9.13"], "label": "Suite Rápida part 4" },
@@ -415,4 +491,3 @@ PositionMother genera datos válidos/inválidos determinísticos:
   ]
 }
 ```
-

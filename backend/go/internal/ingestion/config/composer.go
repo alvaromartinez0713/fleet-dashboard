@@ -3,7 +3,15 @@ package config
 import (
 	"context"
 
+	"github.com/fleet-platform/backend/internal/ingestion/adapters/outbound/infrastructure"
+	"github.com/fleet-platform/backend/internal/ingestion/adapters/outbound/messaging"
+	"github.com/fleet-platform/backend/internal/ingestion/adapters/outbound/resilience"
+	"github.com/fleet-platform/backend/internal/ingestion/application/usecases"
+	"github.com/fleet-platform/backend/internal/ingestion/domain"
 	ingestionhttp "github.com/fleet-platform/backend/internal/ingestion/http"
+	"github.com/fleet-platform/backend/internal/ingestion/http/handler"
+	"github.com/fleet-platform/backend/internal/ingestion/http/mapper"
+	"github.com/fleet-platform/backend/internal/ingestion/http/middleware"
 	"github.com/fleet-platform/backend/internal/ingestion/ports"
 )
 
@@ -13,6 +21,10 @@ import (
 type DependencyComposer struct {
 	cfg    ports.Config
 	logger ports.Logger
+
+	// Reusable infrastructure adapters
+	clock       ports.Clock
+	idGenerator ports.IDGenerator
 }
 
 // NewDependencyComposer creates a new DependencyComposer with the provided configuration and logger.
@@ -24,25 +36,62 @@ func NewDependencyComposer(cfg ports.Config, logger ports.Logger) *DependencyCom
 }
 
 // ComposeAPI wires together the HTTP server and all its dependencies.
-// It creates the HealthChecker, HealthHandler, and Router, connecting them together.
-// If the construction of any dependency fails, it releases already initialized resources
-// and returns an error.
+// It creates adapters, use cases, handlers, and the router with middleware.
 //
 // Returns:
 //   - ports.HTTPServer: The configured and ready-to-start HTTP server
 //   - error: Any error encountered during composition
 func (c *DependencyComposer) ComposeAPI() (ports.HTTPServer, error) {
 	// Create the health checker
-	// For this bootstrap spec, we use a simple always-healthy checker
-	// Future specs will add dependency checks (Kafka, PostgreSQL, etc.)
 	healthChecker := NewSimpleHealthChecker()
 
 	// Create the HTTP router with all dependencies
-	// The router constructor handles middleware registration internally
 	router := ingestionhttp.NewRouter(c.cfg, c.logger, healthChecker)
 
-	// No cleanup needed in this bootstrap spec since all dependencies are stateless
-	// Future specs with database connections, Kafka clients, etc. will need cleanup logic here
+	// Create infrastructure adapters (injected for dependency management)
+	c.clock = infrastructure.NewRealClock()
+	c.idGenerator = infrastructure.NewRealIDGenerator()
+
+	// Create Kafka publisher adapter
+	brokers := []string{"localhost:9092"} // Will be parameterized via config
+	kafkaPublisher, err := messaging.NewKafkaPublisher(brokers)
+	if err != nil {
+		c.logger.Error("failed to create Kafka publisher", ports.Field{Key: "error", Value: err.Error()})
+		return nil, err
+	}
+
+	// Create circuit breaker manager
+	circuitBreakerManager := resilience.NewCircuitBreakerManager()
+
+	// Create rate limiter with default config (12/60s)
+	rateLimitConfig, err := domain.NewRateLimitConfig(12, 60)
+	if err != nil {
+		c.logger.Error("failed to create rate limit config", ports.Field{Key: "error", Value: err.Error()})
+		return nil, err
+	}
+	rateLimiter := resilience.NewRateLimiter(rateLimitConfig)
+
+	// Create error mapper
+	errorMapper := mapper.NewErrorMapper()
+
+	// Create position mapper
+	positionMapper := mapper.NewPositionMapper(c.idGenerator, c.clock)
+
+	// Create use case
+	receivePositionUseCase := usecases.NewReceivePositionUseCase(kafkaPublisher, circuitBreakerManager)
+
+	// Create position handler
+	positionHandler := handler.NewPositionHandler(receivePositionUseCase, positionMapper)
+
+	// Silence unused variables (will be used in future waves)
+	_ = circuitBreakerManager
+	_ = rateLimiter
+	_ = errorMapper
+	_ = positionHandler
+
+	// Register middleware and routes
+	// Note: Middleware registration is handled in router.registerMiddleware()
+	// Position handler registration will be done in a separate step
 
 	c.logger.Info("API dependencies composed successfully")
 
@@ -50,9 +99,6 @@ func (c *DependencyComposer) ComposeAPI() (ports.HTTPServer, error) {
 }
 
 // SimpleHealthChecker is a basic implementation of ports.HealthChecker
-// that always reports the service as healthy.
-// In future specs, this will be replaced with a checker that verifies
-// the availability of Kafka, PostgreSQL, and other required dependencies.
 type SimpleHealthChecker struct{}
 
 // NewSimpleHealthChecker creates a new SimpleHealthChecker.
@@ -61,12 +107,6 @@ func NewSimpleHealthChecker() *SimpleHealthChecker {
 }
 
 // Check always returns (true, nil) indicating the service is healthy.
-// This is appropriate for the bootstrap spec where no external dependencies exist yet.
 func (s *SimpleHealthChecker) Check(ctx context.Context) (bool, error) {
-	// For this bootstrap spec, the service is always healthy
-	// Future specs will add checks for:
-	// - Kafka connectivity
-	// - PostgreSQL connectivity
-	// - Any other required dependencies
 	return true, nil
 }
