@@ -42,3 +42,15 @@ func NewRecoverableError(code, message string, inner error) *AppError {
 		IsRecoverable: true,
 	}
 }
+
+// InvalidGeoPositionError indicates that latitude or longitude values are out of valid bounds.
+type InvalidGeoPositionError struct {
+	*AppError
+}
+
+// NewInvalidGeoPositionError creates a new InvalidGeoPositionError.
+func NewInvalidGeoPositionError(message string) *InvalidGeoPositionError {
+	return &InvalidGeoPositionError{
+		AppError: NewAppError("INVALID_GEO_POSITION", message, nil),
+	}
+}
