@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"sync"
 	"time"
+
+	"github.com/fleet-platform/backend/internal/ingestion/ports"
 )
 
 // CircuitBreakerState represents the state of the circuit breaker.
@@ -28,14 +30,33 @@ type CircuitBreaker struct {
 	successCount    uint32
 	lastFailureTime time.Time
 	timeout         time.Duration
+	clock           ports.Clock
 }
 
-// NewCircuitBreaker creates a new circuit breaker in CLOSED state.
+// NewCircuitBreaker creates a new circuit breaker in CLOSED state with system clock.
 func NewCircuitBreaker() *CircuitBreaker {
+	return NewCircuitBreakerWithClock(nil)
+}
+
+// NewCircuitBreakerWithClock creates a new circuit breaker with a custom clock.
+// If clock is nil, uses system time.
+func NewCircuitBreakerWithClock(clock ports.Clock) *CircuitBreaker {
+	if clock == nil {
+		// Use a simple clock wrapper around time.Now
+		clock = &systemClock{}
+	}
 	return &CircuitBreaker{
 		state:   StateClosed,
 		timeout: defaultTimeout,
+		clock:   clock,
 	}
+}
+
+// systemClock wraps time.Now() to implement ports.Clock
+type systemClock struct{}
+
+func (sc *systemClock) Now() time.Time {
+	return time.Now()
 }
 
 // RecordSuccess records a successful call.
@@ -73,7 +94,7 @@ func (cb *CircuitBreaker) RecordFailure() {
 	switch cb.state {
 	case StateClosed:
 		cb.failureCount++
-		cb.lastFailureTime = time.Now()
+		cb.lastFailureTime = cb.clock.Now()
 		if cb.failureCount >= failureThreshold {
 			// Transition to OPEN after 5 failures
 			cb.state = StateOpen
@@ -84,10 +105,10 @@ func (cb *CircuitBreaker) RecordFailure() {
 		cb.state = StateOpen
 		cb.failureCount = failureThreshold // Immediate reset to threshold
 		cb.successCount = 0
-		cb.lastFailureTime = time.Now()
+		cb.lastFailureTime = cb.clock.Now()
 	case StateOpen:
 		// Update last failure time but don't increment counter
-		cb.lastFailureTime = time.Now()
+		cb.lastFailureTime = cb.clock.Now()
 	}
 }
 
@@ -103,7 +124,7 @@ func (cb *CircuitBreaker) IsOpen() bool {
 
 	if cb.state == StateOpen {
 		// Check if timeout has elapsed to transition to HALF_OPEN
-		if time.Since(cb.lastFailureTime) >= cb.timeout {
+		if cb.clock.Now().Sub(cb.lastFailureTime) >= cb.timeout {
 			cb.state = StateHalfOpen
 			cb.successCount = 0
 			cb.failureCount = 0

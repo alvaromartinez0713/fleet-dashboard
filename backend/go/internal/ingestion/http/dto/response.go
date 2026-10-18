@@ -10,6 +10,9 @@ type PositionResponse struct {
 	EventID   string    `json:"event_id"`
 	Status    string    `json:"status"`
 	Timestamp time.Time `json:"timestamp"`
+	VehicleID string    `json:"vehicle_id"`
+	TraceID   string    `json:"trace_id"`
+	ReceivedAt time.Time `json:"received_at"`
 }
 
 // ProblemDetails implements RFC 9457 Problem Details for HTTP APIs.

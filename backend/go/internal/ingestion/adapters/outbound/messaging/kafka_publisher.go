@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/fleet-platform/backend/internal/ingestion/domain"
-	"github.com/fleet-platform/backend/internal/ingestion/ports"
 	"github.com/segmentio/kafka-go"
 )
 
@@ -33,13 +32,11 @@ func NewKafkaPublisher(brokers []string) (*KafkaPublisherImpl, error) {
 	}
 
 	writer := kafka.NewWriter(kafka.WriterConfig{
-		Brokers:      brokers,
-		Topic:        "positions", // default topic, can be overridden per message
-		Dialer:       dialer,
-		MaxAttempts:  3,
-		WriteBackoffMin: 100 * time.Millisecond,
-		WriteBackoffMax: 1 * time.Second,
-		// Async: true would make writes non-blocking, but we'll use goroutine wrapping
+		Brokers:     brokers,
+		Topic:       "positions", // default topic, can be overridden per message
+		Dialer:      dialer,
+		MaxAttempts: 3,
+		// Note: WriteBackoffMin and WriteBackoffMax are handled by default backoff strategy
 	})
 
 	return &KafkaPublisherImpl{

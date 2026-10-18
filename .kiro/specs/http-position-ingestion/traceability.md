@@ -91,23 +91,23 @@ Esta sección lista cada caso de prueba y los requisitos/propiedades que valida.
 
 | Test ID | Test Name | HTTP Scenario | Validates Requirements | Validates Properties | Code Location | Execution Time |
 |---|---|---|---|---|---|---|
-| 9.1 | valid_position_returns_202 | POST valid position → 202 accepted | RF-01, RF-02, RF-04, RF-07 | P2 (async publication), P4 (timestamps), P9 (trace_id) | tests/suite_rapida/position_handler_test.go::TestValidPositionReturns202 | <50ms |
-| 9.2 | future_captured_at_returns_422 | POST with future captured_at → 422 | RF-02, RF-04, RF-12 | P1 (validation rejection), P5 (future timestamp), P7 (RFC 9457), P10 (error mapping) | tests/suite_rapida/validation_test.go::TestFutureCapturedAtReturns422 | <50ms |
-| 9.3 | missing_vehicle_id_returns_422 | POST without vehicle_id → 422 | RF-02, RF-12 | P1 (validation rejection), P7 (RFC 9457) | tests/suite_rapida/validation_test.go::TestMissingVehicleIDReturns422 | <50ms |
-| 9.4 | latitude_out_of_range_returns_422 | POST with latitude > 90 or < -90 → 422 | RF-02, RF-12 | P1 (validation rejection), P7 (RFC 9457) | tests/suite_rapida/validation_test.go::TestLatitudeOutOfRangeReturns422 | <50ms |
-| 9.5 | longitude_out_of_range_returns_422 | POST with longitude > 180 or < -180 → 422 | RF-02, RF-12 | P1 (validation rejection), P7 (RFC 9457) | tests/suite_rapida/validation_test.go::TestLongitudeOutOfRangeReturns422 | <50ms |
-| 9.6 | invalid_content_type_returns_415 | POST with Content-Type: text/plain → 415 | RF-01, RF-08 | P1 (validation rejection), P7 (RFC 9457) | tests/suite_rapida/middleware_test.go::TestInvalidContentTypeReturns415 | <50ms |
-| 9.7 | idempotency_key_validation | POST with invalid X-Idempotency-Key (not UUID) → 400 | RF-07 | P1 (validation rejection), P7 (RFC 9457) | tests/suite_rapida/middleware_test.go::TestIdempotencyKeyValidation | <50ms |
-| 9.8 | rate_limit_exceeded_returns_429 | POST 13 times per vehicle in 60s → 13th returns 429 | RF-13, RF-12 | P6 (rate limiting), P7 (RFC 9457) | tests/suite_rapida/rate_limit_test.go::TestRateLimitExceededReturns429 | <100ms |
-| 9.9 | rate_limit_window_sliding | POST at T=0, T=30, T=70 (window slides) → all succeed | RF-13 | P6 (sliding window rate limiting) | tests/suite_rapida/rate_limit_test.go::TestRateLimitWindowSliding | <200ms |
-| 9.10 | circuit_breaker_opens_on_repeated_failures | Kafka fails 5 times → 6th request returns 503 | RF-05, RF-12 | P3 (CB opens), P7 (RFC 9457) | tests/suite_rapida/circuit_breaker_test.go::TestCircuitBreakerOpensOnRepeatedFailures | <100ms |
-| 9.11 | circuit_breaker_half_opens_after_timeout | CB OPEN → wait 30s → try request → HALF_OPEN → request proceeds | RF-05 | P3 (CB HALF_OPEN recovery), P2 (async publication resumes) | tests/suite_rapida/circuit_breaker_test.go::TestCircuitBreakerHalfOpensAfterTimeout | <150ms |
-| 9.12 | circuit_breaker_closes_after_successes | CB HALF_OPEN → 2 successful requests → CLOSED | RF-05 | P3 (CB recovers to CLOSED) | tests/suite_rapida/circuit_breaker_test.go::TestCircuitBreakerClosesAfterSuccesses | <100ms |
-| 9.13 | response_includes_trace_id_header | Valid POST → response includes X-Trace-ID header | RF-07, RF-08 | P9 (trace_id continuity), P4 (timestamps include trace_id) | tests/suite_rapida/trace_id_test.go::TestResponseIncludesTraceIDHeader | <50ms |
-| 9.14 | invalid_trace_id_header_returns_400 | POST with invalid X-Trace-ID header → 400 | RF-08, RF-12 | P1 (validation rejection), P7 (RFC 9457), P9 (trace_id validation) | tests/suite_rapida/trace_id_test.go::TestInvalidTraceIDHeaderReturns400 | <50ms |
-| 9.15 | latency_timestamps_correct | Valid POST → response received_at correct, order maintained | RF-07, RF-04 | P4 (4 timestamps), P5 (timestamp validation) | tests/suite_rapida/timestamp_test.go::TestLatencyTimestampsCorrect | <50ms |
-| 9.16 | malformed_json_returns_400 | POST with malformed JSON → 400 | RF-02, RF-12 | P1 (validation rejection), P7 (RFC 9457) | tests/suite_rapida/validation_test.go::TestMalformedJSONReturns400 | <50ms |
-| 9.17 | request_exceeds_max_size_returns_413 | POST with body > 10 KB → 413 | RF-02, RF-12 | P1 (validation rejection), P7 (RFC 9457) | tests/suite_rapida/validation_test.go::TestRequestExceedsMaxSizeReturns413 | <50ms |
+| 9.1 | valid_position_returns_202 | POST valid position → 202 accepted | RF-01, RF-02, RF-04, RF-07 | P2 (async publication), P4 (timestamps), P9 (trace_id) | tests/ingestion/suite-fast/position_handler_test.go::TestValidPositionReturns202 | <50ms |
+| 9.2 | future_captured_at_returns_422 | POST with future captured_at → 422 | RF-02, RF-04, RF-12 | P1 (validation rejection), P5 (future timestamp), P7 (RFC 9457), P10 (error mapping) | tests/ingestion/suite-fast/validation_test.go::TestFutureCapturedAtReturns422 | <50ms |
+| 9.3 | missing_vehicle_id_returns_422 | POST without vehicle_id → 422 | RF-02, RF-12 | P1 (validation rejection), P7 (RFC 9457) | tests/ingestion/suite-fast/validation_test.go::TestMissingVehicleIDReturns422 | <50ms |
+| 9.4 | latitude_out_of_range_returns_422 | POST with latitude > 90 or < -90 → 422 | RF-02, RF-12 | P1 (validation rejection), P7 (RFC 9457) | tests/ingestion/suite-fast/validation_test.go::TestLatitudeOutOfRangeReturns422 | <50ms |
+| 9.5 | longitude_out_of_range_returns_422 | POST with longitude > 180 or < -180 → 422 | RF-02, RF-12 | P1 (validation rejection), P7 (RFC 9457) | tests/ingestion/suite-fast/validation_test.go::TestLongitudeOutOfRangeReturns422 | <50ms |
+| 9.6 | invalid_content_type_returns_415 | POST with Content-Type: text/plain → 415 | RF-01, RF-08 | P1 (validation rejection), P7 (RFC 9457) | tests/ingestion/suite-fast/middleware_test.go::TestInvalidContentTypeReturns415 | <50ms |
+| 9.7 | idempotency_key_validation | POST with invalid X-Idempotency-Key (not UUID) → 400 | RF-07 | P1 (validation rejection), P7 (RFC 9457) | tests/ingestion/suite-fast/middleware_test.go::TestIdempotencyKeyValidation | <50ms |
+| 9.8 | rate_limit_exceeded_returns_429 | POST 13 times per vehicle in 60s → 13th returns 429 | RF-13, RF-12 | P6 (rate limiting), P7 (RFC 9457) | tests/ingestion/suite-fast/rate_limit_test.go::TestRateLimitExceededReturns429 | <100ms |
+| 9.9 | rate_limit_window_sliding | POST at T=0, T=30, T=70 (window slides) → all succeed | RF-13 | P6 (sliding window rate limiting) | tests/ingestion/suite-fast/rate_limit_test.go::TestRateLimitWindowSliding | <200ms |
+| 9.10 | circuit_breaker_opens_on_repeated_failures | Kafka fails 5 times → 6th request returns 503 | RF-05, RF-12 | P3 (CB opens), P7 (RFC 9457) | tests/ingestion/suite-fast/circuit_breaker_test.go::TestCircuitBreakerOpensOnRepeatedFailures | <100ms |
+| 9.11 | circuit_breaker_half_opens_after_timeout | CB OPEN → wait 30s → try request → HALF_OPEN → request proceeds | RF-05 | P3 (CB HALF_OPEN recovery), P2 (async publication resumes) | tests/ingestion/suite-fast/circuit_breaker_test.go::TestCircuitBreakerHalfOpensAfterTimeout | <150ms |
+| 9.12 | circuit_breaker_closes_after_successes | CB HALF_OPEN → 2 successful requests → CLOSED | RF-05 | P3 (CB recovers to CLOSED) | tests/ingestion/suite-fast/circuit_breaker_test.go::TestCircuitBreakerClosesAfterSuccesses | <100ms |
+| 9.13 | response_includes_trace_id_header | Valid POST → response includes X-Trace-ID header | RF-07, RF-08 | P9 (trace_id continuity), P4 (timestamps include trace_id) | tests/ingestion/suite-fast/trace_id_test.go::TestResponseIncludesTraceIDHeader | <50ms |
+| 9.14 | invalid_trace_id_header_returns_400 | POST with invalid X-Trace-ID header → 400 | RF-08, RF-12 | P1 (validation rejection), P7 (RFC 9457), P9 (trace_id validation) | tests/ingestion/suite-fast/trace_id_test.go::TestInvalidTraceIDHeaderReturns400 | <50ms |
+| 9.15 | latency_timestamps_correct | Valid POST → response received_at correct, order maintained | RF-07, RF-04 | P4 (4 timestamps), P5 (timestamp validation) | tests/ingestion/suite-fast/timestamp_test.go::TestLatencyTimestampsCorrect | <50ms |
+| 9.16 | malformed_json_returns_400 | POST with malformed JSON → 400 | RF-02, RF-12 | P1 (validation rejection), P7 (RFC 9457) | tests/ingestion/suite-fast/validation_test.go::TestMalformedJSONReturns400 | <50ms |
+| 9.17 | request_exceeds_max_size_returns_413 | POST with body > 10 KB → 413 | RF-02, RF-12 | P1 (validation rejection), P7 (RFC 9457) | tests/ingestion/suite-fast/validation_test.go::TestRequestExceedsMaxSizeReturns413 | <50ms |
 
 **Tiempo de Ejecución Total Suite Rápida:** <1 segundo (todas las 17 pruebas en paralelo o secuencial, según framework)
 
@@ -153,7 +153,7 @@ Esta sección documenta qué se implementa intencionalmente en el servicio de In
 
 ```bash
 cd backend/go
-go test -v -timeout 2s ./tests/suite_rapida/...
+go test -v -timeout 2s ./tests/ingestion/suite-fast/...
 ```
 
 **Esperado:** Las 17 pruebas pasan sin dependencias externas requeridas.

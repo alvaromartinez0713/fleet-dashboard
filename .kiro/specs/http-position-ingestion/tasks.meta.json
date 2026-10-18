@@ -381,6 +381,16 @@
         "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
         "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
         "timestamp": 1792354603010
+      },
+      {
+        "executionId": "14dba02e-45f6-4398-abf9-2fca5275f27a",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792357347097
+      },
+      {
+        "executionId": "14dba02e-45f6-4398-abf9-2fca5275f27a",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792357672185
       }
     ],
     "8.1 Implementar PositionMother: Object Mother con escenarios predefinidos (Valid, FutureTimestamp, OutOfRangeLatitude, OutOfRangeLongitude, MissingVehicleID)": [
@@ -388,6 +398,16 @@
         "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
         "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
         "timestamp": 1792354603094
+      },
+      {
+        "executionId": "14dba02e-45f6-4398-abf9-2fca5275f27a",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792357674864
+      },
+      {
+        "executionId": "14dba02e-45f6-4398-abf9-2fca5275f27a",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792358129001
       }
     ],
     "8.2 Implementar Fakes: FakeKafkaPublisher (state tracking), FakeClock (controllable time), FakeIDGenerator (deterministic UUIDs), FakeRateLimiter (configurable limits)": [
@@ -395,6 +415,16 @@
         "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
         "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
         "timestamp": 1792354603177
+      },
+      {
+        "executionId": "14dba02e-45f6-4398-abf9-2fca5275f27a",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792357677403
+      },
+      {
+        "executionId": "14dba02e-45f6-4398-abf9-2fca5275f27a",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792358129718
       }
     ],
     "8.3 Implementar TestHTTPServer: harness Gin con fakes inyectados, expone puerto para pruebas, detiene limpiamente": [
@@ -402,6 +432,11 @@
         "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
         "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
         "timestamp": 1792354603258
+      },
+      {
+        "executionId": "54248ed5-fd3e-4f05-be65-b9bfe3f4b627",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792358167231
       }
     ],
     "8.4 Implementar Router HTTP: pila de middleware en orden correcto (TraceID → Idempotency → ContentType → RateLimit → ErrorHandler, evaluados en reverso)": [
@@ -409,6 +444,11 @@
         "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
         "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
         "timestamp": 1792354603328
+      },
+      {
+        "executionId": "54248ed5-fd3e-4f05-be65-b9bfe3f4b627",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792358167687
       }
     ],
     "8.5 Implementar ReceivePositionUseCase: crear VehiclePosition → validar → publicar async a Kafka vía goroutine (fire-and-forget) → devolver 202 inmediatamente": [
@@ -416,6 +456,11 @@
         "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
         "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
         "timestamp": 1792354603394
+      },
+      {
+        "executionId": "54248ed5-fd3e-4f05-be65-b9bfe3f4b627",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792358168410
       }
     ],
     "9.1 Prueba: valid_position_returns_202 (verifica: entrada válida retorna 202, estructura response correcta, trace_id header presente)": [
@@ -423,6 +468,11 @@
         "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
         "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
         "timestamp": 1792354603473
+      },
+      {
+        "executionId": "54248ed5-fd3e-4f05-be65-b9bfe3f4b627",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792358169054
       }
     ],
     "9.2 Prueba: future_captured_at_returns_422 (verifica: captured_at > now rechaza con 422, ProblemDetails con tipo correcto)": [
@@ -430,6 +480,16 @@
         "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
         "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
         "timestamp": 1792354603541
+      },
+      {
+        "executionId": "54248ed5-fd3e-4f05-be65-b9bfe3f4b627",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792358833395
+      },
+      {
+        "executionId": "54248ed5-fd3e-4f05-be65-b9bfe3f4b627",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792359518370
       }
     ],
     "9.3 Prueba: missing_vehicle_id_returns_422 (verifica: vehicle_id vacío rechaza con 422, ProblemDetails con detail)": [
@@ -437,6 +497,16 @@
         "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
         "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
         "timestamp": 1792354603612
+      },
+      {
+        "executionId": "54248ed5-fd3e-4f05-be65-b9bfe3f4b627",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792358833834
+      },
+      {
+        "executionId": "54248ed5-fd3e-4f05-be65-b9bfe3f4b627",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792359519219
       }
     ],
     "9.4 Prueba: latitude_out_of_range_returns_422 (verifica: latitud > 90 o < -90 rechaza con 422)": [
@@ -444,6 +514,16 @@
         "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
         "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
         "timestamp": 1792354603692
+      },
+      {
+        "executionId": "54248ed5-fd3e-4f05-be65-b9bfe3f4b627",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792358834122
+      },
+      {
+        "executionId": "54248ed5-fd3e-4f05-be65-b9bfe3f4b627",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792359519389
       }
     ],
     "9.5 Prueba: longitude_out_of_range_returns_422 (verifica: longitud > 180 o < -180 rechaza con 422)": [
@@ -451,6 +531,16 @@
         "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
         "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
         "timestamp": 1792354603760
+      },
+      {
+        "executionId": "54248ed5-fd3e-4f05-be65-b9bfe3f4b627",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792358837108
+      },
+      {
+        "executionId": "54248ed5-fd3e-4f05-be65-b9bfe3f4b627",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792359519723
       }
     ],
     "9.6 Prueba: invalid_content_type_returns_415 (verifica: Content-Type != application/json rechaza con 415)": [
@@ -458,6 +548,16 @@
         "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
         "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
         "timestamp": 1792354603843
+      },
+      {
+        "executionId": "54248ed5-fd3e-4f05-be65-b9bfe3f4b627",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792359611788
+      },
+      {
+        "executionId": "54248ed5-fd3e-4f05-be65-b9bfe3f4b627",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792360066546
       }
     ],
     "9.7 Prueba: idempotency_key_validation (verifica: X-Idempotency-Key inválido rechaza con 400, ausente es permitido)": [
@@ -465,6 +565,16 @@
         "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
         "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
         "timestamp": 1792354603925
+      },
+      {
+        "executionId": "54248ed5-fd3e-4f05-be65-b9bfe3f4b627",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792359612182
+      },
+      {
+        "executionId": "54248ed5-fd3e-4f05-be65-b9bfe3f4b627",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792360067058
       }
     ],
     "9.8 Prueba: rate_limit_exceeded_returns_429 (verifica: 13ª solicitud del mismo vehicle_id retorna 429)": [
@@ -472,6 +582,11 @@
         "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
         "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
         "timestamp": 1792354604011
+      },
+      {
+        "executionId": "54248ed5-fd3e-4f05-be65-b9bfe3f4b627",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792359612654
       }
     ],
     "9.9 Prueba: rate_limit_window_sliding (verifica: cuota se regenera después de 60s de ventana)": [
@@ -479,6 +594,16 @@
         "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
         "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
         "timestamp": 1792354604095
+      },
+      {
+        "executionId": "54248ed5-fd3e-4f05-be65-b9bfe3f4b627",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792359613042
+      },
+      {
+        "executionId": "54248ed5-fd3e-4f05-be65-b9bfe3f4b627",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792360067919
       }
     ],
     "9.10 Prueba: circuit_breaker_opens_on_repeated_failures (verifica: 5 fallos consecutivos → CircuitBreaker abre, 6ª solicitud retorna 503)": [
@@ -486,6 +611,16 @@
         "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
         "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
         "timestamp": 1792354604176
+      },
+      {
+        "executionId": "54248ed5-fd3e-4f05-be65-b9bfe3f4b627",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792360075688
+      },
+      {
+        "executionId": "54248ed5-fd3e-4f05-be65-b9bfe3f4b627",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792360804711
       }
     ],
     "9.11 Prueba: circuit_breaker_half_opens_after_timeout (verifica: OPEN → HALF_OPEN tras 30s timeout, próxima solicitud se intenta)": [
@@ -493,6 +628,16 @@
         "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
         "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
         "timestamp": 1792354604246
+      },
+      {
+        "executionId": "54248ed5-fd3e-4f05-be65-b9bfe3f4b627",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792360076052
+      },
+      {
+        "executionId": "54248ed5-fd3e-4f05-be65-b9bfe3f4b627",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792360805724
       }
     ],
     "9.12 Prueba: circuit_breaker_closes_after_successes (verifica: 2 éxitos en HALF_OPEN → transiciona a CLOSED)": [
@@ -500,6 +645,16 @@
         "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
         "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
         "timestamp": 1792354604329
+      },
+      {
+        "executionId": "54248ed5-fd3e-4f05-be65-b9bfe3f4b627",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792360076520
+      },
+      {
+        "executionId": "54248ed5-fd3e-4f05-be65-b9bfe3f4b627",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792360805113
       }
     ],
     "9.13 Prueba: response_includes_trace_id_header (verifica: respuesta incluye X-Trace-ID header con UUID v4)": [
@@ -507,6 +662,16 @@
         "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
         "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
         "timestamp": 1792354604409
+      },
+      {
+        "executionId": "54248ed5-fd3e-4f05-be65-b9bfe3f4b627",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792360076913
+      },
+      {
+        "executionId": "54248ed5-fd3e-4f05-be65-b9bfe3f4b627",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792360802675
       }
     ],
     "9.14 Prueba: invalid_trace_id_header_returns_400 (verifica: X-Trace-ID inválido rechaza con 400)": [

@@ -50,5 +50,8 @@ func ContentTypeMiddleware() gin.HandlerFunc {
 // isJSONContentType checks if the content type is application/json (with optional charset).
 func isJSONContentType(contentType string) bool {
 	// Handle "application/json" and "application/json; charset=utf-8"
+	if len(contentType) < len(AllowedContentType) {
+		return false
+	}
 	return contentType == AllowedContentType || contentType[:len(AllowedContentType)] == AllowedContentType
 }

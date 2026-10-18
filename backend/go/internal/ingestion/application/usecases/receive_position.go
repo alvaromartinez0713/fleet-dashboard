@@ -36,14 +36,16 @@ func NewReceivePositionUseCase(
 
 // Execute processes the command and returns the created entity.
 // Workflow:
-//   1. Create VehiclePosition entity (validates invariants, emits event)
-//   2. Check CircuitBreaker (if open, return error without publishing)
-//   3. Publish to Kafka async (fire-and-forget in goroutine)
-//   4. Return entity immediately (HTTP 202)
+//  1. Create VehiclePosition entity (validates invariants, emits event)
+//  2. Check CircuitBreaker before publishing (via Execute)
+//  3. Publish to Kafka async (fire-and-forget in goroutine)
+//  4. Return entity immediately (HTTP 202)
 //
 // Publishing is async: errors are logged, not returned to client.
 // This allows HTTP to return 202 even if Kafka is temporarily unavailable
 // (CircuitBreaker manages the retry strategy).
+//
+// Verifies: P2 (Async+202), P3 (CB-Recovery), P12 (Domain-Events), P13 (Domain-Event-Decoupling)
 func (uc *ReceivePositionUseCase) Execute(ctx context.Context, cmd *commands.ReceivePositionCommand) (*domain.VehiclePosition, error) {
 	// 1. Create entity (validates invariants, emits event)
 	entity, err := domain.NewVehiclePosition(
@@ -61,27 +63,29 @@ func (uc *ReceivePositionUseCase) Execute(ctx context.Context, cmd *commands.Rec
 		return nil, err
 	}
 
-	// 2. Check CircuitBreaker before publishing
-	if uc.circuitBreaker.IsOpen("kafka-positions") {
-		return nil, domain.NewCircuitBreakerOpenError("kafka-positions")
-	}
-
-	// 3. Publish to Kafka async (fire-and-forget)
+	// 2. Publish to Kafka async (fire-and-forget in goroutine)
+	// Fire-and-forget ensures HTTP 202 is returned immediately without blocking on Kafka latency
+	// CircuitBreaker is checked within the async publish operation
 	go func() {
-		// Create Kafka payload
+		// Create Kafka payload from entity (includes all 5 timestamps)
 		payload := entity.ToKafkaPayload()
 
-		// Publish via ports.KafkaPublisher (includes retry logic)
-		err := uc.kafkaPublisher.Publish(context.Background(), "positions", cmd.VehicleID.String(), payload)
-		if err != nil {
-			// Record failure with CircuitBreaker
-			uc.circuitBreaker.RecordFailure("kafka-positions")
-		} else {
-			// Record success with CircuitBreaker
-			uc.circuitBreaker.RecordSuccess("kafka-positions")
-		}
+		// Execute publish with CircuitBreaker protection
+		// If circuit is OPEN, Execute returns CircuitBreakerOpenError without attempting publish
+		// If circuit is CLOSED, Execute calls the publish function and tracks success/failure
+		_ = uc.circuitBreaker.Execute(context.Background(), func() error {
+			// Publish via ports.KafkaPublisher
+			// The publisher is responsible for retries, partitioning by vehicle_id, and error handling
+			return uc.kafkaPublisher.Publish(context.Background(), "positions", cmd.VehicleID.String(), payload)
+		})
+		// Error is intentionally ignored in fire-and-forget pattern:
+		// - If publish succeeds: CircuitBreaker records success
+		// - If publish fails: CircuitBreaker records failure
+		// - If circuit is open: CircuitBreaker records failure
+		// The HTTP response (202) was already sent; we don't propagate the error to the client
 	}()
 
-	// 4. Return entity immediately (HTTP 202)
+	// 3. Return entity immediately (HTTP 202)
+	// The client receives 202 before Kafka processing completes
 	return entity, nil
 }

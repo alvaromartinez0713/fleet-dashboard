@@ -35,50 +35,68 @@ func (em *ErrorMapper) ToProblemDetails(err error, traceID string) (int, *dto.Pr
 		).WithTraceID(traceID)
 	}
 
+	// Check for AppError first (wraps most domain errors)
+	if appErr, ok := err.(*domain.AppError); ok {
+		// AppError is a generic wrapper; try to extract the actual error
+		// For validation errors from NewVehiclePosition, we treat as 422
+		if appErr.Inner != nil {
+			// Recursively convert the wrapped error
+			return em.ToProblemDetails(appErr.Inner, traceID)
+		}
+		// Generic AppError -> 400
+		return http.StatusBadRequest,
+			dto.NewProblemDetails(
+				"https://api.fleet-platform.com/problems/invalid-request",
+				"Invalid request",
+				http.StatusBadRequest,
+			).WithDetail(appErr.Message).WithTraceID(traceID)
+	}
+
 	// Map domain errors
-	switch e := err.(type) {
+	// Note: Check by type name since some errors are returned by value, not pointer
+	switch err.(type) {
 	// Validation errors -> 422 Unprocessable Content
-	case *domain.InvalidVehicleIDError:
+	case domain.InvalidVehicleIDError, *domain.InvalidVehicleIDError:
 		return http.StatusUnprocessableEntity,
 			dto.NewProblemDetails(
 				"https://api.fleet-platform.com/problems/invalid-vehicle-id",
 				"Invalid vehicle ID",
 				http.StatusUnprocessableEntity,
-			).WithDetail(e.Error()).WithTraceID(traceID)
+			).WithDetail(err.Error()).WithTraceID(traceID)
 
-	case *domain.InvalidGeoPositionError:
+	case domain.InvalidGeoPositionError, *domain.InvalidGeoPositionError:
 		return http.StatusUnprocessableEntity,
 			dto.NewProblemDetails(
 				"https://api.fleet-platform.com/problems/invalid-geo-position",
 				"Invalid geographic position",
 				http.StatusUnprocessableEntity,
-			).WithDetail(e.Error()).WithTraceID(traceID)
+			).WithDetail(err.Error()).WithTraceID(traceID)
 
-	case *domain.FutureTimestampError:
+	case domain.FutureTimestampError, *domain.FutureTimestampError:
 		return http.StatusUnprocessableEntity,
 			dto.NewProblemDetails(
 				"https://api.fleet-platform.com/problems/future-timestamp",
 				"Timestamp cannot be in the future",
 				http.StatusUnprocessableEntity,
-			).WithDetail(e.Error()).WithTraceID(traceID)
+			).WithDetail(err.Error()).WithTraceID(traceID)
 
-	case *domain.InvalidEventIDError:
+	case domain.InvalidEventIDError, *domain.InvalidEventIDError:
 		return http.StatusUnprocessableEntity,
 			dto.NewProblemDetails(
 				"https://api.fleet-platform.com/problems/invalid-event-id",
 				"Invalid event ID",
 				http.StatusUnprocessableEntity,
-			).WithDetail(e.Error()).WithTraceID(traceID)
+			).WithDetail(err.Error()).WithTraceID(traceID)
 
-	case *domain.InvalidTraceIDError:
+	case domain.InvalidTraceIDError, *domain.InvalidTraceIDError:
 		return http.StatusBadRequest,
 			dto.NewProblemDetails(
 				"https://api.fleet-platform.com/problems/invalid-trace-id",
 				"Invalid trace ID format",
 				http.StatusBadRequest,
-			).WithDetail(e.Error()).WithTraceID(traceID)
+			).WithDetail(err.Error()).WithTraceID(traceID)
 
-	case *domain.RateLimitExceededError:
+	case domain.RateLimitExceededError, *domain.RateLimitExceededError:
 		return http.StatusTooManyRequests,
 			dto.NewProblemDetails(
 				"https://api.fleet-platform.com/problems/rate-limit-exceeded",
@@ -86,7 +104,7 @@ func (em *ErrorMapper) ToProblemDetails(err error, traceID string) (int, *dto.Pr
 				http.StatusTooManyRequests,
 			).WithDetail("Maximum 12 requests per 60 seconds for this vehicle").WithTraceID(traceID)
 
-	case *domain.CircuitBreakerOpenError:
+	case domain.CircuitBreakerOpenError, *domain.CircuitBreakerOpenError:
 		return http.StatusServiceUnavailable,
 			dto.NewProblemDetails(
 				"https://api.fleet-platform.com/problems/service-unavailable",
@@ -113,20 +131,21 @@ func (em *ErrorMapper) ToHTTPStatus(err error) int {
 		return http.StatusOK
 	}
 
+	// Use a different approach since type assertions don't work well with mixed value/pointer types
 	switch err.(type) {
-	case *domain.InvalidVehicleIDError,
-		*domain.InvalidGeoPositionError,
-		*domain.FutureTimestampError,
-		*domain.InvalidEventIDError:
+	case domain.InvalidVehicleIDError, *domain.InvalidVehicleIDError,
+		domain.InvalidGeoPositionError, *domain.InvalidGeoPositionError,
+		domain.FutureTimestampError, *domain.FutureTimestampError,
+		domain.InvalidEventIDError, *domain.InvalidEventIDError:
 		return http.StatusUnprocessableEntity
 
-	case *domain.InvalidTraceIDError:
+	case domain.InvalidTraceIDError, *domain.InvalidTraceIDError:
 		return http.StatusBadRequest
 
-	case *domain.RateLimitExceededError:
+	case domain.RateLimitExceededError, *domain.RateLimitExceededError:
 		return http.StatusTooManyRequests
 
-	case *domain.CircuitBreakerOpenError:
+	case domain.CircuitBreakerOpenError, *domain.CircuitBreakerOpenError:
 		return http.StatusServiceUnavailable
 
 	default:

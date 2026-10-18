@@ -109,15 +109,16 @@ func NewVehiclePosition(
 	}
 
 	// Emit domain event: PositionReceivedEvent
-	entity.positionReceivedEvent = &PositionReceivedEvent{
-		vehicleID:    vehicleID,
-		eventID:      eventID,
-		capturedAt:   capturedAt,
-		receivedAt:   receivedAt,
-		processedAt:  processedAt,
-		traceID:      traceID,
-		occurredAt:   time.Now().UTC(),
-	}
+	entity.positionReceivedEvent = NewPositionReceivedEvent(
+		eventID,
+		vehicleID,
+		geoPosition,
+		capturedAt,
+		receivedAt,
+		traceID,
+		idempotencyKey,
+		time.Now().UTC(),
+	)
 
 	return entity, nil
 }

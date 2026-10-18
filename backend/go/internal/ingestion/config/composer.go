@@ -11,13 +11,16 @@ import (
 	ingestionhttp "github.com/fleet-platform/backend/internal/ingestion/http"
 	"github.com/fleet-platform/backend/internal/ingestion/http/handler"
 	"github.com/fleet-platform/backend/internal/ingestion/http/mapper"
-	"github.com/fleet-platform/backend/internal/ingestion/http/middleware"
 	"github.com/fleet-platform/backend/internal/ingestion/ports"
 )
 
 // DependencyComposer wires together all dependencies for the ingestion service.
 // It is responsible for instantiating and connecting adapters, handlers, and infrastructure
 // components according to the provided configuration.
+//
+// Responsibility: Dependency Injection (DI) only.
+// No business logic, no orchestration beyond wiring.
+// Only composition of ports (interfaces) with adapters (implementations).
 type DependencyComposer struct {
 	cfg    ports.Config
 	logger ports.Logger
@@ -36,23 +39,26 @@ func NewDependencyComposer(cfg ports.Config, logger ports.Logger) *DependencyCom
 }
 
 // ComposeAPI wires together the HTTP server and all its dependencies.
-// It creates adapters, use cases, handlers, and the router with middleware.
+// Implements Clean Architecture: instantiates adapters, ports, use cases, handlers, middleware,
+// and registers routes in correct order.
+//
+// Middleware Pipeline Order (CRITICAL):
+//   1. TraceIDMiddleware (first, wraps all)
+//   2. IdempotencyKeyMiddleware (validates idempotency key)
+//   3. ContentTypeMiddleware (validates Content-Type)
+//   4. RateLimitMiddleware (enforces rate limit per vehicle)
+//   5. ErrorHandlerMiddleware (last, catches all errors)
 //
 // Returns:
 //   - ports.HTTPServer: The configured and ready-to-start HTTP server
 //   - error: Any error encountered during composition
 func (c *DependencyComposer) ComposeAPI() (ports.HTTPServer, error) {
-	// Create the health checker
-	healthChecker := NewSimpleHealthChecker()
-
-	// Create the HTTP router with all dependencies
-	router := ingestionhttp.NewRouter(c.cfg, c.logger, healthChecker)
-
-	// Create infrastructure adapters (injected for dependency management)
+	// ========== STEP 1: Create infrastructure adapters ==========
 	c.clock = infrastructure.NewRealClock()
 	c.idGenerator = infrastructure.NewRealIDGenerator()
 
-	// Create Kafka publisher adapter
+	// ========== STEP 2: Create outbound adapters (messaging & resilience) ==========
+	// Kafka Publisher
 	brokers := []string{"localhost:9092"} // Will be parameterized via config
 	kafkaPublisher, err := messaging.NewKafkaPublisher(brokers)
 	if err != nil {
@@ -60,10 +66,10 @@ func (c *DependencyComposer) ComposeAPI() (ports.HTTPServer, error) {
 		return nil, err
 	}
 
-	// Create circuit breaker manager
-	circuitBreakerManager := resilience.NewCircuitBreakerManager()
+	// Circuit Breaker (resilience)
+	circuitBreaker := resilience.NewCircuitBreaker()
 
-	// Create rate limiter with default config (12/60s)
+	// Rate Limiter (resilience)
 	rateLimitConfig, err := domain.NewRateLimitConfig(12, 60)
 	if err != nil {
 		c.logger.Error("failed to create rate limit config", ports.Field{Key: "error", Value: err.Error()})
@@ -71,29 +77,37 @@ func (c *DependencyComposer) ComposeAPI() (ports.HTTPServer, error) {
 	}
 	rateLimiter := resilience.NewRateLimiter(rateLimitConfig)
 
-	// Create error mapper
+	// ========== STEP 3: Create HTTP layer mappers ==========
 	errorMapper := mapper.NewErrorMapper()
-
-	// Create position mapper
 	positionMapper := mapper.NewPositionMapper(c.idGenerator, c.clock)
 
-	// Create use case
-	receivePositionUseCase := usecases.NewReceivePositionUseCase(kafkaPublisher, circuitBreakerManager)
+	// ========== STEP 4: Create application use cases ==========
+	// ReceivePositionUseCase depends on ports (interfaces), not implementations
+	receivePositionUseCase := usecases.NewReceivePositionUseCase(kafkaPublisher, circuitBreaker)
 
-	// Create position handler
+	// ========== STEP 5: Create HTTP layer handlers ==========
 	positionHandler := handler.NewPositionHandler(receivePositionUseCase, positionMapper)
 
-	// Silence unused variables (will be used in future waves)
-	_ = circuitBreakerManager
-	_ = rateLimiter
-	_ = errorMapper
-	_ = positionHandler
+	// ========== STEP 6: Create health checker ==========
+	healthChecker := NewSimpleHealthChecker()
 
-	// Register middleware and routes
-	// Note: Middleware registration is handled in router.registerMiddleware()
-	// Position handler registration will be done in a separate step
+	// ========== STEP 7: Create base router (framework setup only) ==========
+	router := ingestionhttp.NewRouter(c.cfg, c.logger, healthChecker)
 
-	c.logger.Info("API dependencies composed successfully")
+	// ========== STEP 8: Register middleware in CORRECT ORDER ==========
+	// Router.RegisterRoutes() handles middleware pipeline configuration and route registration
+	// with strict ordering guarantees (middleware executed in reverse order of registration)
+	if err := router.RegisterRoutes(positionHandler, errorMapper, rateLimiter, c.clock); err != nil {
+		c.logger.Error("failed to register routes", ports.Field{Key: "error", Value: err.Error()})
+		return nil, err
+	}
+
+	c.logger.Info("API dependencies composed successfully",
+		ports.Field{Key: "middleware_count", Value: 5},
+		ports.Field{Key: "middleware_order", Value: "TraceID → Idempotency → ContentType → RateLimit → ErrorHandler"},
+		ports.Field{Key: "routes_registered", Value: 1},
+		ports.Field{Key: "route_position_ingestion", Value: "POST /api/v1/positions"},
+	)
 
 	return router, nil
 }

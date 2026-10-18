@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/fleet-platform/backend/internal/ingestion/adapters/outbound/resilience"
 	"github.com/fleet-platform/backend/internal/ingestion/domain"
 	"github.com/fleet-platform/backend/internal/ingestion/ports"
 )
@@ -21,7 +20,7 @@ const RateLimitContextKey = "rate_limit_exceeded"
 //
 // Verifies: P6 (Rate-Limit), RF-13
 // Execution order: Fourth in middleware chain
-func RateLimitMiddleware(rateLimiter *resilience.RateLimiterImpl, clock ports.Clock) gin.HandlerFunc {
+func RateLimitMiddleware(rateLimiter ports.RateLimiter, clock ports.Clock) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Extract vehicle_id from request body
 		vehicleID, err := extractVehicleIDFromBody(c)
@@ -33,7 +32,7 @@ func RateLimitMiddleware(rateLimiter *resilience.RateLimiterImpl, clock ports.Cl
 		}
 
 		// Check if request is allowed
-		allowed := rateLimiter.Allow(vehicleID, clock.Now())
+		allowed := rateLimiter.Allow(c.Request.Context(), vehicleID)
 		if !allowed {
 			// Rate limit exceeded
 			c.Header("Content-Type", "application/problem+json")
@@ -94,5 +93,5 @@ func extractVehicleIDFromBody(c *gin.Context) (string, error) {
 // NewRateLimitExceededError creates a domain error for rate limit exceeded.
 // Used by ErrorHandlerMiddleware to map to HTTP 429.
 func NewRateLimitExceededError(vehicleID string) *domain.RateLimitExceededError {
-	return domain.NewRateLimitExceededError(vehicleID)
+	return &domain.RateLimitExceededError{VehicleID: vehicleID}
 }

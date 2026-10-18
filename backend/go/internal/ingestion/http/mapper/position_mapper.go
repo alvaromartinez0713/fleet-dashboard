@@ -2,7 +2,6 @@ package mapper
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/fleet-platform/backend/internal/ingestion/application/commands"
 	"github.com/fleet-platform/backend/internal/ingestion/domain"
@@ -47,6 +46,8 @@ func (pm *PositionMapper) FromRequest(
 		return nil, fmt.Errorf("position request is nil")
 	}
 
+	now := pm.clock.Now()
+
 	// Create VehicleID domain value object (validates invariants)
 	vehicleID, err := domain.NewVehicleID(req.VehicleID)
 	if err != nil {
@@ -59,34 +60,38 @@ func (pm *PositionMapper) FromRequest(
 		return nil, err
 	}
 
-	// Create CapturedTimestamp (validates not in future)
-	capturedAt, err := domain.NewCapturedTimestamp(req.CapturedAt, pm.clock.Now())
+	// Create CapturedTimestamp (validates ISO 8601 format, checks not in future)
+	capturedAt, err := domain.NewCapturedTimestamp(req.CapturedAt, now)
 	if err != nil {
 		return nil, err
 	}
 
 	// Create ReceivedTimestamp (set to current time)
-	receivedAt, err := domain.NewReceivedTimestamp(pm.clock.Now())
+	receivedAt, err := domain.NewReceivedTimestamp(now, now)
 	if err != nil {
 		return nil, err
 	}
 
-	// Create ProcessedTimestamp (set to current time, will be updated in usecase)
-	processedAt, err := domain.NewProcessedTimestamp(pm.clock.Now())
+	// Create ProcessedTimestamp (set to current time)
+	processedAt, err := domain.NewProcessedTimestamp(now, now)
 	if err != nil {
 		return nil, err
 	}
 
-	// Create TraceID (already validated in middleware, but wrap here)
-	traceIDObj, err := domain.NewTraceID(traceID)
+	// Create TraceID (optional header provided or generate new)
+	var traceIDPtr *string
+	if traceID != "" {
+		traceIDPtr = &traceID
+	}
+	traceIDObj, err := domain.NewTraceID(traceIDPtr, pm.idGenerator)
 	if err != nil {
 		return nil, err
 	}
 
 	// Create IdempotencyKey if provided (may be nil)
 	var idempotencyKeyObj *domain.IdempotencyKey
-	if idempotencyKey != nil && *idempotencyKey != "" {
-		obj, err := domain.NewIdempotencyKey(*idempotencyKey)
+	if idempotencyKey != nil {
+		obj, err := domain.NewIdempotencyKey(idempotencyKey)
 		if err != nil {
 			return nil, err
 		}
@@ -94,8 +99,7 @@ func (pm *PositionMapper) FromRequest(
 	}
 
 	// Generate EventID (UUID v4)
-	eventIDStr := pm.idGenerator.Generate()
-	eventID, err := domain.NewEventID(eventIDStr)
+	eventID, err := domain.NewEventID(pm.idGenerator)
 	if err != nil {
 		return nil, err
 	}
@@ -119,6 +123,9 @@ func (pm *PositionMapper) FromRequest(
 //   - event_id: UUID v4 string
 //   - status: "accepted" (HTTP 202 semantics)
 //   - timestamp: Current server time
+//   - vehicle_id: Vehicle ID from entity
+//   - trace_id: Trace ID for request correlation
+//   - received_at: Server receive timestamp
 //
 // Verifies: P2 (Async+202), P4 (4-Timestamps), P9 (Trace-ID)
 func (pm *PositionMapper) FromEntity(entity *domain.VehiclePosition) *dto.PositionResponse {
@@ -127,8 +134,11 @@ func (pm *PositionMapper) FromEntity(entity *domain.VehiclePosition) *dto.Positi
 	}
 
 	return &dto.PositionResponse{
-		EventID:   entity.EventID().String(),
-		Status:    "accepted",
-		Timestamp: pm.clock.Now(),
+		EventID:    entity.EventID().String(),
+		Status:     "accepted",
+		Timestamp:  pm.clock.Now(),
+		VehicleID:  entity.VehicleID().String(),
+		TraceID:    entity.TraceID().String(),
+		ReceivedAt: entity.ReceivedAt().Value(),
 	}
 }
