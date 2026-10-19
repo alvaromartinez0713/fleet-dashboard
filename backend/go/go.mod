@@ -1,6 +1,6 @@
 module github.com/fleet-platform/backend
 
-go 1.26.0
+go 1.25.0
 
 require (
 	github.com/gin-gonic/gin v1.9.1
@@ -9,6 +9,7 @@ require (
 	github.com/stretchr/testify v1.11.1
 	github.com/testcontainers/testcontainers-go v0.44.0
 	go.uber.org/zap v1.27.0
+	pgregory.net/rapid v1.2.0
 )
 
 require (

@@ -4,12 +4,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/flyingmutant/rapid"
+	"pgregory.net/rapid"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 
 	"github.com/fleet-platform/backend/internal/ingestion/domain"
-	"github.com/fleet-platform/backend/tests/support/fakes"
+	"	"github.com/fleet-platform/backend/tests/support/fakes" // local package"
 )
 
 // TestLatencyMonotonicity verifies the invariant that for any batch of valid positions

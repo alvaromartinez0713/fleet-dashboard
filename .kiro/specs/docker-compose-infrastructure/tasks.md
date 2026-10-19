@@ -159,8 +159,8 @@ La implementación se construye de forma incremental: configuración base → sc
     - _Requirements: RF-17_
 
 - [ ] 8. Tests de integración para infraestructura
-  - [ ] 8.1 Crear tests/integration/infrastructure_test.go
-    - Agregar build tag: //go:build integration
+  - [ ] 8.1 Crear tests/docker/infrastructure_test.go
+    - Agregar build tag: //go:build docker
     - Importar testcontainers-go o usar comandos docker compose exec
     - Test: Zookeeper arranca y el health check pasa
       - Ejecutar docker compose up -d zookeeper
@@ -246,8 +246,8 @@ La implementación se construye de forma incremental: configuración base → sc
       - Eliminar .env.test
       - _Requirements: RF-08_
 
-  - [ ] 8.2 Crear tests/integration/startup_order_test.go
-    - Agregar build tag: //go:build integration
+  - [ ] 8.2 Crear tests/docker/startup_order_test.go
+    - Agregar build tag: //go:build docker
     - Test: El orden de inicio respeta las dependencias
       - Ejecutar docker compose up -d (todos los servicios)
       - Capturar tiempos de inicio de contenedores desde docker inspect
@@ -256,8 +256,8 @@ La implementación se construye de forma incremental: configuración base → sc
       - Limpiar: docker compose down
       - _Requirements: RF-11_
 
-  - [ ] 8.3 Crear tests/integration/cleanup_test.go
-    - Agregar build tag: //go:build integration
+  - [ ] 8.3 Crear tests/docker/cleanup_test.go
+    - Agregar build tag: //go:build docker
     - Test: docker compose down preserva volúmenes
       - Ejecutar docker compose up -d
       - Esperar healthy
@@ -280,8 +280,8 @@ La implementación se construye de forma incremental: configuración base → sc
 - [ ] 9. Checkpoint - Ejecutar tests de integración
   - Asegurar que todos los tests pasen, preguntar al usuario si surgen dudas.
 
-- [ ] 10. Actualizar README.md con instrucciones de infraestructura
-  - [ ] 10.1 Agregar sección Quick Start
+- [x] 10. Actualizar README.md con instrucciones de infraestructura
+  - [x] 10.1 Agregar sección Quick Start
     - Agregar encabezado de sección: "## Quick Start"
     - Agregar prerrequisitos: Docker, Docker Compose
     - Agregar paso 1: Clonar repositorio
@@ -294,14 +294,14 @@ La implementación se construye de forma incremental: configuración base → sc
       - TimescaleDB: localhost:5432 (o ${TIMESCALEDB_PORT})
     - _Requirements: RF-09, RF-17_
 
-  - [ ] 10.2 Agregar sección Makefile Commands
+  - [x] 10.2 Agregar sección Makefile Commands
     - Agregar encabezado de sección: "## Makefile Commands"
     - Agregar tabla con tres columnas: Command | Description | Usage
     - Documentar todos los 12 targets de make del Makefile
     - Agregar ejemplos para flujos de trabajo comunes (iniciar, ver logs, detener, limpiar)
     - _Requirements: RF-17_
 
-  - [ ] 10.3 Agregar sección Troubleshooting
+  - [x] 10.3 Agregar sección Troubleshooting
     - Agregar encabezado de sección: "## Troubleshooting"
     - Agregar subsección: "Conflicto de puerto en 5432"
       - Explicar cómo establecer TIMESCALEDB_PORT en .env
@@ -318,7 +318,7 @@ La implementación se construye de forma incremental: configuración base → sc
       - Seguro ignorar si el topic existe
     - _Requirements: RF-06, RF-13_
 
-  - [ ] 10.4 Agregar sección Architecture
+  - [x] 10.4 Agregar sección Architecture
     - Agregar encabezado de sección: "## Architecture"
     - Agregar subsección: "Servicios de Infraestructura"
     - Describir rol de Zookeeper (coordinador de Kafka)
@@ -330,15 +330,15 @@ La implementación se construye de forma incremental: configuración base → sc
     - Agregar diagrama de flujo de datos (arte ASCII o referencia a design.md)
     - _Requirements: RF-10_
 
-- [ ] 11. Validación manual con smoke tests
-  - [ ] 11.1 Ejecutar inicio del stack completo
+- [x] 11. Validación manual con smoke tests
+  - [x] 11.1 Ejecutar inicio del stack completo
     - Desde la raíz del proyecto, ejecutar: make up
     - Esperar 30 segundos
     - Ejecutar: make status
     - Verificar que todos los servicios muestren "Up" o "Up (healthy)"
     - _Requirements: RF-01, RF-02, RF-05, RF-11, RNF-03_
 
-  - [ ] 11.2 Probar conectividad de TimescaleDB desde host
+  - [x] 11.2 Probar conectividad de TimescaleDB desde host
     - Ejecutar: psql -h localhost -p 5432 -U fleet_user -d fleet_db
     - Ingresar contraseña de POSTGRES_PASSWORD (por defecto: fleet_password)
     - Ejecutar: \dt telemetry.*
@@ -348,7 +348,7 @@ La implementación se construye de forma incremental: configuración base → sc
     - Salir de psql
     - _Requirements: RF-05, RF-06_
 
-  - [ ] 11.3 Probar existencia del topic de Kafka
+  - [x] 11.3 Probar existencia del topic de Kafka
     - Ejecutar: docker exec fleet-kafka kafka-topics --list --bootstrap-server localhost:9092
     - Verificar que la salida contiene "telemetry.positions"
     - Ejecutar: docker exec fleet-kafka kafka-topics --describe --topic telemetry.positions --bootstrap-server localhost:9092
@@ -356,12 +356,12 @@ La implementación se construye de forma incremental: configuración base → sc
     - Verificar: ReplicationFactor: 1
     - _Requirements: RF-02_
 
-  - [ ] 11.4 Probar endpoint de health de Ingestion API
+  - [x] 11.4 Probar endpoint de health de Ingestion API
     - Ejecutar: curl http://localhost:8080/health
     - Verificar respuesta HTTP 200
     - _Requirements: RF-11_
 
-  - [ ] 11.5 Probar flujo end-to-end (manual)
+  - [x] 11.5 Probar flujo end-to-end (manual)
     - Ejecutar: curl -X POST http://localhost:8080/positions -H "Content-Type: application/json" -d '{"vehicleId":"VH-SMOKE","latitude":40.7128,"longitude":-74.0060,"capturedAt":"2024-01-15T10:00:00Z"}'
     - Verificar respuesta HTTP 202 Accepted
     - Esperar 5 segundos para procesamiento del worker
@@ -369,7 +369,7 @@ La implementación se construye de forma incremental: configuración base → sc
     - Verificar que se devuelve una fila con latitud/longitud correctas
     - _Requirements: RF-02, RF-05, RF-11_
 
-  - [ ] 11.6 Probar acceso a logs
+  - [x] 11.6 Probar acceso a logs
     - Ejecutar: make logs-timescaledb
     - Verificar que los logs se transmiten en tiempo real (Ctrl+C para salir)
     - Ejecutar: make logs-kafka
@@ -378,7 +378,7 @@ La implementación se construye de forma incremental: configuración base → sc
     - Verificar que los logs de todos los servicios se transmiten (Ctrl+C para salir)
     - _Requirements: RF-13_
 
-  - [ ] 11.7 Probar limpieza
+  - [x] 11.7 Probar limpieza
     - Ejecutar: make down
     - Ejecutar: docker compose ps
     - Verificar que no hay contenedores ejecutándose
@@ -391,7 +391,7 @@ La implementación se construye de forma incremental: configuración base → sc
     - Verificar que los volúmenes se eliminaron
     - _Requirements: RF-14_
 
-- [ ] 12. Checkpoint final - Validación completa
+- [x] 12. Checkpoint final - Validación completa
   - Asegurar que todos los tests pasen, preguntar al usuario si surgen dudas.
 
 ## Notas

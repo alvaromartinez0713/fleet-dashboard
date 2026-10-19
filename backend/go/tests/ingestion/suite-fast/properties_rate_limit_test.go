@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/flyingmutant/rapid"
+	"pgregory.net/rapid"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 

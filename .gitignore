@@ -8,6 +8,9 @@
 # ----------------------------------------------------------------------------
 # Environment and Secrets
 # ----------------------------------------------------------------------------
+# Environment variables
+# .env files contain sensitive configuration (passwords, ports, API keys, etc.)
+# Never commit .env to git; use .env.example as template instead
 # NEVER commit environment files with real secrets
 .env
 .env.local

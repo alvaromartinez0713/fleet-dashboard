@@ -275,27 +275,27 @@ El stack deberá funcionar en máquinas de desarrollo típicas.
 
 | ID | Descripción | Suite | Ruta | Tipo |
 |---|---|---|---|---|
-| RF-01 | Servicio Zookeeper | Integration | `tests/integration/zookeeper_test.go` | Go |
-| RF-02 | Kafka + Topic telemetry.positions | Integration | `tests/integration/kafka_test.go` | Go |
-| RF-03 | Health checks | Integration | `tests/integration/health_check_test.go` | Go |
-| RF-04 | Network fleet-network | Integration | `tests/integration/network_test.go` | Go |
-| RF-05 | TimescaleDB setup | Integration | `tests/integration/timescaledb_test.go` | Go |
-| RF-06 | Port mapping para TimescaleDB | Integration | `tests/integration/port_mapping_test.go` | Go |
-| RF-07 | Volúmenes persistencia | Integration | `tests/integration/volumes_test.go` | Go |
+| RF-01 | Servicio Zookeeper | Docker | `tests/docker/infrastructure_test.go` | Go |
+| RF-02 | Kafka + Topic telemetry.positions | Docker | `tests/docker/infrastructure_test.go` | Go |
+| RF-03 | Health checks | Docker | `tests/docker/infrastructure_test.go` | Go |
+| RF-04 | Network fleet-network | Docker | `tests/docker/infrastructure_test.go` | Go |
+| RF-05 | TimescaleDB setup | Docker | `tests/docker/infrastructure_test.go` | Go |
+| RF-06 | Port mapping para TimescaleDB | Docker | `tests/docker/infrastructure_test.go` | Go |
+| RF-07 | Volúmenes persistencia | Docker | `tests/docker/infrastructure_test.go` | Go |
 | RF-08 | Variables .env | Unit | `tests/unit/config_test.go` | Go |
 | RF-09 | .env.example | Manual | README review | Doc |
 | RF-10 | Documentación docker-compose.yml | Manual | YAML review | Doc |
-| RF-11 | Dependencias startup | Integration | `tests/integration/startup_order_test.go` | Go |
-| RF-12 | Restart policies | Integration | `tests/integration/restart_policies_test.go` | Go |
+| RF-11 | Dependencias startup | Docker | `tests/docker/startup_order_test.go` | Go |
+| RF-12 | Restart policies | Docker | `tests/docker/startup_order_test.go` | Go |
 | RF-13 | Logs accesibles | Manual | CLI verification | CLI |
-| RF-14 | Limpieza determinística | Integration | `tests/integration/cleanup_test.go` | Go |
-| RF-15 | Compatibilidad multiplataforma | Integration | `tests/integration/platform_compat_test.go` | Go |
-| RF-16 | Seguridad mínima | Integration | `tests/integration/security_test.go` | Go |
+| RF-14 | Limpieza determinística | Docker | `tests/docker/cleanup_test.go` | Go |
+| RF-15 | Compatibilidad multiplataforma | Docker | `tests/docker/infrastructure_test.go` | Go |
+| RF-16 | Seguridad mínima | Docker | `tests/docker/infrastructure_test.go` | Go |
 | RF-17 | Makefile para orquestación local | Manual | Makefile review | CLI |
-| RNF-01 | Aislamiento local | Integration | `tests/integration/isolation_test.go` | Go |
-| RNF-02 | Reproducibilidad | Integration | `tests/integration/reproducibility_test.go` | Go |
-| RNF-03 | Rendimiento startup | Performance | `tests/performance/startup_time_test.go` | Go |
-| RNF-04 | Tolerancia recursos | Integration | `tests/integration/resource_tolerance_test.go` | Go |
+| RNF-01 | Aislamiento local | Docker | `tests/docker/cleanup_test.go` | Go |
+| RNF-02 | Reproducibilidad | Docker | `tests/docker/infrastructure_test.go` | Go |
+| RNF-03 | Rendimiento startup | Performance | `tests/docker/startup_order_test.go` | Go |
+| RNF-04 | Tolerancia recursos | Docker | `tests/docker/infrastructure_test.go` | Go |
 
 ## Decisiones Pendientes
 

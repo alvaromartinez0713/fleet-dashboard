@@ -104,6 +104,10 @@ CREATE INDEX IF NOT EXISTS idx_positions_trace_id
 GRANT USAGE ON SCHEMA telemetry TO fleet_user;
 GRANT SELECT, INSERT, UPDATE, DELETE ON telemetry.positions TO fleet_user;
 
+-- Grant privileges on future tables created in telemetry schema
+ALTER DEFAULT PRIVILEGES IN SCHEMA telemetry 
+  GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO fleet_user;
+
 -- ============================================================================
 -- Initialization Complete
 -- ============================================================================

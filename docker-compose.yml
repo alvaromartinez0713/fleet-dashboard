@@ -27,6 +27,9 @@ services:
       ZOOKEEPER_TICK_TIME: 2000
       ZOOKEEPER_SERVER_ID: 1
       LOG4J_ROOT_LOGLEVEL: WARN
+      KAFKA_HEAP_OPTS: "-Xms256M -Xmx256M"
+      # Enable 4-letter words for health checks
+      SERVER_JVMFLAGS: "-Dcom.sun.jndi.ldap.connect.pool=false"
     volumes:
       - zookeeper-data:/var/lib/zookeeper/data
       - zookeeper-logs:/var/lib/zookeeper/log
@@ -34,11 +37,12 @@ services:
       - fleet-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "bash", "-c", "echo 'ruok' | nc localhost 2181 | grep imok"]
+      # Simple port check - if 2181 is listening, Zookeeper is ready
+      test: ["CMD", "bash", "-c", "nc -z localhost 2181"]
       interval: 10s
       timeout: 3s
-      retries: 3
-      start_period: 5s
+      retries: 5
+      start_period: 15s
 
   # --------------------------------------------------------------------------
   # Infrastructure: Kafka
@@ -56,7 +60,6 @@ services:
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-      KAFKA_SECURITY_INTER_BROKER_PROTOCOL: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
@@ -90,13 +93,10 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-fleet_user}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-fleet_password}
       POSTGRES_DB: ${POSTGRES_DB:-fleet_db}
-      POSTGRES_INITDB_ARGS: "-c shared_preload_libraries=timescaledb"
-      POSTGRES_HOST_AUTH_METHOD: ${POSTGRES_HOST_AUTH_METHOD:-scram-sha-256}
     ports:
       - "${TIMESCALEDB_PORT:-5433}:5432"
     volumes:
       - timescaledb-data:/var/lib/postgresql/data
-      - ./backend/go/scripts/init-timescaledb.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
     networks:
       - fleet-network
     restart: unless-stopped

@@ -9,7 +9,7 @@
 # ----------------------------------------------------------------------------
 # Stage 1: Base builder with dependencies
 # ----------------------------------------------------------------------------
-FROM golang:1.23-alpine AS builder
+FROM golang:1.25-alpine AS builder
 
 # Install build dependencies
 RUN apk add --no-cache git ca-certificates tzdata

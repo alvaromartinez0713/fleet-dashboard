@@ -59,8 +59,7 @@ func (c *DependencyComposer) ComposeAPI() (ports.HTTPServer, error) {
 
 	// ========== STEP 2: Create outbound adapters (messaging & resilience) ==========
 	// Kafka Publisher
-	brokers := []string{"localhost:9092"} // Will be parameterized via config
-	kafkaPublisher, err := messaging.NewKafkaPublisher(brokers)
+	kafkaPublisher, err := messaging.NewKafkaPublisher([]string{c.cfg.Kafka.Brokers})
 	if err != nil {
 		c.logger.Error("failed to create Kafka publisher", ports.Field{Key: "error", Value: err.Error()})
 		return nil, err
