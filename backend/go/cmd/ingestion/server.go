@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"os"
+	"time"
 
 	"github.com/fleet-platform/backend/internal/ingestion/ports"
 )
@@ -41,7 +42,7 @@ func startServer(server ports.HTTPServer, cfg ports.Config, logger ports.Logger)
 }
 
 // performGracefulShutdown orchestrates the server shutdown with timeout and second signal handling.
-func performGracefulShutdown(server ports.HTTPServer, timeout ports.Duration, logger ports.Logger, sigChan <-chan os.Signal) error {
+func performGracefulShutdown(server ports.HTTPServer, timeout time.Duration, logger ports.Logger, sigChan <-chan os.Signal) error {
 	// Create shutdown context with configured timeout
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()

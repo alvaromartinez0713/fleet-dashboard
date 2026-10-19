@@ -8,6 +8,9 @@
 # ----------------------------------------------------------------------------
 # Environment and Secrets
 # ----------------------------------------------------------------------------
+# Environment variables
+# .env files contain sensitive configuration (passwords, ports, API keys, etc.)
+# Never commit .env to git; use .env.example as template instead
 # NEVER commit environment files with real secrets
 .env
 .env.local
@@ -113,3 +116,7 @@ node_modules/
 # - frontend/.gitignore (when created)
 # - mobile/.gitignore (when created)
 # ============================================================================
+
+# Backend Go - Environment files for production
+backend/go/.env.prod
+backend/go/.env.local
