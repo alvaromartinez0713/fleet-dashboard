@@ -371,3 +371,263 @@ func TestMissingVehicleIDReturns422(t *testing.T) {
 	assert.Equal(t, 0, kafkaPublisher.PublishedCount(),
 		"no event should have been published (request was rejected)")
 }
+
+// TestMalformedJSONReturns400 verifies that a position request with malformed JSON
+// is rejected with status 400 Bad Request.
+//
+// This test validates:
+// - HTTP status code is 400 (Bad Request) when JSON is malformed
+// - Response body is ProblemDetails (RFC 9457)
+// - ProblemDetails.Type indicates validation/client error
+// - ProblemDetails.Status == 400
+// - X-Trace-ID header is still present even for malformed requests
+// - No 500 Internal Server Error (proper error handling)
+//
+// Malformed JSON examples tested:
+// - Truncated JSON: {"vehicleId": "VH-001", "latitude": 40.7
+// - Extra commas: {"vehicleId": "VH-001",, "latitude": 40.7}
+// - Invalid syntax: {invalid json}
+// - Empty body: (empty string)
+//
+// Uses table-driven test pattern for multiple malformed payloads.
+//
+// Verifies: P1 (Validation - input constraints), P7 (RFC9457), P9 (Trace-ID)
+// RF: RF-02 (validation), RF-12 (error handling), RF-04 (trace context)
+func TestMalformedJSONReturns400(t *testing.T) {
+	// ========== ARRANGE ==========
+	server, err := support.NewTestHTTPServer()
+	require.NoError(t, err, "failed to create test HTTP server")
+	defer server.Stop()
+
+	err = server.Start()
+	require.NoError(t, err, "failed to start test HTTP server")
+
+	// Table-driven test: various malformed JSON payloads
+	testCases := []struct {
+		name           string
+		malformedJSON  string
+		expectedStatus int
+	}{
+		{
+			name:           "truncated JSON",
+			malformedJSON:  `{"vehicleId": "VH-001", "latitude": 40.7`,
+			expectedStatus: http.StatusBadRequest,
+		},
+		{
+			name:           "extra comma",
+			malformedJSON:  `{"vehicleId": "VH-001",, "latitude": 40.7}`,
+			expectedStatus: http.StatusBadRequest,
+		},
+		{
+			name:           "missing comma",
+			malformedJSON:  `{"vehicleId": "VH-001" "latitude": 40.7}`,
+			expectedStatus: http.StatusBadRequest,
+		},
+		{
+			name:           "invalid syntax",
+			malformedJSON:  `{invalid json}`,
+			expectedStatus: http.StatusBadRequest,
+		},
+		{
+			name:           "empty body",
+			malformedJSON:  ``,
+			expectedStatus: http.StatusBadRequest,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			// ========== ACT ==========
+			req, err := http.NewRequest(
+				http.MethodPost,
+				server.BaseURL()+"/api/v1/positions",
+				bytes.NewReader([]byte(tc.malformedJSON)),
+			)
+			require.NoError(t, err, "failed to create HTTP request")
+
+			req.Header.Set("Content-Type", "application/json")
+
+			resp, err := http.DefaultClient.Do(req)
+			require.NoError(t, err, "failed to send HTTP request")
+			defer resp.Body.Close()
+
+			// ========== ASSERT ==========
+
+			// 1. Status code must be 400 Bad Request (not 500 Internal Server Error)
+			assert.Equal(t, tc.expectedStatus, resp.StatusCode,
+				"HTTP status should be 400 for malformed JSON: %q", tc.malformedJSON)
+
+			// 2. Response Content-Type must be application/problem+json
+			contentType := resp.Header.Get("Content-Type")
+			assert.Contains(t, contentType, "application/problem+json",
+				"Response Content-Type should be application/problem+json, got: %s", contentType)
+
+			// 3. X-Trace-ID header must be present even for error responses
+			traceIDHeader := resp.Header.Get("X-Trace-ID")
+			assert.NotEmpty(t, traceIDHeader,
+				"X-Trace-ID response header should be present for error responses")
+
+			// Verify X-Trace-ID is valid UUID v4
+			_, err = uuid.Parse(traceIDHeader)
+			assert.NoError(t, err,
+				"X-Trace-ID header should be valid UUID v4: %s", traceIDHeader)
+
+			// 4. Parse response body as ProblemDetails (RFC 9457)
+			var problemDetails dto.ProblemDetails
+			err = json.NewDecoder(resp.Body).Decode(&problemDetails)
+			require.NoError(t, err, "failed to decode response body as ProblemDetails")
+
+			// 5. Verify ProblemDetails structure
+			assert.NotEmpty(t, problemDetails.Type,
+				"ProblemDetails.type should not be empty")
+
+			// 6. ProblemDetails.Status must be 400
+			assert.Equal(t, http.StatusBadRequest, problemDetails.Status,
+				"ProblemDetails.status should be 400")
+
+			// 7. ProblemDetails.Detail should explain the error
+			assert.NotEmpty(t, problemDetails.Detail,
+				"ProblemDetails.detail should explain the JSON parsing error")
+
+			// 8. ProblemDetails.TraceID should match response header
+			assert.Equal(t, traceIDHeader, problemDetails.TraceID,
+				"ProblemDetails.trace_id should match X-Trace-ID response header")
+
+			// 9. Verify no event was published to Kafka (request rejected)
+			kafkaPublisher := server.GetKafkaPublisher()
+			assert.Equal(t, 0, kafkaPublisher.PublishedCount(),
+				"no event should have been published to Kafka (request was rejected)")
+		})
+	}
+
+	// Verifies: P1 (Validation), P7 (RFC9457), P9 (Trace-ID)
+	// RF: RF-02, RF-04, RF-12
+}
+
+// TestRequestExceedsMaxSizeReturns413 verifies that a position request with payload
+// exceeding the maximum allowed size is rejected with status 413 Payload Too Large.
+//
+// This test validates:
+// - HTTP status code is 413 (Payload Too Large) when body > 10 KB
+// - Response body is ProblemDetails (RFC 9457)
+// - ProblemDetails.Type indicates size limit error
+// - ProblemDetails.Status == 413
+// - ProblemDetails.Detail indicates the size constraint
+// - X-Trace-ID header is present even for size errors
+// - No event is published to Kafka (request rejected before publication)
+//
+// Size limit: 10 KB (10,240 bytes) per HTTP POST body
+// Test strategy: Create valid JSON structure but add filler to exceed 10 KB
+//
+// Verifies: P1 (Validation - size constraints), P7 (RFC9457), P9 (Trace-ID)
+// RF: RF-02 (validation), RF-12 (error handling), RF-04 (trace context)
+func TestRequestExceedsMaxSizeReturns413(t *testing.T) {
+	// ========== ARRANGE ==========
+	server, err := support.NewTestHTTPServer()
+	require.NoError(t, err, "failed to create test HTTP server")
+	defer server.Stop()
+
+	err = server.Start()
+	require.NoError(t, err, "failed to start test HTTP server")
+
+	// Create a payload that exceeds 10 KB (10,240 bytes)
+	// Strategy: Build valid base request, then add a large field to exceed the limit
+	largeFieldSize := 10*1024 + 1 // 10 KB + 1 byte
+	largeField := string(make([]byte, largeFieldSize))
+	for i := 0; i < largeFieldSize; i++ {
+		largeField[i] = 'x'
+	}
+
+	// Build request with oversized field
+	oversizedPayload := map[string]interface{}{
+		"vehicleId":   "VH-001",
+		"latitude":    40.7,
+		"longitude":   -74.0,
+		"capturedAt":  "2024-01-15T10:30:00.000Z",
+		"oversizedField": largeField,
+	}
+
+	payloadBytes, err := json.Marshal(oversizedPayload)
+	require.NoError(t, err, "failed to marshal oversized payload")
+
+	// Verify payload actually exceeds 10 KB
+	require.Greater(t, len(payloadBytes), 10*1024,
+		"Payload should exceed 10 KB: %d bytes", len(payloadBytes))
+
+	// ========== ACT ==========
+	req, err := http.NewRequest(
+		http.MethodPost,
+		server.BaseURL()+"/api/v1/positions",
+		bytes.NewReader(payloadBytes),
+	)
+	require.NoError(t, err, "failed to create HTTP request")
+
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := http.DefaultClient.Do(req)
+	require.NoError(t, err, "failed to send HTTP request")
+	defer resp.Body.Close()
+
+	// ========== ASSERT ==========
+
+	// 1. Status code must be 413 Payload Too Large
+	assert.Equal(t, http.StatusRequestEntityTooLarge, resp.StatusCode,
+		"HTTP status should be 413 Payload Too Large, got %d %s",
+		resp.StatusCode, http.StatusText(resp.StatusCode))
+
+	// 2. Response Content-Type must be application/problem+json
+	contentType := resp.Header.Get("Content-Type")
+	assert.Contains(t, contentType, "application/problem+json",
+		"Response Content-Type should be application/problem+json, got: %s", contentType)
+
+	// 3. Parse response body as ProblemDetails (RFC 9457)
+	var problemDetails dto.ProblemDetails
+	err = json.NewDecoder(resp.Body).Decode(&problemDetails)
+	require.NoError(t, err, "failed to decode response body as ProblemDetails")
+
+	// 4. Verify ProblemDetails structure
+
+	// 4a. Type should indicate size/payload error
+	assert.NotEmpty(t, problemDetails.Type,
+		"ProblemDetails.Type should not be empty")
+	assert.Contains(t, problemDetails.Type, "size",
+		"ProblemDetails.Type should indicate size error, got: %s", problemDetails.Type)
+
+	// 4b. Title should be human-readable
+	assert.NotEmpty(t, problemDetails.Title,
+		"ProblemDetails.Title should not be empty")
+
+	// 4c. Status must be 413
+	assert.Equal(t, http.StatusRequestEntityTooLarge, problemDetails.Status,
+		"ProblemDetails.Status should be 413, got: %d", problemDetails.Status)
+
+	// 4d. Detail should explain the size constraint
+	assert.NotEmpty(t, problemDetails.Detail,
+		"ProblemDetails.Detail should not be empty")
+	assert.Contains(t, problemDetails.Detail, "10",
+		"ProblemDetails.Detail should mention size limit: %s", problemDetails.Detail)
+
+	// 4e. TraceID is present and is UUID v4
+	assert.NotEmpty(t, problemDetails.TraceID,
+		"ProblemDetails.TraceID should not be empty")
+	_, err = uuid.Parse(problemDetails.TraceID)
+	assert.NoError(t, err,
+		"ProblemDetails.TraceID should be valid UUID v4: %s", problemDetails.TraceID)
+
+	// 5. X-Trace-ID response header is present
+	traceIDHeader := resp.Header.Get("X-Trace-ID")
+	assert.NotEmpty(t, traceIDHeader,
+		"X-Trace-ID response header should be present for error responses")
+
+	// 6. X-Trace-ID header should match ProblemDetails.TraceID
+	assert.Equal(t, problemDetails.TraceID, traceIDHeader,
+		"X-Trace-ID header should match ProblemDetails.TraceID")
+
+	// 7. Verify no event was published to Kafka (request rejected)
+	kafkaPublisher := server.GetKafkaPublisher()
+	assert.Equal(t, 0, kafkaPublisher.PublishedCount(),
+		"no event should have been published to Kafka (request was rejected)")
+
+	// Verifies: P1 (Validation - size constraints), P7 (RFC9457), P9 (Trace-ID)
+	// RF: RF-02, RF-12
+}

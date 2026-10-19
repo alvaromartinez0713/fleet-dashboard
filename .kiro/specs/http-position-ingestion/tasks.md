@@ -232,24 +232,24 @@ Según `testing.md` (secciones 3, 5, 10):
 
 ✅ **Nota:** PRIMERA onda con `_test.go`. Entradas: Solo a través de casos de uso. Fakes inyectados.
 
-- [-] 8.3 Implementar TestHTTPServer: harness Gin con fakes inyectados, expone puerto para pruebas, detiene limpiamente
+- [x] 8.3 Implementar TestHTTPServer: harness Gin con fakes inyectados, expone puerto para pruebas, detiene limpiamente
   - _Test Coverage: Suite Fast_
   - _RF: (all)_
   - _Location: tests/support/http_server.go_
   - **Nota:** Herramienta, no test. No es `_test.go`.
 
-- [-] 8.4 Implementar Router HTTP: pila de middleware en orden correcto (TraceID → Idempotency → ContentType → RateLimit → ErrorHandler, evaluados en reverso)
+- [x] 8.4 Implementar Router HTTP: pila de middleware en orden correcto (TraceID → Idempotency → ContentType → RateLimit → ErrorHandler, evaluados en reverso)
   - _Correctness Property: (all)_
   - _RF: (all)_
   - _Location: adapters/inbound/http/router.go_
 
-- [-] 8.5 Implementar ReceivePositionUseCase: crear VehiclePosition → validar → publicar async a Kafka vía goroutine (fire-and-forget) → devolver 202 inmediatamente
+- [x] 8.5 Implementar ReceivePositionUseCase: crear VehiclePosition → validar → publicar async a Kafka vía goroutine (fire-and-forget) → devolver 202 inmediatamente
   - _Correctness Property: P2 (Async+202), P3 (CB-Recovery), P12 (Domain-Events), P13 (Domain-Event-Decoupling)_
   - _RF: RF-01, RF-03, RF-04, RF-06_
   - _Location: application/usecases/receive_position.go_
   - **Nota:** UseCase es código de producción, no test.
 
-- [-] 9.1 Prueba: valid_position_returns_202 (verifica: entrada válida retorna 202, estructura response correcta, trace_id header presente)
+- [x] 9.1 Prueba: valid_position_returns_202 (verifica: entrada válida retorna 202, estructura response correcta, trace_id header presente)
   - _Correctness Property: P2 (Async+202), P4 (4-Timestamps), P9 (Trace-ID)_
   - _RF: RF-01, RF-02, RF-04, RF-07_
   - _Test Suite: Suite Fast_
@@ -344,25 +344,25 @@ Según `testing.md` (secciones 3, 5, 10):
 
 ✅ **Nota:** Tests Suite Fast. Últimas pruebas.
 
-- [~] 9.14 Prueba: invalid_trace_id_header_returns_400 (verifica: X-Trace-ID inválido rechaza con 400)
+- [x] 9.14 Prueba: invalid_trace_id_header_returns_400 (verifica: X-Trace-ID inválido rechaza con 400)
   - _Correctness Property: P9 (Trace-ID)_
   - _RF: RF-08_
   - _Test Suite: Suite Fast_
   - _Test File: tests/suite_fast/middleware_test.go_
 
-- [~] 9.15 Prueba: latency_timestamps_correct (verifica: procesamiento y recepción latency calculadas correctamente, capturedAt ≤ receivedAt ≤ processedAt)
+- [x] 9.15 Prueba: latency_timestamps_correct (verifica: procesamiento y recepción latency calculadas correctamente, capturedAt ≤ receivedAt ≤ processedAt)
   - _Correctness Property: P4 (4-Timestamps)_
   - _RF: RF-07_
   - _Test Suite: Suite Fast_
   - _Test File: tests/suite_fast/timestamp_test.go_
 
-- [~] 9.16 Prueba: malformed_json_returns_400 (verifica: JSON inválido rechaza con 400, ProblemDetails)
+- [x] 9.16 Prueba: malformed_json_returns_400 (verifica: JSON inválido rechaza con 400, ProblemDetails)
   - _Correctness Property: P1 (Validation)_
   - _RF: RF-02_
   - _Test Suite: Suite Fast_
   - _Test File: tests/suite_fast/validation_test.go_
 
-- [~] 9.17 Prueba: request_exceeds_max_size_returns_413 (verifica: solicitud > 1MB rechaza con 413)
+- [x] 9.17 Prueba: request_exceeds_max_size_returns_413 (verifica: solicitud > 1MB rechaza con 413)
   - _Correctness Property: P1 (Validation)_
   - _RF: RF-02_
   - _Test Suite: Suite Fast_
@@ -372,25 +372,25 @@ Según `testing.md` (secciones 3, 5, 10):
 
 ✅ **Nota:** Tests Suite Integration. Kafka real + Testcontainers.
 
-- [~] 10.1 Prueba: position_published_to_kafka_with_correct_schema (verifica: evento persistido en Kafka con schema correcto: partición=vehicle_id, offset avanzado)
+- [x] 10.1 Prueba: position_published_to_kafka_with_correct_schema (verifica: evento persistido en Kafka con schema correcto: partición=vehicle_id, offset avanzado)
   - _Correctness Property: P2 (Async+202), P12 (Domain-Events)_
   - _RF: RF-03, RF-02_
   - _Test Suite: Suite Integration_
   - _Test File: tests/suite_integration/kafka_test.go_
 
-- [~] 10.2 Prueba: kafka_unavailable_toxiproxy_returns_503 (verifica: Toxiproxy bloquea Kafka, CircuitBreaker abre, retorna 503 con ProblemDetails)
+- [x] 10.2 Prueba: kafka_unavailable_toxiproxy_returns_503 (verifica: Toxiproxy bloquea Kafka, CircuitBreaker abre, retorna 503 con ProblemDetails)
   - _Correctness Property: P3 (CB-Recovery)_
   - _RF: RF-05, RF-10, RF-11_
   - _Test Suite: Suite Integration_
   - _Test File: tests/suite_integration/resilience_test.go_
 
-- [~] 10.3 Prueba: kafka_timeout_toxiproxy_returns_503 (verifica: Toxiproxy injeta 2s latencia, timeout respetado, retorna 503)
+- [x] 10.3 Prueba: kafka_timeout_toxiproxy_returns_503 (verifica: Toxiproxy injeta 2s latencia, timeout respetado, retorna 503)
   - _Correctness Property: P3 (CB-Recovery)_
   - _RF: RF-05, RF-10, RF-11_
   - _Test Suite: Suite Integration_
   - _Test File: tests/suite_integration/resilience_test.go_
 
-- [~] 10.4 Prueba: idempotency_window_1h_retention (verifica: X-Idempotency-Key almacenado con ventana de 1h, mismo key en ventana se detecta)
+- [x] 10.4 Prueba: idempotency_window_1h_retention (verifica: X-Idempotency-Key almacenado con ventana de 1h, mismo key en ventana se detecta)
   - _Correctness Property: P1 (Validation)_
   - _RF: RF-07_
   - _Test Suite: Suite Integration_
@@ -400,25 +400,25 @@ Según `testing.md` (secciones 3, 5, 10):
 
 ✅ **Nota:** Tests Suite Integration. Concurrencia + Async.
 
-- [~] 10.5 Prueba: rate_limiter_window_reset_real_clock (verifica: reloj real, ventana se desliza tras 60s, cuota se regenera)
+- [x] 10.5 Prueba: rate_limiter_window_reset_real_clock (verifica: reloj real, ventana se desliza tras 60s, cuota se regenera)
   - _Correctness Property: P6 (Rate-Limit)_
   - _RF: RF-13_
   - _Test Suite: Suite Integration_
   - _Test File: tests/suite_integration/rate_limit_test.go_
 
-- [~] 10.6 Prueba: concurrent_requests_same_vehicle_rate_limit (verifica: 12 solicitudes concurrentes del mismo vehicle_id, 13ª rechazada con 429)
+- [x] 10.6 Prueba: concurrent_requests_same_vehicle_rate_limit (verifica: 12 solicitudes concurrentes del mismo vehicle_id, 13ª rechazada con 429)
   - _Correctness Property: P6 (Rate-Limit)_
   - _RF: RF-13_
   - _Test Suite: Suite Integration_
   - _Test File: tests/suite_integration/rate_limit_test.go_
 
-- [~] 10.7 Prueba: concurrent_requests_different_vehicles_isolated (verifica: rate limit de VH-A no afecta a VH-B, aislamiento total)
+- [x] 10.7 Prueba: concurrent_requests_different_vehicles_isolated (verifica: rate limit de VH-A no afecta a VH-B, aislamiento total)
   - _Correctness Property: P6 (Rate-Limit)_
   - _RF: RF-13_
   - _Test Suite: Suite Integration_
   - _Test File: tests/suite_integration/rate_limit_test.go_
 
-- [~] 10.8 Prueba: kafka_consumer_confirmation_not_persisted_without_worker (verifica: 202 retornado antes de confirmación de Kafka, sin worker no hay persistencia final)
+- [x] 10.8 Prueba: kafka_consumer_confirmation_not_persisted_without_worker (verifica: 202 retornado antes de confirmación de Kafka, sin worker no hay persistencia final)
   - _Correctness Property: P2 (Async+202)_
   - _RF: RF-05, RF-06_
   - _Test Suite: Suite Integration_
@@ -426,11 +426,11 @@ Según `testing.md` (secciones 3, 5, 10):
 
 ### Onda 14: Tareas Opcionales
 
-- [~] 11.1 Crear especificación OpenAPI 3.1.0 (endpoint POST /positions, schema request/response, ProblemDetails, ejemplos)
+- [x] 11.1 Crear especificación OpenAPI 3.1.0 (endpoint POST /positions, schema request/response, ProblemDetails, ejemplos)
   - _RF: RF-09_
   - _Location: openapi.yaml_
 
-- [~] 11.2 Implementar pruebas basadas en propiedades: latencia monótona (processingLatency ≥ receptionLatency), deslizamiento de ventana de RateLimiter
+- [x] 11.2 Implementar pruebas basadas en propiedades: latencia monótona (processingLatency ≥ receptionLatency), deslizamiento de ventana de RateLimiter
   - _Correctness Property: P4 (4-Timestamps), P6 (Rate-Limit)_
   - _Location: tests/suite_fast/property_based_test.go_
 

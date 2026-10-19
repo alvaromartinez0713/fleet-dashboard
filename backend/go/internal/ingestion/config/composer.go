@@ -75,7 +75,7 @@ func (c *DependencyComposer) ComposeAPI() (ports.HTTPServer, error) {
 		c.logger.Error("failed to create rate limit config", ports.Field{Key: "error", Value: err.Error()})
 		return nil, err
 	}
-	rateLimiter := resilience.NewRateLimiter(rateLimitConfig)
+	rateLimiter := resilience.NewRateLimiter(*rateLimitConfig, c.clock)
 
 	// ========== STEP 3: Create HTTP layer mappers ==========
 	errorMapper := mapper.NewErrorMapper()

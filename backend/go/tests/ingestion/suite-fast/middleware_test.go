@@ -616,3 +616,99 @@ func isValidUUIDv4(uuidStr string) bool {
 	}
 	return parsed.Version() == 4
 }
+
+// TestInvalidTraceIDHeaderReturns400 verifies that a request with an invalid
+// X-Trace-ID header (non-UUID v4 format) is rejected with status 400 Bad Request.
+//
+// This test validates:
+// - HTTP status code is 400 (Bad Request) when X-Trace-ID is invalid format
+// - Response body is ProblemDetails (RFC 9457)
+// - ProblemDetails.Type indicates trace-id-invalid error
+// - ProblemDetails.Status == 400
+// - ProblemDetails.Detail explains the issue
+// - X-Trace-ID response header is present (generated as fallback)
+//
+// Valid X-Trace-ID formats:
+// - UUID v4: 550e8400-e29b-41d4-a716-446655440000
+// - Generated if absent (TraceIDMiddleware)
+//
+// Invalid X-Trace-ID formats (rejected with 400):
+// - "invalid-uuid"
+// - "12345"
+// - "not-a-uuid-format"
+// - Any non-UUID string
+//
+// Verifies: P9 (Trace-ID validation), P7 (RFC9457)
+// RF: RF-08, RF-12
+func TestInvalidTraceIDHeaderReturns400(t *testing.T) {
+	// ========== ARRANGE ==========
+	server, err := support.NewTestHTTPServer()
+	require.NoError(t, err, "failed to create test HTTP server")
+	defer server.Stop()
+
+	err = server.Start()
+	require.NoError(t, err, "failed to start test HTTP server")
+
+	// Build valid position request body using Object Mother
+	positionRequest := mothers.PositionMother{}.Valid().Build()
+	reqBody, err := json.Marshal(positionRequest)
+	require.NoError(t, err, "failed to marshal request body")
+
+	// ========== ACT ==========
+	// POST /api/v1/positions with invalid X-Trace-ID header
+	req, err := http.NewRequest(
+		http.MethodPost,
+		server.BaseURL()+"/api/v1/positions",
+		bytes.NewReader(reqBody),
+	)
+	require.NoError(t, err, "failed to create HTTP request")
+
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("X-Trace-ID", "invalid-uuid-not-valid") // Invalid format - not a UUID
+
+	resp, err := http.DefaultClient.Do(req)
+	require.NoError(t, err, "failed to send HTTP request")
+	defer resp.Body.Close()
+
+	// ========== ASSERT ==========
+	// 1. Status code must be 400 Bad Request
+	assert.Equal(t, http.StatusBadRequest, resp.StatusCode,
+		"HTTP status should be 400 for invalid Trace-ID, got %d", resp.StatusCode)
+
+	// 2. Response Content-Type must be application/problem+json
+	contentType := resp.Header.Get("Content-Type")
+	assert.Equal(t, "application/problem+json", contentType,
+		"Response Content-Type should be application/problem+json, got %s", contentType)
+
+	// 3. Parse response body as ProblemDetails
+	var problemDetails dto.ProblemDetails
+	err = json.NewDecoder(resp.Body).Decode(&problemDetails)
+	require.NoError(t, err, "failed to decode ProblemDetails from response")
+
+	// 4. Verify ProblemDetails.Type indicates trace-id error
+	assert.NotEmpty(t, problemDetails.Type,
+		"ProblemDetails.type should not be empty")
+	assert.Contains(t, problemDetails.Type, "trace-id",
+		"ProblemDetails.type should indicate trace-id error: %s", problemDetails.Type)
+
+	// 5. ProblemDetails.Title describes the issue
+	assert.NotEmpty(t, problemDetails.Title,
+		"ProblemDetails.title should not be empty")
+
+	// 6. ProblemDetails.Status == 400
+	assert.Equal(t, http.StatusBadRequest, problemDetails.Status,
+		"ProblemDetails.status should be 400")
+
+	// 7. ProblemDetails.Detail explains the trace-id requirement
+	assert.NotEmpty(t, problemDetails.Detail,
+		"ProblemDetails.detail should not be empty")
+
+	// 8. X-Trace-ID response header must be present (generated as fallback)
+	traceIDHeader := resp.Header.Get("X-Trace-ID")
+	assert.NotEmpty(t, traceIDHeader,
+		"X-Trace-ID response header should be present (generated as fallback)")
+
+	// 9. Generated X-Trace-ID should be valid UUID v4
+	assert.True(t, isValidUUIDv4(traceIDHeader),
+		"X-Trace-ID should be valid UUID v4, got: %s", traceIDHeader)
+}

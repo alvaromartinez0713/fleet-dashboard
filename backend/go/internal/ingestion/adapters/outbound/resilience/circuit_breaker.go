@@ -1,6 +1,7 @@
 package resilience
 
 import (
+	"context"
 	"fmt"
 	"sync"
 	"time"
@@ -149,6 +150,31 @@ func (cb *CircuitBreaker) String() string {
 	cb.mu.RLock()
 	defer cb.mu.RUnlock()
 	return fmt.Sprintf("CircuitBreaker{state=%s, failures=%d, successes=%d}", cb.state, cb.failureCount, cb.successCount)
+}
+
+// Execute runs a function with circuit breaker protection.
+// Implements ports.CircuitBreakerManager interface.
+// If the circuit is OPEN, returns CircuitBreakerOpenError immediately.
+// If the circuit is CLOSED or HALF_OPEN, calls fn and tracks the result.
+func (cb *CircuitBreaker) Execute(ctx context.Context, fn func() error) error {
+	// Check if circuit is open
+	if cb.IsOpen() {
+		return ports.CircuitBreakerOpenError{
+			Message: "circuit breaker is open: dependency unavailable",
+		}
+	}
+
+	// Execute the function
+	err := fn()
+
+	// Track result
+	if err != nil {
+		cb.RecordFailure()
+		return err
+	}
+
+	cb.RecordSuccess()
+	return nil
 }
 
 // CircuitBreakerManager manages multiple circuit breakers by name.

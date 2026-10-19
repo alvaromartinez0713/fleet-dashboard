@@ -125,7 +125,9 @@ func (pm *PositionMapper) FromRequest(
 //   - timestamp: Current server time
 //   - vehicle_id: Vehicle ID from entity
 //   - trace_id: Trace ID for request correlation
-//   - received_at: Server receive timestamp
+//   - captured_at: Client's capture timestamp (ISO 8601 string)
+//   - received_at: Server receive timestamp (ISO 8601 string)
+//   - processed_at: Server process timestamp (ISO 8601 string)
 //
 // Verifies: P2 (Async+202), P4 (4-Timestamps), P9 (Trace-ID)
 func (pm *PositionMapper) FromEntity(entity *domain.VehiclePosition) *dto.PositionResponse {
@@ -134,11 +136,13 @@ func (pm *PositionMapper) FromEntity(entity *domain.VehiclePosition) *dto.Positi
 	}
 
 	return &dto.PositionResponse{
-		EventID:    entity.EventID().String(),
-		Status:     "accepted",
-		Timestamp:  pm.clock.Now(),
-		VehicleID:  entity.VehicleID().String(),
-		TraceID:    entity.TraceID().String(),
-		ReceivedAt: entity.ReceivedAt().Value(),
+		EventID:     entity.EventID().String(),
+		Status:      "accepted",
+		Timestamp:   pm.clock.Now(),
+		VehicleID:   entity.VehicleID().String(),
+		TraceID:     entity.TraceID().String(),
+		CapturedAt:  entity.CapturedAt().Value().Format("2006-01-02T15:04:05.000Z07:00"),
+		ReceivedAt:  entity.ReceivedAt().Value().Format("2006-01-02T15:04:05.000Z07:00"),
+		ProcessedAt: entity.ProcessedAt().Value().Format("2006-01-02T15:04:05.000Z07:00"),
 	}
 }

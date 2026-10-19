@@ -6,13 +6,16 @@ import (
 
 // PositionResponse represents the HTTP response body after successful position ingestion (202 Accepted).
 // Contains confirmation that the request was accepted for processing.
+// Includes all three timestamps set by the HTTP layer (captured_at, received_at, processed_at).
 type PositionResponse struct {
-	EventID   string    `json:"event_id"`
-	Status    string    `json:"status"`
-	Timestamp time.Time `json:"timestamp"`
-	VehicleID string    `json:"vehicle_id"`
-	TraceID   string    `json:"trace_id"`
-	ReceivedAt time.Time `json:"received_at"`
+	EventID     string    `json:"event_id"`
+	Status      string    `json:"status"`
+	Timestamp   time.Time `json:"timestamp"`
+	VehicleID   string    `json:"vehicle_id"`
+	TraceID     string    `json:"trace_id"`
+	CapturedAt  string    `json:"captured_at"`
+	ReceivedAt  string    `json:"received_at"`
+	ProcessedAt string    `json:"processed_at"`
 }
 
 // ProblemDetails implements RFC 9457 Problem Details for HTTP APIs.

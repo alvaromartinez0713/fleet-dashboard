@@ -4,11 +4,15 @@ import (
 	"context"
 	"sync"
 
+	"github.com/fleet-platform/backend/internal/ingestion/adapters/outbound/resilience"
+	"github.com/fleet-platform/backend/internal/ingestion/domain"
 	"github.com/fleet-platform/backend/internal/ingestion/ports"
 )
 
 // FakeRateLimiter is a test implementation of ports.RateLimiter.
 // It allows tests to control whether requests are allowed or rejected based on a configurable limit.
+// This fake does NOT track timestamps, so it doesn't properly implement sliding window behavior.
+// For property-based tests that require real sliding window behavior, use NewRateLimiterReal().
 //
 // Thread-safe: all operations are protected by sync.Mutex.
 type FakeRateLimiter struct {
@@ -70,4 +74,19 @@ func (f *FakeRateLimiter) SetLimit(limit int) {
 	defer f.mutex.Unlock()
 
 	f.allowedCallsPerWindow = limit
+}
+
+// NewRateLimiterReal creates a real RateLimiterImpl with the given config and clock.
+// This is used in property-based tests that require actual sliding window behavior.
+// Unlike FakeRateLimiter, this implementation tracks timestamps and enforces the
+// sliding window invariant correctly.
+//
+// Args:
+//   config: RateLimitConfig (e.g., 12 requests per 60 seconds)
+//   clock: Clock port (can be FakeClock for deterministic testing)
+//
+// Returns:
+//   *resilience.RateLimiterImpl: Real rate limiter with proper sliding window semantics
+func NewRateLimiterReal(config domain.RateLimitConfig, clock ports.Clock) *resilience.RateLimiterImpl {
+	return resilience.NewRateLimiter(config, clock)
 }

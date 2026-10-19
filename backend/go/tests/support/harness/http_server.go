@@ -1,8 +1,9 @@
-package support
+package harness
 
 import (
 	"context"
 	"fmt"
+	"io"
 	"net"
 	"net/http"
 	"time"
@@ -40,8 +41,16 @@ type TestHTTPServer struct {
 	circuitBreak *fakes.FakeCircuitBreaker
 
 	// Configuration for this test instance
-	testConfig ports.Config
+	httpConfig HTTPConfig
 	testLogger ports.Logger
+}
+
+// HTTPConfig holds HTTP server configuration for testing
+type HTTPConfig struct {
+	Port            int
+	ReadTimeout     time.Duration
+	WriteTimeout    time.Duration
+	ShutdownTimeout time.Duration
 }
 
 // NewTestHTTPServer creates a new TestHTTPServer with all dependencies injected as fakes.
@@ -66,13 +75,12 @@ func NewTestHTTPServer() (*TestHTTPServer, error) {
 	fakeCircuitBreak := &fakes.FakeCircuitBreaker{}
 
 	// Create test configuration with reasonable defaults
-	testCfg := ports.Config{}
-	testCfg.HTTP.Port = 0 // Will use auto-assigned port
-	testCfg.HTTP.ReadTimeout = 15 * time.Second
-	testCfg.HTTP.WriteTimeout = 15 * time.Second
-	testCfg.HTTP.ShutdownTimeout = 5 * time.Second
-	testCfg.Logging.Level = "info"
-	testCfg.Logging.Format = "json"
+	httpCfg := HTTPConfig{
+		Port:            0, // Will use auto-assigned port
+		ReadTimeout:     15 * time.Second,
+		WriteTimeout:    15 * time.Second,
+		ShutdownTimeout: 5 * time.Second,
+	}
 
 	// Create test logger
 	testLogger := NewTestLogger()
@@ -84,7 +92,7 @@ func NewTestHTTPServer() (*TestHTTPServer, error) {
 		kafkaPub:     fakeKafkaPub,
 		rateLim:      fakeRateLim,
 		circuitBreak: fakeCircuitBreak,
-		testConfig:   testCfg,
+		httpConfig:   httpCfg,
 		testLogger:   testLogger,
 	}
 
@@ -152,8 +160,8 @@ func (s *TestHTTPServer) composeServer() error {
 	s.server = &http.Server{
 		Addr:         listener.Addr().String(),
 		Handler:      engine,
-		ReadTimeout:  s.testConfig.HTTP.ReadTimeout,
-		WriteTimeout: s.testConfig.HTTP.WriteTimeout,
+		ReadTimeout:  s.httpConfig.ReadTimeout,
+		WriteTimeout: s.httpConfig.WriteTimeout,
 	}
 
 	return nil
@@ -185,8 +193,8 @@ func (s *TestHTTPServer) Stop() error {
 		return nil
 	}
 
-	// Create a context with timeout for graceful shutdown
-	ctx, cancel := context.WithTimeout(context.Background(), s.testConfig.HTTP.ShutdownTimeout)
+	// Create graceful shutdown context
+	ctx, cancel := context.WithTimeout(context.Background(), s.httpConfig.ShutdownTimeout)
 	defer cancel()
 
 	// Shutdown the server gracefully
@@ -239,4 +247,122 @@ type testHealthChecker struct{}
 // Check always returns healthy for tests.
 func (t *testHealthChecker) Check(ctx context.Context) (bool, error) {
 	return true, nil
+}
+
+
+// NewTestHTTPServerWithPublisher creates a test HTTP server with a provided Kafka publisher.
+// This is used for integration tests where a real Kafka publisher is needed.
+//
+// Args:
+//   kafkaPublisher: A KafkaPublisher implementation (can be real or fake)
+//
+// Returns:
+//   *TestHTTPServer: Configured test server ready to start
+//   error: Any error during composition
+//
+// This variant allows tests to inject a real KafkaPublisher (connected to real Kafka)
+// while keeping other dependencies as fakes for determinism.
+func NewTestHTTPServerWithPublisher(kafkaPublisher ports.KafkaPublisher) *TestHTTPServer {
+	// Create fake implementations for everything except Kafka
+	fakeClock := fakes.NewFakeClock()
+	fakeIDGen := fakes.NewFakeIDGeneratorWithDefaults()
+	fakeRateLim := fakes.NewFakeRateLimiter(12)
+	fakeCircuitBreak := &fakes.FakeCircuitBreaker{}
+
+	// Create test configuration
+	httpCfg := HTTPConfig{
+		Port:            0,
+		ReadTimeout:     15 * time.Second,
+		WriteTimeout:    15 * time.Second,
+		ShutdownTimeout: 5 * time.Second,
+	}
+
+	testLogger := NewTestLogger()
+
+	// Create server with provided Kafka publisher
+	tserver := &TestHTTPServer{
+		clock:        fakeClock,
+		idGen:        fakeIDGen,
+		kafkaPub:     &fakes.FakeKafkaPublisher{}, // Placeholder, replaced below
+		rateLim:      fakeRateLim,
+		circuitBreak: fakeCircuitBreak,
+		httpConfig:   httpCfg,
+		testLogger:   testLogger,
+	}
+
+	// Compose the server (similar to composeServer but with real Kafka)
+	engine := gin.New()
+	errorMapper := mapper.NewErrorMapper()
+	positionMapper := mapper.NewPositionMapper(tserver.idGen, tserver.clock)
+
+	// Create use case with provided Kafka publisher
+	receivePositionUseCase := usecases.NewReceivePositionUseCase(kafkaPublisher, tserver.circuitBreak)
+
+	positionHandler := handler.NewPositionHandler(receivePositionUseCase, positionMapper)
+
+	// Register middleware
+	engine.Use(middleware.ErrorHandlerMiddleware(errorMapper))
+	engine.Use(middleware.RateLimitMiddleware(tserver.rateLim, tserver.clock))
+	engine.Use(middleware.ContentTypeMiddleware())
+	engine.Use(middleware.IdempotencyKeyMiddleware())
+	engine.Use(middleware.TraceIDMiddleware())
+
+	// Register routes
+	engine.POST("/api/v1/positions", positionHandler.Handle)
+
+	// Create listener
+	listener, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		tserver.testLogger.Error("failed to create listener", ports.Field{Key: "error", Value: err.Error()})
+		return tserver
+	}
+	tserver.listener = listener
+
+	// Extract port and build base URL
+	addr := listener.Addr().(*net.TCPAddr)
+	tserver.baseURL = fmt.Sprintf("http://127.0.0.1:%d", addr.Port)
+
+	// Create HTTP server
+	tserver.server = &http.Server{
+		Addr:         listener.Addr().String(),
+		Handler:      engine,
+		ReadTimeout:  tserver.httpConfig.ReadTimeout,
+		WriteTimeout: tserver.httpConfig.WriteTimeout,
+	}
+
+	// Start the server
+	go func() {
+		if err := tserver.server.Serve(tserver.listener); err != nil && err != http.ErrServerClosed {
+			tserver.testLogger.Error("test server listener error", ports.Field{Key: "error", Value: err.Error()})
+		}
+	}()
+
+	// Give server time to start
+	time.Sleep(10 * time.Millisecond)
+
+	return tserver
+}
+
+// BytesReader wraps a byte slice as an io.Reader
+type BytesReader struct {
+	data []byte
+	pos  int
+}
+
+// NewBytesReader creates a new BytesReader from byte slice
+func NewBytesReader(data []byte) *BytesReader {
+	return &BytesReader{
+		data: data,
+		pos:  0,
+	}
+}
+
+// Read implements io.Reader interface
+func (br *BytesReader) Read(p []byte) (int, error) {
+	if br.pos >= len(br.data) {
+		return 0, io.EOF
+	}
+	n := copy(p, br.data[br.pos:])
+	br.pos += n
+	return n, nil
 }

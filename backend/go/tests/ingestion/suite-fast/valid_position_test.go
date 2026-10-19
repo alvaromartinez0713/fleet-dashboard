@@ -112,8 +112,8 @@ func TestValidPositionReturns202(t *testing.T) {
 	_, err = uuid.Parse(responseBody.TraceID)
 	assert.NoError(t, err, "response.trace_id should be valid UUID v4: %s", responseBody.TraceID)
 
-	// 7. Response.ReceivedAt is present and non-zero
-	assert.False(t, responseBody.ReceivedAt.IsZero(), "response.received_at should be set")
+	// 7. Response.ReceivedAt is present and not empty
+	assert.NotEmpty(t, responseBody.ReceivedAt, "response.received_at should be set")
 
 	// 8. X-Trace-ID response header is present
 	traceIDHeader := resp.Header.Get("X-Trace-ID")

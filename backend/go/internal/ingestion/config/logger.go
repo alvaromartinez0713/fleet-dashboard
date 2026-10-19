@@ -3,7 +3,6 @@ package config
 import (
 	"context"
 
-	"github.com/fleet-platform/backend/internal/ingestion/domain"
 	"github.com/fleet-platform/backend/internal/ingestion/ports"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -97,14 +96,18 @@ func (z *ZapLogger) Panic(msg string, fields ...ports.Field) {
 // WithTraceID stores the trace identifier in the context for later retrieval.
 // The TraceID will be automatically included in all subsequent log entries
 // that use GetTraceID to retrieve it from the context.
-func (z *ZapLogger) WithTraceID(ctx context.Context, tid domain.TraceID) context.Context {
-	return domain.ContextWithTraceID(ctx, tid)
+func (z *ZapLogger) WithTraceID(ctx context.Context, tid string) context.Context {
+	// Store the trace ID as a string in the context
+	return context.WithValue(ctx, "trace_id", tid)
 }
 
 // GetTraceID retrieves the trace identifier from the context.
-// Returns an empty TraceID if not present in the context.
-func (z *ZapLogger) GetTraceID(ctx context.Context) domain.TraceID {
-	tid, _ := domain.TraceIDFromContext(ctx)
+// Returns an empty string if not present in the context.
+func (z *ZapLogger) GetTraceID(ctx context.Context) string {
+	tid, ok := ctx.Value("trace_id").(string)
+	if !ok {
+		return ""
+	}
 	return tid
 }
 

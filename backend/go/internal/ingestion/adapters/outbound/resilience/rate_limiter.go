@@ -1,10 +1,12 @@
 package resilience
 
 import (
+	"context"
 	"sync"
 	"time"
 
 	"github.com/fleet-platform/backend/internal/ingestion/domain"
+	"github.com/fleet-platform/backend/internal/ingestion/ports"
 )
 
 // RateLimiterImpl implements a sliding-window rate limiter per vehicle_id.
@@ -15,20 +17,24 @@ type RateLimiterImpl struct {
 	mu              sync.RWMutex
 	config          domain.RateLimitConfig
 	requestsPerKey  map[string][]time.Time // vehicle_id → timestamps of requests
+	clock           ports.Clock            // Clock for retrieving current time
 }
 
-// NewRateLimiter creates a new rate limiter with the given config.
-func NewRateLimiter(config domain.RateLimitConfig) *RateLimiterImpl {
+// NewRateLimiter creates a new rate limiter with the given config and clock.
+func NewRateLimiter(config domain.RateLimitConfig, clock ports.Clock) *RateLimiterImpl {
 	return &RateLimiterImpl{
 		config:         config,
 		requestsPerKey: make(map[string][]time.Time),
+		clock:          clock,
 	}
 }
 
 // Allow checks if a request from the given vehicle_id is allowed under the rate limit.
 // Uses a sliding window: removes timestamps older than the window, then checks if count < limit.
 // Returns true if the request is allowed, false if rate limit exceeded.
-func (rl *RateLimiterImpl) Allow(vehicleID string, now time.Time) bool {
+// Implements ports.RateLimiter interface.
+func (rl *RateLimiterImpl) Allow(ctx context.Context, vehicleID string) bool {
+	now := rl.clock.Now()
 	rl.mu.Lock()
 	defer rl.mu.Unlock()
 
