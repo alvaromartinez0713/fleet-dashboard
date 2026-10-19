@@ -16,7 +16,6 @@ help:
 	@echo "  make test-ingestion     - Run all ingestion tests (fast + integration)"
 	@echo "  make test-ingestion-fast - Run Suite Fast (fast tests, no Docker)"
 	@echo "  make test-ingestion-integration - Run Suite Integration (Docker required)"
-	@echo "  make test-infrastructure - Run Docker infrastructure tests (Docker required)"
 	@echo "  make test-worker        - Run worker tests"
 	@echo ""
 	@echo "Verify & Clean:"
@@ -51,10 +50,6 @@ test-ingestion-fast:
 test-ingestion-integration:
 	@echo "Running ingestion Suite Integration (integration tests)..."
 	@cd ./tests/ingestion && go test -v -tags=integration -timeout 120s ./suite-integration/...
-
-test-infrastructure:
-	@echo "Running Docker infrastructure tests..."
-	@cd ./tests/docker && go test -v -tags=docker -timeout 180s ./...
 
 test-worker:
 	@echo "Running worker tests..."
