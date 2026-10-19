@@ -951,16 +951,17 @@ fleet-dashboard/
 ├── backend/go/                # Servicios backend en Go
 │   ├── cmd/                   # Puntos de entrada
 │   │   ├── ingestion/        # API de ingesta
+│   │   ├── migrate/          # Servicio de migraciones de BD
 │   │   └── worker/           # Worker de procesamiento
 │   ├── internal/             # Código interno (Clean Architecture)
-│   ├── scripts/              # Scripts de inicialización
-│   │   ├── init-timescaledb.sql
+│   ├── migrations/           # Migraciones SQL versionadas (golang-migrate)
+│   ├── scripts/              # Scripts auxiliares
 │   │   └── create-kafka-topic.sh
 │   └── tests/                # Pruebas
 ├── frontend/                  # (Futuro) Dashboard web en React
 ├── mobile/                    # (Futuro) App móvil en React Native
 ├── infrastructure/           # (Futuro) Infraestructura como código (Terraform)
-├── docker-compose.yml        # Configuración de servicios
+# docker-compose.yml está en infrastructure/docker/ (centralizado)
 ├── .env.example              # Plantilla de variables de entorno
 ├── .env                      # Variables locales (no commitear)
 ├── Makefile                  # Comandos de orquestación

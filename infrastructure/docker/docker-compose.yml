@@ -102,10 +102,34 @@ services:
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-fleet_user} -d $${POSTGRES_DB:-fleet_db}"]
-      interval: 10s
+      interval: 5s
       timeout: 3s
-      retries: 3
-      start_period: 15s
+      retries: 5
+      start_period: 10s
+
+  # --------------------------------------------------------------------------
+  # Database Migration Service
+  # --------------------------------------------------------------------------
+  # One-shot service that runs SQL migrations against TimescaleDB
+  # Executes before ingestion and worker services to ensure schema is ready
+  migrate:
+    build:
+      context: ./backend/go
+      dockerfile: Dockerfile
+      target: migrate
+    container_name: fleet-migrate
+    environment:
+      DB_HOST: ${DB_HOST:-timescaledb}
+      DB_PORT: ${DB_PORT:-5432}
+      DB_USER: ${POSTGRES_USER:-fleet_user}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-fleet_password}
+      DB_NAME: ${POSTGRES_DB:-fleet_db}
+    depends_on:
+      timescaledb:
+        condition: service_healthy
+    networks:
+      - fleet-network
+    restart: "no"
 
   # --------------------------------------------------------------------------
   # Ingestion Service
@@ -132,6 +156,8 @@ services:
       LOG_LEVEL: ${LOG_LEVEL:-info}
       LOG_FORMAT: ${LOG_FORMAT:-json}
     depends_on:
+      migrate:
+        condition: service_completed_successfully
       kafka:
         condition: service_healthy
     networks:
@@ -172,6 +198,8 @@ services:
       LOG_LEVEL: ${LOG_LEVEL:-info}
       LOG_FORMAT: ${LOG_FORMAT:-json}
     depends_on:
+      migrate:
+        condition: service_completed_successfully
       kafka:
         condition: service_healthy
       timescaledb:
