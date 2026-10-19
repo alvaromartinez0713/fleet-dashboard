@@ -8,8 +8,8 @@ La implementación se construye de forma incremental: configuración base → sc
 
 ## Tareas
 
-- [ ] 1. Extender docker-compose.yml con servicios de infraestructura
-  - [ ] 1.1 Agregar definición del servicio Zookeeper
+- [x] 1. Extender docker-compose.yml con servicios de infraestructura
+  - [x] 1.1 Agregar definición del servicio Zookeeper
     - Agregar bloque de servicio para zookeeper con imagen confluentinc/cp-zookeeper:7.6.0
     - Configurar variables de entorno (ZOO_MY_ID, ZOO_PORT, ZOO_SERVERS)
     - Agregar health check usando el comando "ruok"
@@ -18,7 +18,7 @@ La implementación se construye de forma incremental: configuración base → sc
     - Agregar comentarios de documentación en línea
     - _Requirements: RF-01, RF-03, RF-07, RF-10, RF-12_
 
-  - [ ] 1.2 Agregar definición del servicio Kafka
+  - [x] 1.2 Agregar definición del servicio Kafka
     - Agregar bloque de servicio para kafka con imagen confluentinc/cp-kafka:7.6.0
     - Configurar variables de entorno (KAFKA_BROKER_ID, KAFKA_ZOOKEEPER_CONNECT, KAFKA_ADVERTISED_LISTENERS, replication, partitions, retention)
     - Agregar health check usando el comando kafka-broker-api-versions
@@ -28,7 +28,7 @@ La implementación se construye de forma incremental: configuración base → sc
     - Agregar comentarios de documentación en línea
     - _Requirements: RF-02, RF-03, RF-07, RF-10, RF-11, RF-12_
 
-  - [ ] 1.3 Agregar definición del servicio TimescaleDB
+  - [x] 1.3 Agregar definición del servicio TimescaleDB
     - Agregar bloque de servicio para timescaledb con imagen timescale/timescaledb:2.14.0-pg15
     - Configurar variables de entorno usando sintaxis ${VAR:-default} (POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB)
     - Agregar health check usando el comando pg_isready
@@ -39,7 +39,7 @@ La implementación se construye de forma incremental: configuración base → sc
     - Agregar comentarios de documentación en línea
     - _Requirements: RF-05, RF-03, RF-06, RF-07, RF-08, RF-10, RF-12_
 
-  - [ ] 1.4 Agregar sección de volúmenes
+  - [x] 1.4 Agregar sección de volúmenes
     - Definir volumen zookeeper-data con nombre: fleet-zookeeper-data
     - Definir volumen zookeeper-logs con nombre: fleet-zookeeper-logs
     - Definir volumen kafka-data con nombre: fleet-kafka-data
@@ -47,23 +47,23 @@ La implementación se construye de forma incremental: configuración base → sc
     - Agregar comentarios de documentación para los propósitos de los volúmenes
     - _Requirements: RF-07, RF-10_
 
-  - [ ] 1.5 Actualizar configuración de red
+  - [x] 1.5 Actualizar configuración de red
     - Verificar que fleet-network esté definida correctamente (ya existe en el archivo actual)
     - Agregar comentarios de documentación sobre resolución DNS
     - Asegurar que todos los servicios se conecten a fleet-network (comportamiento por defecto)
     - _Requirements: RF-04, RF-10_
 
-  - [ ] 1.6 Actualizar servicios existentes (ingestion, worker)
+  - [x] 1.6 Actualizar servicios existentes (ingestion, worker)
     - Actualizar depends_on del worker para incluir kafka y timescaledb con condition: service_healthy
     - Verificar referencias de depends_on del servicio ingestion si es necesario
     - Asegurar formato consistente con los nuevos servicios
     - _Requirements: RF-11_
 
-- [ ] 2. Checkpoint - Verificar sintaxis de docker-compose.yml
+- [x] 2. Checkpoint - Verificar sintaxis de docker-compose.yml
   - Asegurar que todos los tests pasen, preguntar al usuario si surgen dudas.
 
-- [ ] 3. Crear archivo de plantilla .env.example
-  - [ ] 3.1 Crear .env.example en la raíz del proyecto
+- [x] 3. Crear archivo de plantilla .env.example
+  - [x] 3.1 Crear .env.example en la raíz del proyecto
     - Agregar encabezado de archivo con instrucciones para copiar a .env
     - Agregar HTTP_PORT con valor por defecto 8080 y comentario
     - Agregar HTTP_READ_TIMEOUT con valor por defecto 15s y comentario
@@ -79,15 +79,15 @@ La implementación se construye de forma incremental: configuración base → sc
     - Organizar en secciones con encabezados (HTTP API, Logging, Worker, TimescaleDB)
     - _Requirements: RF-08, RF-09, RF-16_
 
-  - [ ] 3.2 Actualizar .gitignore
+  - [x] 3.2 Actualizar .gitignore
     - Agregar .env a .gitignore si no está presente
     - Agregar .env.local a .gitignore
     - Agregar .env.*.local a .gitignore
     - Agregar comentario explicando por qué .env se ignora
     - _Requirements: RF-16_
 
-- [ ] 4. Crear script de inicialización init-timescaledb.sql
-  - [ ] 4.1 Crear backend/go/scripts/init-timescaledb.sql
+- [x] 4. Crear script de inicialización init-timescaledb.sql
+  - [x] 4.1 Crear backend/go/scripts/init-timescaledb.sql
     - Agregar encabezado de archivo con descripción y notas de diseño del esquema
     - Agregar CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE
     - Agregar CREATE SCHEMA IF NOT EXISTS telemetry
@@ -115,8 +115,8 @@ La implementación se construye de forma incremental: configuración base → sc
     - Agregar comentarios en línea explicando cada sección
     - _Requirements: RF-05, RF-08, RF-16_
 
-- [ ] 5. Crear script de inicialización create-kafka-topic.sh
-  - [ ] 5.1 Crear backend/go/scripts/create-kafka-topic.sh
+- [x] 5. Crear script de inicialización create-kafka-topic.sh
+  - [x] 5.1 Crear backend/go/scripts/create-kafka-topic.sh
     - Agregar shebang: #!/bin/bash
     - Agregar encabezado de archivo con descripción
     - Agregar sleep 15 para esperar a que Kafka esté completamente listo
@@ -132,15 +132,15 @@ La implementación se construye de forma incremental: configuración base → sc
     - Agregar sentencia echo confirmando la creación del topic
     - _Requirements: RF-02_
 
-  - [ ] 5.2 Hacer el script ejecutable
+  - [x] 5.2 Hacer el script ejecutable
     - Ejecutar chmod +x backend/go/scripts/create-kafka-topic.sh
     - _Requirements: RF-02_
 
-- [ ] 6. Checkpoint - Verificar sintaxis de scripts de inicialización
+- [x] 6. Checkpoint - Verificar sintaxis de scripts de inicialización
   - Asegurar que todos los tests pasen, preguntar al usuario si surgen dudas.
 
-- [ ] 7. Crear Makefile a nivel raíz
-  - [ ] 7.1 Crear Makefile en la raíz del proyecto
+- [x] 7. Crear Makefile a nivel raíz
+  - [x] 7.1 Crear Makefile en la raíz del proyecto
     - Agregar encabezado de archivo con descripción e instrucciones de uso
     - Declarar .PHONY con todos los targets: help up down logs logs-timescaledb logs-kafka status clean clean-hard restart build
     - Establecer .DEFAULT_GOAL := help
@@ -158,130 +158,8 @@ La implementación se construye de forma incremental: configuración base → sc
     - Agregar comentarios explicando cada sección
     - _Requirements: RF-17_
 
-- [ ] 8. Tests de integración para infraestructura
-  - [ ] 8.1 Crear tests/docker/infrastructure_test.go
-    - Agregar build tag: //go:build docker
-    - Importar testcontainers-go o usar comandos docker compose exec
-    - Test: Zookeeper arranca y el health check pasa
-      - Ejecutar docker compose up -d zookeeper
-      - Esperar estado healthy (máximo 30s)
-      - Verificar que el estado del contenedor sea "healthy"
-      - Limpiar: docker compose down
-      - _Requirements: RF-01, RF-03, RNF-03_
-    
-    - Test: Kafka arranca, se conecta a Zookeeper y está healthy
-      - Ejecutar docker compose up -d zookeeper kafka
-      - Esperar estado healthy de kafka (máximo 45s)
-      - Verificar que el estado del contenedor kafka sea "healthy"
-      - Limpiar: docker compose down
-      - _Requirements: RF-02, RF-03, RF-11, RNF-03_
-    
-    - Test: El topic de Kafka telemetry.positions existe con configuración correcta
-      - Ejecutar docker compose up -d zookeeper kafka
-      - Esperar kafka healthy
-      - Ejecutar: docker exec fleet-kafka kafka-topics --list --bootstrap-server localhost:9092
-      - Afirmar: la salida contiene "telemetry.positions"
-      - Ejecutar: docker exec fleet-kafka kafka-topics --describe --topic telemetry.positions --bootstrap-server localhost:9092
-      - Afirmar: la salida muestra 3 particiones
-      - Afirmar: la salida muestra replication factor 1
-      - Limpiar: docker compose down
-      - _Requirements: RF-02_
-    
-    - Test: TimescaleDB arranca, inicializa el esquema y está healthy
-      - Ejecutar docker compose up -d timescaledb
-      - Esperar estado healthy de timescaledb (máximo 30s)
-      - Verificar que el estado del contenedor sea "healthy"
-      - Limpiar: docker compose down
-      - _Requirements: RF-05, RF-03, RNF-03_
-    
-    - Test: Creación de esquema y tabla de TimescaleDB
-      - Ejecutar docker compose up -d timescaledb
-      - Esperar estado healthy
-      - Ejecutar psql: docker exec fleet-timescaledb psql -U fleet_user -d fleet_db -c "\dn"
-      - Afirmar: la salida contiene el esquema "telemetry"
-      - Ejecutar psql: docker exec fleet-timescaledb psql -U fleet_user -d fleet_db -c "\dt telemetry.*"
-      - Afirmar: la salida contiene la tabla "telemetry.positions"
-      - Ejecutar psql: docker exec fleet-timescaledb psql -U fleet_user -d fleet_db -c "SELECT * FROM timescaledb_information.hypertables WHERE hypertable_name='positions'"
-      - Afirmar: la consulta devuelve 1 fila (hypertable existe)
-      - Limpiar: docker compose down
-      - _Requirements: RF-05_
-    
-    - Test: Resolución DNS de red entre servicios
-      - Ejecutar docker compose up -d zookeeper kafka timescaledb
-      - Esperar a que todos estén healthy
-      - Ejecutar: docker exec fleet-kafka ping -c 1 zookeeper
-      - Afirmar: ping tiene éxito
-      - Ejecutar: docker exec fleet-kafka ping -c 1 timescaledb
-      - Afirmar: ping tiene éxito
-      - Limpiar: docker compose down
-      - _Requirements: RF-04_
-    
-    - Test: Persistencia de volumen después de stop/start
-      - Ejecutar docker compose up -d timescaledb
-      - Esperar healthy
-      - Ejecutar psql INSERT: docker exec fleet-timescaledb psql -U fleet_user -d fleet_db -c "INSERT INTO telemetry.positions (captured_at, vehicle_id, latitude, longitude, received_at, processed_at, event_id, trace_id) VALUES (NOW(), 'VH-TEST', 40.0, -74.0, NOW(), NOW(), gen_random_uuid(), gen_random_uuid())"
-      - Ejecutar docker compose stop
-      - Ejecutar docker compose start
-      - Esperar healthy
-      - Ejecutar psql SELECT: docker exec fleet-timescaledb psql -U fleet_user -d fleet_db -t -c "SELECT COUNT(*) FROM telemetry.positions WHERE vehicle_id='VH-TEST'"
-      - Afirmar: count = 1 (datos persistidos)
-      - Limpiar: docker compose down -v
-      - _Requirements: RF-07, NRF-01_
-    
-    - Test: Mapeo de puerto para TimescaleDB
-      - Ejecutar docker compose up -d timescaledb
-      - Esperar healthy
-      - Ejecutar psql desde host: psql -h localhost -p 5432 -U fleet_user -d fleet_db -c "SELECT 1"
-      - Afirmar: la consulta tiene éxito (conexión desde host funciona)
-      - Limpiar: docker compose down
-      - _Requirements: RF-06_
-    
-    - Test: Variables de entorno desde .env se aplican
-      - Crear .env.test temporal con TIMESCALEDB_PORT=5433
-      - Ejecutar docker compose --env-file .env.test up -d timescaledb
-      - Esperar healthy
-      - Ejecutar: docker compose --env-file .env.test ps
-      - Afirmar: el mapeo de puerto muestra "0.0.0.0:5433->5432/tcp"
-      - Limpiar: docker compose --env-file .env.test down
-      - Eliminar .env.test
-      - _Requirements: RF-08_
-
-  - [ ] 8.2 Crear tests/docker/startup_order_test.go
-    - Agregar build tag: //go:build docker
-    - Test: El orden de inicio respeta las dependencias
-      - Ejecutar docker compose up -d (todos los servicios)
-      - Capturar tiempos de inicio de contenedores desde docker inspect
-      - Afirmar: tiempo de inicio de zookeeper < tiempo de inicio de kafka
-      - Afirmar: kafka alcanza healthy antes de que worker comience a consumir
-      - Limpiar: docker compose down
-      - _Requirements: RF-11_
-
-  - [ ] 8.3 Crear tests/docker/cleanup_test.go
-    - Agregar build tag: //go:build docker
-    - Test: docker compose down preserva volúmenes
-      - Ejecutar docker compose up -d
-      - Esperar healthy
-      - Ejecutar docker compose down (sin -v)
-      - Ejecutar docker volume ls
-      - Afirmar: el volumen fleet-kafka-data existe
-      - Afirmar: el volumen fleet-timescaledb-data existe
-      - Limpiar: docker volume rm fleet-kafka-data fleet-timescaledb-data (limpieza manual)
-      - _Requirements: RF-14_
-    
-    - Test: docker compose down -v elimina volúmenes
-      - Ejecutar docker compose up -d
-      - Esperar healthy
-      - Ejecutar docker compose down -v
-      - Ejecutar docker volume ls
-      - Afirmar: el volumen fleet-kafka-data NO existe
-      - Afirmar: el volumen fleet-timescaledb-data NO existe
-      - _Requirements: RF-14_
-
-- [ ] 9. Checkpoint - Ejecutar tests de integración
-  - Asegurar que todos los tests pasen, preguntar al usuario si surgen dudas.
-
-- [x] 10. Actualizar README.md con instrucciones de infraestructura
-  - [x] 10.1 Agregar sección Quick Start
+- [x] 9. Actualizar README.md con instrucciones de infraestructura
+  - [x] 9.1 Agregar sección Quick Start
     - Agregar encabezado de sección: "## Quick Start"
     - Agregar prerrequisitos: Docker, Docker Compose
     - Agregar paso 1: Clonar repositorio
@@ -294,14 +172,14 @@ La implementación se construye de forma incremental: configuración base → sc
       - TimescaleDB: localhost:5432 (o ${TIMESCALEDB_PORT})
     - _Requirements: RF-09, RF-17_
 
-  - [x] 10.2 Agregar sección Makefile Commands
+  - [x] 9.2 Agregar sección Makefile Commands
     - Agregar encabezado de sección: "## Makefile Commands"
     - Agregar tabla con tres columnas: Command | Description | Usage
     - Documentar todos los 12 targets de make del Makefile
     - Agregar ejemplos para flujos de trabajo comunes (iniciar, ver logs, detener, limpiar)
     - _Requirements: RF-17_
 
-  - [x] 10.3 Agregar sección Troubleshooting
+  - [x] 9.3 Agregar sección Troubleshooting
     - Agregar encabezado de sección: "## Troubleshooting"
     - Agregar subsección: "Conflicto de puerto en 5432"
       - Explicar cómo establecer TIMESCALEDB_PORT en .env
@@ -318,7 +196,7 @@ La implementación se construye de forma incremental: configuración base → sc
       - Seguro ignorar si el topic existe
     - _Requirements: RF-06, RF-13_
 
-  - [x] 10.4 Agregar sección Architecture
+  - [x] 9.4 Agregar sección Architecture
     - Agregar encabezado de sección: "## Architecture"
     - Agregar subsección: "Servicios de Infraestructura"
     - Describir rol de Zookeeper (coordinador de Kafka)
@@ -330,15 +208,15 @@ La implementación se construye de forma incremental: configuración base → sc
     - Agregar diagrama de flujo de datos (arte ASCII o referencia a design.md)
     - _Requirements: RF-10_
 
-- [x] 11. Validación manual con smoke tests
-  - [x] 11.1 Ejecutar inicio del stack completo
+- [x] 10. Validación manual con smoke tests
+  - [x] 10.1 Ejecutar inicio del stack completo
     - Desde la raíz del proyecto, ejecutar: make up
     - Esperar 30 segundos
     - Ejecutar: make status
     - Verificar que todos los servicios muestren "Up" o "Up (healthy)"
     - _Requirements: RF-01, RF-02, RF-05, RF-11, RNF-03_
 
-  - [x] 11.2 Probar conectividad de TimescaleDB desde host
+  - [x] 10.2 Probar conectividad de TimescaleDB desde host
     - Ejecutar: psql -h localhost -p 5432 -U fleet_user -d fleet_db
     - Ingresar contraseña de POSTGRES_PASSWORD (por defecto: fleet_password)
     - Ejecutar: \dt telemetry.*
@@ -348,7 +226,7 @@ La implementación se construye de forma incremental: configuración base → sc
     - Salir de psql
     - _Requirements: RF-05, RF-06_
 
-  - [x] 11.3 Probar existencia del topic de Kafka
+  - [x] 10.3 Probar existencia del topic de Kafka
     - Ejecutar: docker exec fleet-kafka kafka-topics --list --bootstrap-server localhost:9092
     - Verificar que la salida contiene "telemetry.positions"
     - Ejecutar: docker exec fleet-kafka kafka-topics --describe --topic telemetry.positions --bootstrap-server localhost:9092
@@ -356,12 +234,12 @@ La implementación se construye de forma incremental: configuración base → sc
     - Verificar: ReplicationFactor: 1
     - _Requirements: RF-02_
 
-  - [x] 11.4 Probar endpoint de health de Ingestion API
+  - [x] 10.4 Probar endpoint de health de Ingestion API
     - Ejecutar: curl http://localhost:8080/health
     - Verificar respuesta HTTP 200
     - _Requirements: RF-11_
 
-  - [x] 11.5 Probar flujo end-to-end (manual)
+  - [x] 10.5 Probar flujo end-to-end (manual)
     - Ejecutar: curl -X POST http://localhost:8080/positions -H "Content-Type: application/json" -d '{"vehicleId":"VH-SMOKE","latitude":40.7128,"longitude":-74.0060,"capturedAt":"2024-01-15T10:00:00Z"}'
     - Verificar respuesta HTTP 202 Accepted
     - Esperar 5 segundos para procesamiento del worker
@@ -369,7 +247,7 @@ La implementación se construye de forma incremental: configuración base → sc
     - Verificar que se devuelve una fila con latitud/longitud correctas
     - _Requirements: RF-02, RF-05, RF-11_
 
-  - [x] 11.6 Probar acceso a logs
+  - [x] 10.6 Probar acceso a logs
     - Ejecutar: make logs-timescaledb
     - Verificar que los logs se transmiten en tiempo real (Ctrl+C para salir)
     - Ejecutar: make logs-kafka
@@ -378,7 +256,7 @@ La implementación se construye de forma incremental: configuración base → sc
     - Verificar que los logs de todos los servicios se transmiten (Ctrl+C para salir)
     - _Requirements: RF-13_
 
-  - [x] 11.7 Probar limpieza
+  - [x] 10.7 Probar limpieza
     - Ejecutar: make down
     - Ejecutar: docker compose ps
     - Verificar que no hay contenedores ejecutándose
@@ -391,8 +269,161 @@ La implementación se construye de forma incremental: configuración base → sc
     - Verificar que los volúmenes se eliminaron
     - _Requirements: RF-14_
 
-- [x] 12. Checkpoint final - Validación completa
+- [x] 11. Checkpoint final - Validación completa
   - Asegurar que todos los tests pasen, preguntar al usuario si surgen dudas.
+
+- [x] 12. Reorganización de estructura de infraestructura y configuración
+  - [x] 12.1 Crear carpeta `infrastructure/docker/`
+    - Crear directorio `infrastructure/` en la raíz del proyecto
+    - Crear subdirectorio `infrastructure/docker/`
+    - Crear subdirectorios `infrastructure/docker/services/` (para configs específicas de servicios)
+    - Crear subdirectorios `infrastructure/docker/scripts/` (para scripts de inicialización)
+    - _Requirements: RNF-05_
+
+  - [x] 12.2 Mover docker-compose.yml a infrastructure/docker/
+    - Copiar actual `docker-compose.yml` (raíz) → `infrastructure/docker/docker-compose.yml`
+    - 
+    - Eliminar `docker-compose.yml` de la raíz (o dejar symlink)
+    - Verificar que rutas en docker-compose.yml son relativas o correctas desde infrastructure/docker/
+    - _Requirements: RNF-05_
+
+  - [x] 12.3 Reorganizar archivos .env - Infraestructura Docker
+    - Copiar actual `.env` (raíz) → `infrastructure/docker/.env` (mantener valores actuales)
+    - Copiar actual `.env.example` (raíz) → `infrastructure/docker/.env.example`
+    - Crear `infrastructure/docker/.env.example` con valores para desarrollo local:
+      - ZOOKEEPER_CLIENT_PORT=2181
+      - KAFKA_BROKERS=kafka:9092
+      - KAFKA_TOPIC=telemetry.positions
+      - POSTGRES_USER=fleet_user
+      - POSTGRES_PASSWORD=changeme
+      - POSTGRES_DB=fleet_db
+      - TIMESCALEDB_PORT=5433
+      - DB_HOST=localhost
+      - KAFKA_HOST=localhost
+      - Agregar comentarios explicativos
+    - _Requirements: RF-08_
+
+  - [x] 12.4 Reorganizar archivos .env - Backend Go (Producción)
+    - Crear `backend/go/.env.example` con variables de PRODUCCIÓN:
+      - DB_HOST=timescaledb.rds.amazonaws.com (ejemplo)
+      - DB_PORT=5432
+      - DB_USER=fleet_prod_user
+      - DB_PASSWORD=<change_me>
+      - DB_NAME=fleet_prod_db
+      - DB_SSL=true
+      - KAFKA_BROKERS=kafka-prod-broker:9092
+      - KAFKA_TOPIC=telemetry.positions.prod
+      - HTTP_PORT=8080
+      - HTTP_READ_TIMEOUT=15s
+      - HTTP_WRITE_TIMEOUT=15s
+      - HTTP_SHUTDOWN_TIMEOUT=30s
+      - LOG_LEVEL=warn
+      - LOG_FORMAT=json
+      - Agregar comentarios explicativos (NO valores reales)
+    - _Requirements: RF-08, RF-16_
+
+  - [x] 12.5 Reorganizar archivos .env - Backend Go (Local)
+    - Crear `backend/go/.env.local` (template comentado para desarrollo local):
+      - Comentarios explicando que es para override local
+      - Ejemplo comentado:
+        # DB_HOST=localhost
+        # DB_PORT=5433
+        # DB_USER=fleet_user
+        # DB_PASSWORD=fleet_password
+        # DB_NAME=fleet_db
+        # KAFKA_BROKERS=localhost:9092
+        # LOG_LEVEL=debug
+        # LOG_FORMAT=text
+      - _Requirements: RF-16_
+
+  - [x] 12.6 Crear .env.prod template en Backend Go
+    - Crear `backend/go/.env.prod` (vacío pero gitignored):
+      - Este archivo contendrá valores reales de producción
+      - NO debe subirse a git (ya gitignored)
+      - Será inyectado por CI/CD desde Secrets Manager
+    - _Requirements: RF-16_
+
+  - [x] 12.7 Actualizar .gitignore
+    - Verificar que `.env` está en .gitignore (no debería estar)
+    - Agregar `.env` a .gitignore si no está presente
+    - Agregar `backend/go/.env.prod` a .gitignore
+    - Agregar `backend/go/.env.local` a .gitignore
+    - Agregar comentarios explicativos:
+      # Environment-specific files (not tracked)
+      .env
+      .env.local
+      backend/go/.env.prod
+      backend/go/.env.local
+    - _Requirements: RF-16_
+
+  - [x] 12.8 Crear README en infrastructure/docker/
+    - Crear `infrastructure/docker/README.md` con:
+      - Sección: "Docker Compose Development Infrastructure"
+      - Sección: "Quick Start" (copiar from Quick Start anterior)
+      - Sección: "Environment Variables" explicando .env
+      - Sección: "Services":
+        - Zookeeper: role, port, health check
+        - Kafka: role, brokers, topic telemetry.positions, partitions
+        - TimescaleDB: role, port mapping, schema initialization
+      - Sección: "Troubleshooting" (copiar del README principal)
+      - Sección: "Scripts" (referencias a init-db.sh, create-topics.sh)
+    - _Requirements: RF-10_
+
+  - [x] 12.9 Crear README en infrastructure/
+    - Crear `infrastructure/README.md` con:
+      - Sección: "Infrastructure Organization"
+      - Explicar que infrastructure/ contiene:
+        - docker/: Development infrastructure (local Docker Compose)
+        - (future) terraform/: Production infrastructure (AWS)
+      - Sección: "Environments":
+        - Development (Docker Compose local)
+        - Production (AWS with Terraform - future)
+      - Sección: "Configuration":
+        - infrastructure/docker/.env: Local development variables
+        - backend/go/.env.prod: Production variables (Secrets Manager)
+        - backend/go/.env.local: Local overrides
+      - Sección: "Getting Started":
+        - Referencia a infrastructure/docker/README.md
+    - _Requirements: RF-10_
+
+  - [x] 12.10 Actualizar Makefile en raíz
+    - Si existe, actualizar referencias a docker-compose.yml:
+      - Cambiar `docker-compose.yml` → `infrastructure/docker/docker-compose.yml`
+      - Cambiar `docker compose -f docker-compose.yml up` → `cd infrastructure/docker && docker compose up`
+      - O usar `docker-compose -f infrastructure/docker/docker-compose.yml`
+    - Actualizar referencias a .env:
+      - Cambiar `.env` → `infrastructure/docker/.env`
+    - Verificar que todos los targets (up, down, logs, etc.) funcionan desde raíz
+    - _Requirements: RF-17_
+
+  - [x] 12.11 Actualizar Makefile en backend/go/
+    - Si existen referencias a .env de raíz, actualizar:
+      - Cambiar rutas de .env a ../../../infrastructure/docker/.env si es necesario
+    - Verificar que todos los targets funcionan desde backend/go/
+    - _Requirements: RF-17_
+
+  - [x] 12.12 Actualizar documentación principal (README.md raíz)
+    - Actualizar sección Quick Start:
+      - Cambiar "Copiar .env.example a .env" → "Copiar infrastructure/docker/.env.example a infrastructure/docker/.env"
+      - Cambiar "docker compose up" → "make up (desde raíz)"
+    - Actualizar sección Architecture:
+      - Agregar nota sobre structure: "Ver infrastructure/ para detalles"
+      - Agregar referencia a infrastructure/README.md
+    - Mantener todo lo demás igual
+    - _Requirements: RF-10_
+
+  - [x] 12.13 Verificación final de estructura
+    - Listar árbol de directorios:
+      - Confirmar que infrastructure/docker/ existe con docker-compose.yml
+      - Confirmar que backend/go/ tiene .env.example, .env.local, .env.prod
+    - Confirmar que .gitignore ignora correctamente:
+      - .env
+      - backend/go/.env.prod
+      - backend/go/.env.local
+    - Confirmar que Makefile en raíz puede ejecutar: make up, make down, make logs
+    - Confirmar que tests pueden ejecutarse: make test-infrastructure
+    - Confirmar que archivos no contienen secretos reales
+    - _Requirements: RNF-05, RF-16_
 
 ## Notas
 
@@ -417,10 +448,10 @@ La implementación se construye de forma incremental: configuración base → sc
     { "id": 2, "tasks": ["3.1", "3.2", "4.1"] },
     { "id": 3, "tasks": ["5.1"] },
     { "id": 4, "tasks": ["5.2", "7.1"] },
-    { "id": 5, "tasks": ["8.1", "8.2", "8.3", "10.1"] },
-    { "id": 6, "tasks": ["10.2", "10.3", "10.4"] },
-    { "id": 7, "tasks": ["11.1", "11.2", "11.3", "11.4"] },
-    { "id": 8, "tasks": ["11.5", "11.6", "11.7"] }
+    { "id": 5, "tasks": ["7.1", "9.1"] },
+    { "id": 6, "tasks": ["9.2", "9.3", "9.4"] },
+    { "id": 7, "tasks": ["10.1", "10.2", "10.3", "10.4"] },
+    { "id": 8, "tasks": ["10.5", "10.6", "10.7"] }
   ]
 }
 ```

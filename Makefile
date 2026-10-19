@@ -9,12 +9,19 @@
 #        make up            (start stack in background)
 #        make down          (stop stack)
 #        make logs          (stream logs)
+#
+# Note: Docker Compose configuration is in infrastructure/docker/
 # ============================================================================
 
 .PHONY: help up down logs logs-timescaledb logs-kafka status clean clean-hard restart build
 
 # Default target when 'make' is called without args
 .DEFAULT_GOAL := help
+
+# Docker Compose configuration location
+DOCKER_COMPOSE_DIR := infrastructure/docker
+DOCKER_COMPOSE_FILE := $(DOCKER_COMPOSE_DIR)/docker-compose.yml
+DOCKER_COMPOSE_ENV := $(DOCKER_COMPOSE_DIR)/.env
 
 # ============================================================================
 # HELP
@@ -39,6 +46,8 @@ help:
 	@echo "  make clean           - Stop and remove containers (preserve volumes)"
 	@echo "  make clean-hard      - Remove everything including volumes and prune unused"
 	@echo ""
+	@echo "Configuration: $(DOCKER_COMPOSE_DIR)"
+	@echo ""
 
 # ============================================================================
 # STARTUP & MANAGEMENT
@@ -46,24 +55,30 @@ help:
 
 up:
 	@echo "Starting Fleet Platform infrastructure..."
-	docker compose up -d
+	@echo "Configuration: $(DOCKER_COMPOSE_DIR)"
+	docker compose -f $(DOCKER_COMPOSE_FILE) --env-file $(DOCKER_COMPOSE_ENV) up -d
 	@echo "✓ Stack started. Services will be healthy in 20-30 seconds."
 	@echo "✓ Ingestion API: http://localhost:8080"
-	@echo "✓ TimescaleDB: localhost:$$(grep TIMESCALEDB_PORT .env 2>/dev/null | cut -d= -f2 || echo 5432)"
+	@if [ -f "$(DOCKER_COMPOSE_ENV)" ]; then \
+		TIMESCALEDB_PORT=$$(grep TIMESCALEDB_PORT $(DOCKER_COMPOSE_ENV) | cut -d= -f2 || echo 5432); \
+		echo "✓ TimescaleDB: localhost:$$TIMESCALEDB_PORT"; \
+	else \
+		echo "✓ TimescaleDB: localhost:5432"; \
+	fi
 
 down:
 	@echo "Stopping Fleet Platform infrastructure..."
-	docker compose down
+	docker compose -f $(DOCKER_COMPOSE_FILE) --env-file $(DOCKER_COMPOSE_ENV) down
 	@echo "✓ Services stopped. Volumes preserved for next start."
 
 restart:
 	@echo "Restarting all services..."
-	docker compose restart
+	docker compose -f $(DOCKER_COMPOSE_FILE) --env-file $(DOCKER_COMPOSE_ENV) restart
 	@echo "✓ Services restarted."
 
 build:
 	@echo "Building Docker images..."
-	docker compose build
+	docker compose -f $(DOCKER_COMPOSE_FILE) --env-file $(DOCKER_COMPOSE_ENV) build
 	@echo "✓ Build complete."
 
 # ============================================================================
@@ -73,19 +88,19 @@ build:
 status:
 	@echo "Service Status:"
 	@echo "==============="
-	docker compose ps
+	docker compose -f $(DOCKER_COMPOSE_FILE) --env-file $(DOCKER_COMPOSE_ENV) ps
 
 logs:
 	@echo "Streaming logs from all services (Ctrl+C to exit)..."
-	docker compose logs -f
+	docker compose -f $(DOCKER_COMPOSE_FILE) --env-file $(DOCKER_COMPOSE_ENV) logs -f
 
 logs-kafka:
 	@echo "Streaming logs from Kafka (Ctrl+C to exit)..."
-	docker compose logs -f kafka
+	docker compose -f $(DOCKER_COMPOSE_FILE) --env-file $(DOCKER_COMPOSE_ENV) logs -f kafka
 
 logs-timescaledb:
 	@echo "Streaming logs from TimescaleDB (Ctrl+C to exit)..."
-	docker compose logs -f timescaledb
+	docker compose -f $(DOCKER_COMPOSE_FILE) --env-file $(DOCKER_COMPOSE_ENV) logs -f timescaledb
 
 # ============================================================================
 # CLEANUP
@@ -93,7 +108,7 @@ logs-timescaledb:
 
 clean:
 	@echo "Stopping and removing containers (volumes preserved)..."
-	docker compose down
+	docker compose -f $(DOCKER_COMPOSE_FILE) --env-file $(DOCKER_COMPOSE_ENV) down
 	@echo "✓ Cleanup complete. Use 'make clean-hard' to remove volumes."
 
 clean-hard:
@@ -102,7 +117,7 @@ clean-hard:
 	echo; \
 	if [[ $$REPLY =~ ^[Yy]$$ ]]; then \
 		echo "Removing everything..."; \
-		docker compose down -v; \
+		docker compose -f $(DOCKER_COMPOSE_FILE) --env-file $(DOCKER_COMPOSE_ENV) down -v; \
 		docker system prune -f; \
 		echo "✓ Hard cleanup complete. All data removed."; \
 	else \

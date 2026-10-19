@@ -268,6 +268,28 @@ Todos los servicios se ejecutan en contenedores Docker conectados a través de u
 - Log retention policies: 24h por defecto, ajustable
 - Kafka log compaction: Mantener solo último estado por clave (futuro)
 
+
+## Infrastructure Configuration
+
+The infrastructure for the Fleet Platform is organized in the `infrastructure/` directory:
+
+- **`infrastructure/docker/`**: Docker Compose development environment (local)
+- **`infrastructure/terraform/`**: Terraform configuration for AWS (future)
+
+For detailed information about infrastructure setup, configuration, and troubleshooting, see:
+- [Infrastructure Overview](./infrastructure/README.md)
+- [Docker Compose Setup](./infrastructure/docker/README.md)
+
+### Environment Files
+
+Configuration varies by environment:
+
+- **Docker Development**: `infrastructure/docker/.env` (local Docker Compose)
+- **Backend Production**: `backend/go/.env.prod` (production secrets, via Secrets Manager)
+- **Backend Local Dev**: `backend/go/.env.local` (local overrides, gitignored)
+
+Never commit `.env` files with real secrets. Use `.env.example` as a template for documentation.
+
 ## Quick Start
 
 Get the Fleet Platform running locally in 5 minutes.
@@ -295,7 +317,7 @@ cd fleet-dashboard
 **Step 2: Copy environment template and customize (optional)**
 
 ```bash
-cp .env.example .env
+cp infrastructure/docker/.env.example infrastructure/docker/.env
 ```
 
 By default:

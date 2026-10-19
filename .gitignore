@@ -116,3 +116,7 @@ node_modules/
 # - frontend/.gitignore (when created)
 # - mobile/.gitignore (when created)
 # ============================================================================
+
+# Backend Go - Environment files for production
+backend/go/.env.prod
+backend/go/.env.local
