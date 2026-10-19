@@ -421,22 +421,22 @@ La implementación se construye de forma incremental: configuración base → sc
       - backend/go/.env.prod
       - backend/go/.env.local
     - Confirmar que Makefile en raíz puede ejecutar: make up, make down, make logs
-    - Confirmar que tests pueden ejecutarse: make test-infrastructure
+    - ~~Confirmar que tests pueden ejecutarse: make test-infrastructure~~ (tests removidos)
     - Confirmar que archivos no contienen secretos reales
     - _Requirements: RNF-05, RF-16_
 
 ## Notas
 
 - **Sin property-based testing**: Esta funcionalidad es configuración IaC (Infrastructure as Code). Property-based testing no es aplicable según testing.md sección 13.
-- **Tests de integración requieren Docker**: Los tests en la suite "integration" requieren Docker Engine con el plugin compose instalado.
-- **Smoke tests manuales**: Las tareas 11.1-11.7 se realizan manualmente como validación final antes de declarar la funcionalidad completa.
-- **Flujo de dependencias**: Las tareas 1-2 deben completarse antes que 3-5. La tarea 6 (tests) se bloquea en 1-5. Las tareas 7 (Makefile) y 10 (README) pueden ejecutarse en paralelo con los tests.
+- **Tests de infraestructura**: Removidos (infraestructura es efímera). Validación mediante Makefile y smoke tests manuales.
+- **Smoke tests manuales**: Las tareas 10.1-10.7 se realizan manualmente como validación final antes de declarar la funcionalidad completa.
+- **Flujo de dependencias**: Las tareas se ejecutan en waves secuenciales: 1 (docker-compose) → 2 (checkpoint) → 3-4 (archivos) → 5 (scripts) → 6 (checkpoint) → 7 (Makefile) → 9 (README) → 10 (smoke tests) → 11 (checkpoint) → 12 (reorganización)
 - **Seguridad de volúmenes**: docker compose down preserva volúmenes por defecto. Usar clean-hard solo cuando se desee reiniciar intencionalmente.
 - **Conflictos de puerto**: Si TIMESCALEDB_PORT=5432 genera conflicto, cambiar a 5433 u otro puerto disponible en .env.
 - **Timing de health check**: El primer inicio toma más tiempo (descargas de imágenes). Los inicios subsecuentes deberían ser <30s.
 - **Creación de topic de Kafka**: El script es idempotente. Si el topic existe, --if-not-exists previene errores.
 - **Inicialización de TimescaleDB**: El script SQL se ejecuta una vez en el primer inicio del contenedor. Los inicios subsecuentes se saltan (datos en volumen).
-- **Estrategia de testing**: Los tests de integración verifican comunicación entre servicios. Los smoke tests verifican el flujo end-to-end manualmente.
+- **Estrategia de validación**: Smoke tests manuales (10.1-10.7) verifican el flujo end-to-end y comportamiento de la infraestructura.
 
 ## Task Dependency Graph
 
@@ -445,13 +445,17 @@ La implementación se construye de forma incremental: configuración base → sc
   "waves": [
     { "id": 0, "tasks": ["1.1", "1.2", "1.3"] },
     { "id": 1, "tasks": ["1.4", "1.5", "1.6"] },
-    { "id": 2, "tasks": ["3.1", "3.2", "4.1"] },
-    { "id": 3, "tasks": ["5.1"] },
-    { "id": 4, "tasks": ["5.2", "7.1"] },
-    { "id": 5, "tasks": ["7.1", "9.1"] },
-    { "id": 6, "tasks": ["9.2", "9.3", "9.4"] },
-    { "id": 7, "tasks": ["10.1", "10.2", "10.3", "10.4"] },
-    { "id": 8, "tasks": ["10.5", "10.6", "10.7"] }
+    { "id": 2, "tasks": ["2"] },
+    { "id": 3, "tasks": ["3.1", "3.2", "4.1"] },
+    { "id": 4, "tasks": ["5.1"] },
+    { "id": 5, "tasks": ["5.2"] },
+    { "id": 6, "tasks": ["6"] },
+    { "id": 7, "tasks": ["7.1"] },
+    { "id": 8, "tasks": ["9.1"] },
+    { "id": 9, "tasks": ["9.2", "9.3", "9.4"] },
+    { "id": 10, "tasks": ["10.1", "10.2", "10.3", "10.4", "10.5", "10.6", "10.7"] },
+    { "id": 11, "tasks": ["11"] },
+    { "id": 12, "tasks": ["12.1", "12.2", "12.3", "12.4", "12.5", "12.6", "12.7", "12.8", "12.9", "12.10", "12.11", "12.12", "12.13"] }
   ]
 }
 ```
