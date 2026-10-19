@@ -1,0 +1,1041 @@
+{
+  "pbtResults": {},
+  "executionHistory": {
+    "1.1 Implementar VehicleID VO: no vacío, alphanumeric, máx 50 caracteres, constructor valida invariantes": [
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354600241
+      },
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354609734
+      },
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354900361
+      }
+    ],
+    "1.2 Implementar GeoPosition VO: latitud -90 a 90, longitud -180 a 180, constructor valida invariantes": [
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354600567
+      },
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354610230
+      },
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354900829
+      }
+    ],
+    "1.3 Implementar Timestamp VOs: CapturedTimestamp, ReceivedTimestamp, ProcessedTimestamp con validación de ordenamiento capturedAt ≤ receivedAt ≤ processedAt": [
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354600853
+      },
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354611052
+      },
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354901606
+      }
+    ],
+    "1.4 Implementar EventID VO: UUID v4 generado por IDGenerator, inmodificable tras creación": [
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354601058
+      },
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354611350
+      },
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354901889
+      }
+    ],
+    "1.5 Implementar TraceID VO: UUID v4 validado de encabezado X-Trace-ID, generado si ausente": [
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354601140
+      },
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354907990
+      },
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792355228905
+      }
+    ],
+    "1.6 Implementar IdempotencyKey VO: UUID v4 validado de encabezado X-Idempotency-Key, formato obligatorio si presente": [
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354601223
+      },
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354908294
+      },
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792355229538
+      }
+    ],
+    "1.7 Implementar RateLimitConfig VO: requestsPerWindow (12), windowSize (60s), inmodificable": [
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354601309
+      },
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354908749
+      },
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792355229933
+      }
+    ],
+    "1.8 Implementar Clock interface + RealClock adapter: inyectable para determinismo de pruebas, RealClock retorna time.Now()": [
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354601405
+      },
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354908918
+      },
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792355230723
+      }
+    ],
+    "1.9 Implementar dominio errors: FutureTimestampError, InvalidVehicleIDError, InvalidGeoPositionError, InvalidEventIDError, InvalidTraceIDError, RateLimitExceededError, CircuitBreakerOpenError": [
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354601478
+      },
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792355250237
+      },
+      {
+        "executionId": "f4a9249e-6da0-4ff4-8368-cb48de66fd4a",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792356099620
+      }
+    ],
+    "2.1 Implementar PositionReceivedEvent VO: 7 campos (eventID, vehicleID, geoPosition, capturedAt, receivedAt, traceID, idempotencyKey), Value Object immutable": [
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354601557
+      },
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792355251789
+      },
+      {
+        "executionId": "f4a9249e-6da0-4ff4-8368-cb48de66fd4a",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792356100618
+      }
+    ],
+    "2.2 Implementar VehiclePosition Entity: encapsula 5 timestamps + métodos de dominio (ReceptionLatency, ProcessingLatency, TotalLatency, ToKafkaPayload), NO anémica": [
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354601644
+      },
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792355251074
+      },
+      {
+        "executionId": "f4a9249e-6da0-4ff4-8368-cb48de66fd4a",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792356101610
+      }
+    ],
+    "3.1 Definir 6 puertos: KafkaPublisher, CircuitBreakerManager, RateLimiter, Logger, Clock, IDGenerator como interfaces sin dependencias de frameworks": [
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354601741
+      },
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792355252291
+      }
+    ],
+    "3.2 Definir Clock puerto: interfaz Now() time.Time inyectable": [
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354601832
+      },
+      {
+        "executionId": "f4a9249e-6da0-4ff4-8368-cb48de66fd4a",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792356106262
+      },
+      {
+        "executionId": "f4a9249e-6da0-4ff4-8368-cb48de66fd4a",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792356361601
+      }
+    ],
+    "4.1 Implementar KafkaPublisher adapter: 3 reintentos con backoff exponencial, partición por vehicle_id, dead-letter queue para fallos definitivos": [
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354601928
+      },
+      {
+        "executionId": "f4a9249e-6da0-4ff4-8368-cb48de66fd4a",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792356106605
+      },
+      {
+        "executionId": "f4a9249e-6da0-4ff4-8368-cb48de66fd4a",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792356362804
+      }
+    ],
+    "4.2 Implementar CircuitBreaker adaptador: máquina de estados CLOSED → OPEN (5 fallos) → HALF_OPEN (30s timeout) → CLOSED (2 éxitos), thread-safe con sync.RWMutex": [
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354602007
+      },
+      {
+        "executionId": "f4a9249e-6da0-4ff4-8368-cb48de66fd4a",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792356107208
+      },
+      {
+        "executionId": "f4a9249e-6da0-4ff4-8368-cb48de66fd4a",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792356363456
+      }
+    ],
+    "4.3 Implementar RateLimiter adapter: ventana deslizante en memoria, 12/60s por defecto, aislamiento por vehicle_id, thread-safe": [
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354602090
+      },
+      {
+        "executionId": "f4a9249e-6da0-4ff4-8368-cb48de66fd4a",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792356107516
+      },
+      {
+        "executionId": "f4a9249e-6da0-4ff4-8368-cb48de66fd4a",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792356364244
+      }
+    ],
+    "4.4 Implementar Clock e IDGenerator adapters (reales para producción, inyectables para pruebas): RealClock retorna time.Now(), RealIDGenerator retorna UUID v4": [
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354602162
+      },
+      {
+        "executionId": "f4a9249e-6da0-4ff4-8368-cb48de66fd4a",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792356362237
+      }
+    ],
+    "5.1 Implementar DTOs: PositionRequest (vehicle_id, latitude, longitude, captured_at), PositionResponse (event_id, status, timestamp), ProblemDetails (RFC 9457)": [
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354602243
+      },
+      {
+        "executionId": "f4a9249e-6da0-4ff4-8368-cb48de66fd4a",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792356364580
+      }
+    ],
+    "5.2 Implementar mappers: PositionMapper (FromRequest → ReceivePositionCommand, FromEntity → PositionResponse), ErrorMapper (DomainError → ProblemDetails)": [
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354602369
+      },
+      {
+        "executionId": "f4a9249e-6da0-4ff4-8368-cb48de66fd4a",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792356365301
+      }
+    ],
+    "6.1 Implementar TraceIDMiddleware: generar o validar UUID v4 de X-Trace-ID, almacenar en gin.Context, escribir respuesta header X-Trace-ID antes de c.Next()": [
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354602528
+      },
+      {
+        "executionId": "f4a9249e-6da0-4ff4-8368-cb48de66fd4a",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792356365874
+      }
+    ],
+    "6.2 Implementar IdempotencyKeyMiddleware: validar X-Idempotency-Key si presente (UUID v4), almacenar en Context, no blockear si ausente": [
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354602609
+      },
+      {
+        "executionId": "f4a9249e-6da0-4ff4-8368-cb48de66fd4a",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792356366520
+      }
+    ],
+    "6.3 Implementar ContentTypeMiddleware: validar Content-Type: application/json, rechazar con 415 si diferente": [
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354602689
+      },
+      {
+        "executionId": "f4a9249e-6da0-4ff4-8368-cb48de66fd4a",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792356367058
+      }
+    ],
+    "6.4 Implementar RateLimitMiddleware: extraer vehicle_id del cuerpo vía gin.GetRawData(), verificar RateLimiter, rechazar con 429 si límite excedido": [
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354602763
+      },
+      {
+        "executionId": "f4a9249e-6da0-4ff4-8368-cb48de66fd4a",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792356367824
+      }
+    ],
+    "6.5 Implementar ErrorHandlerMiddleware: capturar c.Error() y panic, convertir dominio errors a ProblemDetails con trace_id, responder RFC 9457": [
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354602847
+      },
+      {
+        "executionId": "f4a9249e-6da0-4ff4-8368-cb48de66fd4a",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792356368309
+      }
+    ],
+    "6.6 Implementar PositionHandler: ~15 líneas, deserializar request → mapper.FromRequest → useCase.Execute → mapper.FromEntity → responder 202": [
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354602925
+      },
+      {
+        "executionId": "f4a9249e-6da0-4ff4-8368-cb48de66fd4a",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792356369128
+      }
+    ],
+    "7.1 Implementar Composer: inyección de dependencias, instanciar config → adaptadores → useCase → middleware → Router Gin con pila en orden correcto": [
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354603010
+      },
+      {
+        "executionId": "14dba02e-45f6-4398-abf9-2fca5275f27a",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792357347097
+      },
+      {
+        "executionId": "14dba02e-45f6-4398-abf9-2fca5275f27a",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792357672185
+      }
+    ],
+    "8.1 Implementar PositionMother: Object Mother con escenarios predefinidos (Valid, FutureTimestamp, OutOfRangeLatitude, OutOfRangeLongitude, MissingVehicleID)": [
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354603094
+      },
+      {
+        "executionId": "14dba02e-45f6-4398-abf9-2fca5275f27a",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792357674864
+      },
+      {
+        "executionId": "14dba02e-45f6-4398-abf9-2fca5275f27a",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792358129001
+      }
+    ],
+    "8.2 Implementar Fakes: FakeKafkaPublisher (state tracking), FakeClock (controllable time), FakeIDGenerator (deterministic UUIDs), FakeRateLimiter (configurable limits)": [
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354603177
+      },
+      {
+        "executionId": "14dba02e-45f6-4398-abf9-2fca5275f27a",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792357677403
+      },
+      {
+        "executionId": "14dba02e-45f6-4398-abf9-2fca5275f27a",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792358129718
+      }
+    ],
+    "8.3 Implementar TestHTTPServer: harness Gin con fakes inyectados, expone puerto para pruebas, detiene limpiamente": [
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354603258
+      },
+      {
+        "executionId": "54248ed5-fd3e-4f05-be65-b9bfe3f4b627",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792358167231
+      },
+      {
+        "executionId": "08fe1b95-de5f-4fcd-8395-c11f22b66bad",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792365179743
+      },
+      {
+        "executionId": "08fe1b95-de5f-4fcd-8395-c11f22b66bad",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792365195202
+      },
+      {
+        "executionId": "08fe1b95-de5f-4fcd-8395-c11f22b66bad",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792366204056
+      }
+    ],
+    "8.4 Implementar Router HTTP: pila de middleware en orden correcto (TraceID → Idempotency → ContentType → RateLimit → ErrorHandler, evaluados en reverso)": [
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354603328
+      },
+      {
+        "executionId": "54248ed5-fd3e-4f05-be65-b9bfe3f4b627",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792358167687
+      },
+      {
+        "executionId": "08fe1b95-de5f-4fcd-8395-c11f22b66bad",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792365181239
+      },
+      {
+        "executionId": "08fe1b95-de5f-4fcd-8395-c11f22b66bad",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792365195755
+      },
+      {
+        "executionId": "08fe1b95-de5f-4fcd-8395-c11f22b66bad",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792366202600
+      }
+    ],
+    "8.5 Implementar ReceivePositionUseCase: crear VehiclePosition → validar → publicar async a Kafka vía goroutine (fire-and-forget) → devolver 202 inmediatamente": [
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354603394
+      },
+      {
+        "executionId": "54248ed5-fd3e-4f05-be65-b9bfe3f4b627",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792358168410
+      },
+      {
+        "executionId": "08fe1b95-de5f-4fcd-8395-c11f22b66bad",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792365182132
+      },
+      {
+        "executionId": "08fe1b95-de5f-4fcd-8395-c11f22b66bad",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792365196213
+      },
+      {
+        "executionId": "08fe1b95-de5f-4fcd-8395-c11f22b66bad",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792366201783
+      }
+    ],
+    "9.1 Prueba: valid_position_returns_202 (verifica: entrada válida retorna 202, estructura response correcta, trace_id header presente)": [
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354603473
+      },
+      {
+        "executionId": "54248ed5-fd3e-4f05-be65-b9bfe3f4b627",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792358169054
+      },
+      {
+        "executionId": "08fe1b95-de5f-4fcd-8395-c11f22b66bad",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792365182691
+      },
+      {
+        "executionId": "08fe1b95-de5f-4fcd-8395-c11f22b66bad",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792365196722
+      },
+      {
+        "executionId": "08fe1b95-de5f-4fcd-8395-c11f22b66bad",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792366203110
+      }
+    ],
+    "9.2 Prueba: future_captured_at_returns_422 (verifica: captured_at > now rechaza con 422, ProblemDetails con tipo correcto)": [
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354603541
+      },
+      {
+        "executionId": "54248ed5-fd3e-4f05-be65-b9bfe3f4b627",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792358833395
+      },
+      {
+        "executionId": "54248ed5-fd3e-4f05-be65-b9bfe3f4b627",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792359518370
+      }
+    ],
+    "9.3 Prueba: missing_vehicle_id_returns_422 (verifica: vehicle_id vacío rechaza con 422, ProblemDetails con detail)": [
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354603612
+      },
+      {
+        "executionId": "54248ed5-fd3e-4f05-be65-b9bfe3f4b627",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792358833834
+      },
+      {
+        "executionId": "54248ed5-fd3e-4f05-be65-b9bfe3f4b627",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792359519219
+      }
+    ],
+    "9.4 Prueba: latitude_out_of_range_returns_422 (verifica: latitud > 90 o < -90 rechaza con 422)": [
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354603692
+      },
+      {
+        "executionId": "54248ed5-fd3e-4f05-be65-b9bfe3f4b627",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792358834122
+      },
+      {
+        "executionId": "54248ed5-fd3e-4f05-be65-b9bfe3f4b627",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792359519389
+      }
+    ],
+    "9.5 Prueba: longitude_out_of_range_returns_422 (verifica: longitud > 180 o < -180 rechaza con 422)": [
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354603760
+      },
+      {
+        "executionId": "54248ed5-fd3e-4f05-be65-b9bfe3f4b627",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792358837108
+      },
+      {
+        "executionId": "54248ed5-fd3e-4f05-be65-b9bfe3f4b627",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792359519723
+      }
+    ],
+    "9.6 Prueba: invalid_content_type_returns_415 (verifica: Content-Type != application/json rechaza con 415)": [
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354603843
+      },
+      {
+        "executionId": "54248ed5-fd3e-4f05-be65-b9bfe3f4b627",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792359611788
+      },
+      {
+        "executionId": "54248ed5-fd3e-4f05-be65-b9bfe3f4b627",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792360066546
+      }
+    ],
+    "9.7 Prueba: idempotency_key_validation (verifica: X-Idempotency-Key inválido rechaza con 400, ausente es permitido)": [
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354603925
+      },
+      {
+        "executionId": "54248ed5-fd3e-4f05-be65-b9bfe3f4b627",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792359612182
+      },
+      {
+        "executionId": "54248ed5-fd3e-4f05-be65-b9bfe3f4b627",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792360067058
+      }
+    ],
+    "9.8 Prueba: rate_limit_exceeded_returns_429 (verifica: 13ª solicitud del mismo vehicle_id retorna 429)": [
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354604011
+      },
+      {
+        "executionId": "54248ed5-fd3e-4f05-be65-b9bfe3f4b627",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792359612654
+      }
+    ],
+    "9.9 Prueba: rate_limit_window_sliding (verifica: cuota se regenera después de 60s de ventana)": [
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354604095
+      },
+      {
+        "executionId": "54248ed5-fd3e-4f05-be65-b9bfe3f4b627",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792359613042
+      },
+      {
+        "executionId": "54248ed5-fd3e-4f05-be65-b9bfe3f4b627",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792360067919
+      }
+    ],
+    "9.10 Prueba: circuit_breaker_opens_on_repeated_failures (verifica: 5 fallos consecutivos → CircuitBreaker abre, 6ª solicitud retorna 503)": [
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354604176
+      },
+      {
+        "executionId": "54248ed5-fd3e-4f05-be65-b9bfe3f4b627",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792360075688
+      },
+      {
+        "executionId": "54248ed5-fd3e-4f05-be65-b9bfe3f4b627",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792360804711
+      }
+    ],
+    "9.11 Prueba: circuit_breaker_half_opens_after_timeout (verifica: OPEN → HALF_OPEN tras 30s timeout, próxima solicitud se intenta)": [
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354604246
+      },
+      {
+        "executionId": "54248ed5-fd3e-4f05-be65-b9bfe3f4b627",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792360076052
+      },
+      {
+        "executionId": "54248ed5-fd3e-4f05-be65-b9bfe3f4b627",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792360805724
+      }
+    ],
+    "9.12 Prueba: circuit_breaker_closes_after_successes (verifica: 2 éxitos en HALF_OPEN → transiciona a CLOSED)": [
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354604329
+      },
+      {
+        "executionId": "54248ed5-fd3e-4f05-be65-b9bfe3f4b627",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792360076520
+      },
+      {
+        "executionId": "54248ed5-fd3e-4f05-be65-b9bfe3f4b627",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792360805113
+      }
+    ],
+    "9.13 Prueba: response_includes_trace_id_header (verifica: respuesta incluye X-Trace-ID header con UUID v4)": [
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354604409
+      },
+      {
+        "executionId": "54248ed5-fd3e-4f05-be65-b9bfe3f4b627",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792360076913
+      },
+      {
+        "executionId": "54248ed5-fd3e-4f05-be65-b9bfe3f4b627",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792360802675
+      }
+    ],
+    "9.14 Prueba: invalid_trace_id_header_returns_400 (verifica: X-Trace-ID inválido rechaza con 400)": [
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354604480
+      },
+      {
+        "executionId": "efe08757-fa29-4d43-bef7-a3b3c7dc27d5",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792363653723
+      },
+      {
+        "executionId": "efe08757-fa29-4d43-bef7-a3b3c7dc27d5",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792364015538
+      }
+    ],
+    "9.15 Prueba: latency_timestamps_correct (verifica: procesamiento y recepción latency calculadas correctamente, capturedAt ≤ receivedAt ≤ processedAt)": [
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354604562
+      },
+      {
+        "executionId": "efe08757-fa29-4d43-bef7-a3b3c7dc27d5",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792363656954
+      },
+      {
+        "executionId": "efe08757-fa29-4d43-bef7-a3b3c7dc27d5",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792364016257
+      }
+    ],
+    "9.16 Prueba: malformed_json_returns_400 (verifica: JSON inválido rechaza con 400, ProblemDetails)": [
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354604630
+      },
+      {
+        "executionId": "efe08757-fa29-4d43-bef7-a3b3c7dc27d5",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792363657795
+      },
+      {
+        "executionId": "efe08757-fa29-4d43-bef7-a3b3c7dc27d5",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792364016837
+      }
+    ],
+    "9.17 Prueba: request_exceeds_max_size_returns_413 (verifica: solicitud > 1MB rechaza con 413)": [
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354604713
+      },
+      {
+        "executionId": "efe08757-fa29-4d43-bef7-a3b3c7dc27d5",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792363658143
+      },
+      {
+        "executionId": "efe08757-fa29-4d43-bef7-a3b3c7dc27d5",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792364017352
+      }
+    ],
+    "10.1 Prueba: position_published_to_kafka_with_correct_schema (verifica: evento persistido en Kafka con schema correcto: partición=vehicle_id, offset avanzado)": [
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354604796
+      },
+      {
+        "executionId": "efe08757-fa29-4d43-bef7-a3b3c7dc27d5",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792364024006
+      },
+      {
+        "executionId": "08fe1b95-de5f-4fcd-8395-c11f22b66bad",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792365183282
+      },
+      {
+        "executionId": "08fe1b95-de5f-4fcd-8395-c11f22b66bad",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792366207821
+      },
+      {
+        "executionId": "08fe1b95-de5f-4fcd-8395-c11f22b66bad",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792367121993
+      }
+    ],
+    "10.2 Prueba: kafka_unavailable_toxiproxy_returns_503 (verifica: Toxiproxy bloquea Kafka, CircuitBreaker abre, retorna 503 con ProblemDetails)": [
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354604863
+      },
+      {
+        "executionId": "efe08757-fa29-4d43-bef7-a3b3c7dc27d5",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792364024548
+      },
+      {
+        "executionId": "08fe1b95-de5f-4fcd-8395-c11f22b66bad",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792365184235
+      },
+      {
+        "executionId": "08fe1b95-de5f-4fcd-8395-c11f22b66bad",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792366208847
+      },
+      {
+        "executionId": "08fe1b95-de5f-4fcd-8395-c11f22b66bad",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792367124325
+      }
+    ],
+    "10.3 Prueba: kafka_timeout_toxiproxy_returns_503 (verifica: Toxiproxy injeta 2s latencia, timeout respetado, retorna 503)": [
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354604945
+      },
+      {
+        "executionId": "efe08757-fa29-4d43-bef7-a3b3c7dc27d5",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792364025055
+      },
+      {
+        "executionId": "08fe1b95-de5f-4fcd-8395-c11f22b66bad",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792365184773
+      },
+      {
+        "executionId": "08fe1b95-de5f-4fcd-8395-c11f22b66bad",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792366209170
+      },
+      {
+        "executionId": "08fe1b95-de5f-4fcd-8395-c11f22b66bad",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792367122745
+      }
+    ],
+    "10.4 Prueba: idempotency_window_1h_retention (verifica: X-Idempotency-Key almacenado con ventana de 1h, mismo key en ventana se detecta)": [
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354605028
+      },
+      {
+        "executionId": "efe08757-fa29-4d43-bef7-a3b3c7dc27d5",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792364025813
+      },
+      {
+        "executionId": "08fe1b95-de5f-4fcd-8395-c11f22b66bad",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792365185249
+      },
+      {
+        "executionId": "08fe1b95-de5f-4fcd-8395-c11f22b66bad",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792366209617
+      },
+      {
+        "executionId": "08fe1b95-de5f-4fcd-8395-c11f22b66bad",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792367123591
+      }
+    ],
+    "10.5 Prueba: rate_limiter_window_reset_real_clock (verifica: reloj real, ventana se desliza tras 60s, cuota se regenera)": [
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354605110
+      },
+      {
+        "executionId": "08fe1b95-de5f-4fcd-8395-c11f22b66bad",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792365185730
+      },
+      {
+        "executionId": "08fe1b95-de5f-4fcd-8395-c11f22b66bad",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792367128704
+      },
+      {
+        "executionId": "08fe1b95-de5f-4fcd-8395-c11f22b66bad",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792367568712
+      }
+    ],
+    "10.6 Prueba: concurrent_requests_same_vehicle_rate_limit (verifica: 12 solicitudes concurrentes del mismo vehicle_id, 13ª rechazada con 429)": [
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354605195
+      },
+      {
+        "executionId": "08fe1b95-de5f-4fcd-8395-c11f22b66bad",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792365186311
+      },
+      {
+        "executionId": "08fe1b95-de5f-4fcd-8395-c11f22b66bad",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792367128891
+      },
+      {
+        "executionId": "08fe1b95-de5f-4fcd-8395-c11f22b66bad",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792367567343
+      }
+    ],
+    "10.7 Prueba: concurrent_requests_different_vehicles_isolated (verifica: rate limit de VH-A no afecta a VH-B, aislamiento total)": [
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354605278
+      },
+      {
+        "executionId": "08fe1b95-de5f-4fcd-8395-c11f22b66bad",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792365186819
+      },
+      {
+        "executionId": "08fe1b95-de5f-4fcd-8395-c11f22b66bad",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792367129139
+      }
+    ],
+    "10.8 Prueba: kafka_consumer_confirmation_not_persisted_without_worker (verifica: 202 retornado antes de confirmación de Kafka, sin worker no hay persistencia final)": [
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354605377
+      },
+      {
+        "executionId": "08fe1b95-de5f-4fcd-8395-c11f22b66bad",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792365187403
+      },
+      {
+        "executionId": "08fe1b95-de5f-4fcd-8395-c11f22b66bad",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792367129798
+      },
+      {
+        "executionId": "08fe1b95-de5f-4fcd-8395-c11f22b66bad",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792367566655
+      }
+    ],
+    "11.1 Crear especificación OpenAPI 3.1.0 (endpoint POST /positions, schema request/response, ProblemDetails, ejemplos)": [
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354605478
+      },
+      {
+        "executionId": "08fe1b95-de5f-4fcd-8395-c11f22b66bad",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792365187839
+      },
+      {
+        "executionId": "08fe1b95-de5f-4fcd-8395-c11f22b66bad",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792367607270
+      },
+      {
+        "executionId": "08fe1b95-de5f-4fcd-8395-c11f22b66bad",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792367980491
+      }
+    ],
+    "11.2 Implementar pruebas basadas en propiedades: latencia monótona (processingLatency ≥ receptionLatency), deslizamiento de ventana de RateLimiter": [
+      {
+        "executionId": "27526861-9e4c-4be7-9bb6-9cbc604e662e",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792354605559
+      },
+      {
+        "executionId": "08fe1b95-de5f-4fcd-8395-c11f22b66bad",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792365188270
+      },
+      {
+        "executionId": "08fe1b95-de5f-4fcd-8395-c11f22b66bad",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792367609619
+      },
+      {
+        "executionId": "08fe1b95-de5f-4fcd-8395-c11f22b66bad",
+        "chatSessionId": "sess_db24cc4f-339b-4eac-9286-86baf5530a1d",
+        "timestamp": 1792367981193
+      }
+    ]
+  }
+}

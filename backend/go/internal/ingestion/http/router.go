@@ -9,12 +9,15 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"github.com/fleet-platform/backend/internal/ingestion/http/handler"
 	"github.com/fleet-platform/backend/internal/ingestion/http/health"
+	"github.com/fleet-platform/backend/internal/ingestion/http/mapper"
 	"github.com/fleet-platform/backend/internal/ingestion/http/middleware"
 	"github.com/fleet-platform/backend/internal/ingestion/ports"
 )
 
 // Router wraps the Gin engine and http.Server, implementing the ports.HTTPServer interface.
+// It coordinates middleware registration, route registration, and server lifecycle.
 type Router struct {
 	engine      *gin.Engine
 	server      *http.Server
@@ -24,8 +27,8 @@ type Router struct {
 }
 
 // NewRouter creates a new Router with the provided configuration, logger, and health checker.
-// It initializes the Gin engine with custom settings and registers the middleware chain
-// in order: trace_id → logging → recovery/error.
+// It initializes the Gin engine with minimal setup.
+// Middleware and routes are registered separately via RegisterRoutes() for explicit control.
 func NewRouter(
 	cfg ports.Config,
 	logger ports.Logger,
@@ -45,14 +48,11 @@ func NewRouter(
 		healthCheck: healthChecker,
 	}
 
-	// Register middleware chain: trace_id → logging → recovery/error
-	r.registerMiddleware()
-
 	// Register custom handlers for NoRoute (404) and NoMethod (405)
 	r.registerErrorHandlers()
 
-	// Register routes
-	r.registerRoutes()
+	// Register health endpoint (static, always present)
+	r.registerHealthRoute()
 
 	// Create the http.Server with configured timeouts
 	r.server = &http.Server{
@@ -65,14 +65,72 @@ func NewRouter(
 	return r
 }
 
-// registerMiddleware sets up the middleware chain in order:
-// 1. TraceIDMiddleware - extracts or generates trace ID
-// 2. LoggingMiddleware - logs request details with trace ID
-// 3. RecoveryMiddleware - recovers from panics and logs stack traces
-func (r *Router) registerMiddleware() {
+// RegisterRoutes configures the middleware pipeline in EXACT ORDER and registers routes.
+// This must be called exactly once before Start().
+//
+// Middleware Execution Order (CRITICAL):
+// 1. TraceIDMiddleware           (outermost, wraps all - first registered)
+// 2. IdempotencyKeyMiddleware    (second)
+// 3. ContentTypeMiddleware       (third)
+// 4. RateLimitMiddleware         (fourth)
+// 5. ErrorHandlerMiddleware      (innermost, last registered)
+//
+// NOTE: Gin executes middleware in REVERSE order of registration,
+// so ErrorHandler is registered LAST but executes INNERMOST.
+//
+// Routes are registered AFTER all middleware.
+//
+// Verifies: All correctness properties, RF-01 to RF-13
+func (r *Router) RegisterRoutes(
+	positionHandler *handler.PositionHandler,
+	errorMapper *mapper.ErrorMapper,
+	rateLimiter ports.RateLimiter,
+	clock ports.Clock,
+) error {
+	// ========== MIDDLEWARE PIPELINE (CRITICAL - exact order) ==========
+	// Register in REVERSE execution order (last registered = innermost = executed last)
+
+	// 5. ErrorHandlerMiddleware - LAST (will be innermost, executes AFTER all handlers)
+	// This catches all errors and panics, mapping them to RFC 9457 ProblemDetails
+	r.engine.Use(middleware.ErrorHandlerMiddleware(errorMapper))
+
+	// 4. RateLimitMiddleware - FOURTH
+	// Verifies rate limit per vehicle_id (12/60s)
+	// Returns 429 Too Many Requests if exceeded
+	r.engine.Use(middleware.RateLimitMiddleware(rateLimiter, clock))
+
+	// 3. ContentTypeMiddleware - THIRD
+	// Validates Content-Type: application/json for POST/PATCH/PUT
+	// Returns 415 Unsupported Media Type if invalid
+	r.engine.Use(middleware.ContentTypeMiddleware())
+
+	// 2. IdempotencyKeyMiddleware - SECOND
+	// Validates X-Idempotency-Key header (optional, if provided must be UUID v4)
+	// Stores idempotency_key in context for downstream handlers
+	r.engine.Use(middleware.IdempotencyKeyMiddleware())
+
+	// 1. TraceIDMiddleware - FIRST (will be outermost, executes BEFORE all handlers)
+	// Generates or validates X-Trace-ID header (UUID v4)
+	// Stores trace_id in context for all downstream handlers
+	// Always writes X-Trace-ID to response header
 	r.engine.Use(middleware.TraceIDMiddleware())
-	r.engine.Use(middleware.LoggingMiddleware(r.logger))
-	r.engine.Use(middleware.RecoveryMiddleware(r.logger))
+
+	// ========== ROUTE REGISTRATION ==========
+	// Routes are registered AFTER all middleware
+
+	// POST /api/v1/positions - Position ingestion endpoint
+	// Accepts: PositionRequest DTO
+	// Returns: 202 Accepted (async processing) or 4xx/5xx with ProblemDetails
+	// Verifies: P2 (Async+202), P4 (4-Timestamps), P9 (Trace-ID)
+	r.engine.POST("/api/v1/positions", positionHandler.Handle)
+
+	return nil
+}
+
+// registerHealthRoute registers the health check endpoint.
+func (r *Router) registerHealthRoute() {
+	healthHandler := health.NewHealthHandler(r.healthCheck)
+	r.engine.GET("/health", healthHandler.Handle)
 }
 
 // registerErrorHandlers configures custom handlers for 404 (NoRoute) and 405 (NoMethod)
@@ -80,16 +138,6 @@ func (r *Router) registerMiddleware() {
 func (r *Router) registerErrorHandlers() {
 	r.engine.NoRoute(middleware.NoRouteHandler())
 	r.engine.NoMethod(middleware.NoMethodHandler())
-}
-
-// registerRoutes registers all HTTP routes for the service.
-// For this bootstrap spec, only the health endpoint is registered.
-func (r *Router) registerRoutes() {
-	// Create health handler
-	healthHandler := health.NewHealthHandler(r.healthCheck)
-
-	// Register health endpoint
-	r.engine.GET("/health", healthHandler.Handle)
 }
 
 // Start binds the configured port and starts the HTTP server in a non-blocking goroutine.
@@ -132,4 +180,18 @@ func (r *Router) Stop(ctx context.Context) error {
 
 	r.logger.Info("HTTP server shutdown completed successfully")
 	return nil
+}
+
+// RegisterRoute adds a new route to the engine.
+// Used by the composer to register routes after the router is created.
+// Deprecated: Use RegisterRoutes() instead for better separation of concerns.
+func (r *Router) RegisterRoute(method, path string, handlers ...gin.HandlerFunc) {
+	r.engine.Handle(method, path, handlers...)
+}
+
+// GetEngine returns the underlying Gin engine.
+// Used by the composer to register middleware and routes.
+// This is useful for testing and direct access to the Gin engine if needed.
+func (r *Router) GetEngine() *gin.Engine {
+	return r.engine
 }

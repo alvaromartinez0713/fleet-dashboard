@@ -2,8 +2,6 @@ package ports
 
 import (
 	"context"
-
-	"github.com/fleet-platform/backend/internal/ingestion/domain"
 )
 
 // Logger defines the contract for structured logging throughout the ingestion service.
@@ -34,11 +32,12 @@ type Logger interface {
 	// WithTraceID stores the trace identifier in the context for later retrieval.
 	// The TraceID will be automatically included in all subsequent log entries
 	// that use GetTraceID to retrieve it from the context.
-	WithTraceID(ctx context.Context, tid domain.TraceID) context.Context
+	// tid is a string representation of the trace ID.
+	WithTraceID(ctx context.Context, tid string) context.Context
 
 	// GetTraceID retrieves the trace identifier from the context.
-	// Returns an empty TraceID if not present in the context.
-	GetTraceID(ctx context.Context) domain.TraceID
+	// Returns an empty string if not present in the context.
+	GetTraceID(ctx context.Context) string
 
 	// WithFields returns a new Logger instance with the provided fields
 	// pre-attached. All subsequent log calls on the returned logger will

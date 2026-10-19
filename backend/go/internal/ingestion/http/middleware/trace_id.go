@@ -1,45 +1,76 @@
 package middleware
 
 import (
-	"regexp"
-
 	"github.com/gin-gonic/gin"
-
-	"github.com/fleet-platform/backend/internal/ingestion/domain"
+	"github.com/google/uuid"
 )
 
-// uuidV4Pattern matches the standard UUID v4 format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx (36 chars)
-var uuidV4Pattern = regexp.MustCompile(`^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$`)
+const TraceIDHeaderKey = "X-Trace-ID"
+const TraceIDContextKey = "trace_id"
 
-// TraceIDMiddleware extracts or generates a trace ID for each request.
-// It reads the X-Trace-ID header; if the value is a valid UUID v4 (36 characters,
-// format xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx) it reuses it. Otherwise, it generates
-// a new trace ID using domain.NewTraceID(). The trace ID is stored in the context
-// and written to the X-Trace-ID response header before calling c.Next().
+// TraceIDMiddleware generates or validates X-Trace-ID UUID v4 header.
+// If the header is present:
+//   - Validates it as a valid UUID v4
+//   - If invalid, returns 400 Bad Request (caught by ErrorHandlerMiddleware)
+//   - If valid, stores it in context for downstream use
+// If the header is absent:
+//   - Generates a new UUID v4
+//   - Stores it in context
+// Always writes X-Trace-ID to response header before c.Next()
+//
+// Verifies: P9 (Trace-ID), RF-08
+// Execution order: First (outermost) in middleware chain
 func TraceIDMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var traceID domain.TraceID
+		traceID := c.GetHeader(TraceIDHeaderKey)
 
-		// Extract X-Trace-ID header from the request
-		headerValue := c.GetHeader("X-Trace-ID")
-
-		// Validate: must be exactly 36 characters and match UUID v4 format
-		if len(headerValue) == 36 && uuidV4Pattern.MatchString(headerValue) {
-			// Valid UUID v4 format - reuse it
-			traceID = domain.TraceID(headerValue)
+		// If trace ID is provided, validate it as UUID v4
+		if traceID != "" {
+			if _, err := uuid.Parse(traceID); err != nil {
+				// Invalid UUID format: set error and return early
+				_ = c.Error(NewInvalidTraceIDError("invalid trace ID format"))
+				c.AbortWithStatusJSON(400, gin.H{"error": "invalid trace ID"})
+				return
+			}
 		} else {
-			// Invalid or missing - generate a new one
-			traceID = domain.NewTraceID()
+			// Generate new trace ID if not provided
+			traceID = uuid.New().String()
 		}
 
-		// Store trace ID in context
-		ctx := domain.ContextWithTraceID(c.Request.Context(), traceID)
-		c.Request = c.Request.WithContext(ctx)
+		// Store trace ID in context for downstream use
+		c.Set(TraceIDContextKey, traceID)
 
-		// Write trace ID to response header before processing the request
-		c.Header("X-Trace-ID", string(traceID))
+		// Write trace ID to response header
+		c.Header(TraceIDHeaderKey, traceID)
 
-		// Continue to next middleware/handler
+		// Continue to next middleware
 		c.Next()
 	}
+}
+
+// GetTraceIDFromContext retrieves the trace ID from the gin context.
+// Returns the trace ID string or an empty string if not found.
+func GetTraceIDFromContext(c *gin.Context) string {
+	val, exists := c.Get(TraceIDContextKey)
+	if !exists {
+		return ""
+	}
+	traceID, ok := val.(string)
+	if !ok {
+		return ""
+	}
+	return traceID
+}
+
+// NewInvalidTraceIDError creates an error for invalid trace ID.
+type InvalidTraceIDError struct {
+	message string
+}
+
+func NewInvalidTraceIDError(msg string) *InvalidTraceIDError {
+	return &InvalidTraceIDError{message: msg}
+}
+
+func (e *InvalidTraceIDError) Error() string {
+	return e.message
 }

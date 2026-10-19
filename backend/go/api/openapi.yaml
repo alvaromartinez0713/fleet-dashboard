@@ -1,0 +1,702 @@
+openapi: 3.1.0
+
+info:
+  title: Fleet Platform - Position Ingestion API
+  version: 1.0.0
+  description: |
+    HTTP API for receiving vehicle position telemetry from mobile clients and external systems.
+    
+    The API accepts individual position records, validates them against an explicit contract,
+    and publishes them asynchronously to Kafka for downstream processing.
+    
+    Key characteristics:
+    - **Asynchronous ingestion**: Returns HTTP 202 (Accepted) immediately after validation and Kafka enqueuing, without waiting for persistence in TimescaleDB
+    - **Fast response**: p99 latency ≤ 100ms for successful requests
+    - **RFC 9457 errors**: All error responses follow Problem Details specification
+    - **Detailed auditing**: Four timestamps per event (captured_at, received_at, processed_at, stored_at) enable end-to-end latency analysis
+    - **Resilience**: Circuit Breaker protects against Kafka failures; rate limiting prevents abuse per vehicle
+  
+  contact:
+    name: Fleet Platform Team
+  
+  x-api-id: fleet-position-ingestion
+  x-api-lifecycle: production
+
+servers:
+  - url: http://localhost:8080
+    description: Local development
+  - url: https://api.fleet-platform.com
+    description: Production
+
+tags:
+  - name: Positions
+    description: Vehicle position ingestion operations
+
+paths:
+  /api/v1/positions:
+    post:
+      tags:
+        - Positions
+      summary: Ingest a single vehicle position
+      operationId: receivePosition
+      description: |
+        Accepts a single vehicle position record (not a batch array).
+        
+        The server validates the request against the contract (types, formats, value ranges),
+        enqueues the event for asynchronous publication to Kafka, and responds immediately
+        with HTTP 202 (Accepted).
+        
+        Success (202) does NOT guarantee final persistence in TimescaleDB. It confirms only that:
+        1. The request passed validation
+        2. The event was enqueued for Kafka publication
+        
+        The worker service consumes Kafka events and persists them. Failures in the worker
+        or database will not result in error notifications to the client.
+        
+        **Timestamps**:
+        - `captured_at` (required): When the position was captured on the device (client-provided, ISO 8601 UTC)
+        - `received_at` (response): When the HTTP server received the request
+        - `processed_at` (response): When the server completed validation and enqueued the event
+        - `stored_at` (eventual): When the worker persists to TimescaleDB (not in initial 202 response)
+      
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PositionRequest'
+            examples:
+              valid:
+                summary: Valid position ingestion
+                value:
+                  vehicle_id: VH-001
+                  latitude: 40.7128
+                  longitude: -74.0060
+                  captured_at: "2024-01-15T10:30:00.000Z"
+      
+      parameters:
+        - name: X-Trace-ID
+          in: header
+          description: |
+            Optional UUID v4 for request tracing across logs and monitoring systems.
+            If provided, must be a valid UUID v4. If omitted, server generates one automatically.
+            Present in response headers to enable request tracking.
+          schema:
+            type: string
+            format: uuid
+          example: 550e8400-e29b-41d4-a716-446655440000
+        
+        - name: X-Idempotency-Key
+          in: header
+          description: |
+            Optional UUID v4 for idempotency (reserved for future use).
+            If provided, must be a valid UUID v4. Currently, deduplication is not implemented.
+            This header is validated but ignored in the current version.
+          schema:
+            type: string
+            format: uuid
+          example: 660e8400-e29b-41d4-a716-446655440001
+      
+      responses:
+        '202':
+          description: |
+            Request accepted for asynchronous processing.
+            
+            The position has passed validation and was enqueued for publication to Kafka.
+            The response includes confirmation headers and a body with event details.
+            
+            **Important**: This status does NOT guarantee final persistence in TimescaleDB.
+            It only confirms acceptance in Kafka queue.
+          headers:
+            X-Trace-ID:
+              description: Unique trace ID for this request (UUID v4). Use for log correlation.
+              schema:
+                type: string
+                format: uuid
+              example: 550e8400-e29b-41d4-a716-446655440000
+            X-Request-ID:
+              description: Unique request ID for this specific HTTP request (UUID v4).
+              schema:
+                type: string
+                format: uuid
+              example: 770e8400-e29b-41d4-a716-446655440002
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PositionResponse'
+              examples:
+                accepted:
+                  summary: Position accepted for processing
+                  value:
+                    event_id: 880e8400-e29b-41d4-a716-446655440003
+                    status: accepted
+                    timestamp: "2024-01-15T10:30:00.000Z"
+                    vehicle_id: VH-001
+                    trace_id: 550e8400-e29b-41d4-a716-446655440000
+                    captured_at: "2024-01-15T10:30:00.000Z"
+                    received_at: "2024-01-15T10:30:00.100Z"
+                    processed_at: "2024-01-15T10:30:00.115Z"
+        
+        '400':
+          description: |
+            Bad Request: Request is malformed or headers are invalid.
+            
+            Returned when:
+            - JSON body is syntactically invalid
+            - X-Trace-ID header is provided but not a valid UUID v4
+            - X-Idempotency-Key header is provided but not a valid UUID v4
+            - Content-Type header is missing or not application/json
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+              examples:
+                malformed_json:
+                  summary: Malformed JSON body
+                  value:
+                    type: "https://api.fleet-platform.com/problems/malformed-json"
+                    title: "Malformed JSON"
+                    status: 400
+                    detail: "Invalid JSON in request body"
+                    instance: "/problems/occurrences/550e8400-e29b-41d4-a716-446655440000"
+                    trace_id: 550e8400-e29b-41d4-a716-446655440000
+                invalid_trace_id:
+                  summary: Invalid X-Trace-ID header
+                  value:
+                    type: "https://api.fleet-platform.com/problems/invalid-trace-id"
+                    title: "Invalid Trace ID"
+                    status: 400
+                    detail: "X-Trace-ID header must be a valid UUID v4"
+                    instance: "/problems/occurrences/550e8400-e29b-41d4-a716-446655440000"
+                    trace_id: 550e8400-e29b-41d4-a716-446655440000
+        
+        '413':
+          description: |
+            Content Too Large: Request body exceeds maximum size (10 KB).
+            
+            Returned when the HTTP request body size in UTF-8 bytes exceeds the configured maximum (default 10 KB).
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+              examples:
+                content_too_large:
+                  summary: Request body exceeds maximum size
+                  value:
+                    type: "https://api.fleet-platform.com/problems/content-too-large"
+                    title: "Content Too Large"
+                    status: 413
+                    detail: "Request body size (15360 bytes) exceeds maximum (10240 bytes)"
+                    instance: "/problems/occurrences/550e8400-e29b-41d4-a716-446655440000"
+                    trace_id: 550e8400-e29b-41d4-a716-446655440000
+        
+        '415':
+          description: |
+            Unsupported Media Type: Content-Type header is missing or not application/json.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+              examples:
+                unsupported_media_type:
+                  summary: Missing or incorrect Content-Type
+                  value:
+                    type: "https://api.fleet-platform.com/problems/unsupported-media-type"
+                    title: "Unsupported Media Type"
+                    status: 415
+                    detail: "Content-Type must be application/json"
+                    instance: "/problems/occurrences/550e8400-e29b-41d4-a716-446655440000"
+                    trace_id: 550e8400-e29b-41d4-a716-446655440000
+        
+        '422':
+          description: |
+            Unprocessable Content: Request is syntactically valid JSON but violates semantic constraints.
+            
+            Returned when:
+            - Required fields are missing (vehicle_id, latitude, longitude, captured_at)
+            - Field values are out of valid range (latitude: -90 to 90, longitude: -180 to 180)
+            - Field types are incorrect (latitude/longitude not numbers)
+            - captured_at is not a valid ISO 8601 UTC timestamp
+            - captured_at is in the future (later than server time)
+            - vehicle_id is empty or exceeds 255 characters
+            - Request body is an array instead of a single object
+            - Additional fields are not recognized (JSON is permissive; unknown fields are ignored)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+              examples:
+                invalid_coordinates:
+                  summary: Coordinates out of valid range
+                  value:
+                    type: "https://api.fleet-platform.com/problems/invalid-geo-position"
+                    title: "Invalid Geo Position"
+                    status: 422
+                    detail: "latitude must be between -90 and 90, got 120.5"
+                    instance: "/problems/occurrences/550e8400-e29b-41d4-a716-446655440000"
+                    trace_id: 550e8400-e29b-41d4-a716-446655440000
+                future_timestamp:
+                  summary: Captured timestamp is in the future
+                  value:
+                    type: "https://api.fleet-platform.com/problems/future-timestamp"
+                    title: "Future Timestamp"
+                    status: 422
+                    detail: "captured_at cannot be in the future (2099-01-15T10:30:00.000Z is after server time)"
+                    instance: "/problems/occurrences/550e8400-e29b-41d4-a716-446655440000"
+                    trace_id: 550e8400-e29b-41d4-a716-446655440000
+                missing_field:
+                  summary: Required field is missing
+                  value:
+                    type: "https://api.fleet-platform.com/problems/missing-field"
+                    title: "Missing Required Field"
+                    status: 422
+                    detail: "Field 'latitude' is required"
+                    instance: "/problems/occurrences/550e8400-e29b-41d4-a716-446655440000"
+                    trace_id: 550e8400-e29b-41d4-a716-446655440000
+                invalid_timestamp:
+                  summary: Invalid or unparseable timestamp
+                  value:
+                    type: "https://api.fleet-platform.com/problems/invalid-timestamp"
+                    title: "Invalid Timestamp"
+                    status: 422
+                    detail: "captured_at must be ISO 8601 UTC format (YYYY-MM-DDTHH:MM:SS.sssZ), got '2024-01-15 10:30:00'"
+                    instance: "/problems/occurrences/550e8400-e29b-41d4-a716-446655440000"
+                    trace_id: 550e8400-e29b-41d4-a716-446655440000
+        
+        '429':
+          description: |
+            Too Many Requests: Rate limit exceeded for this vehicle.
+            
+            The server enforces a rate limit per vehicle_id (default: 12 requests per 60 seconds, calculated as (60s / 5s) * 1.2).
+            When a vehicle exceeds its quota in the sliding window, subsequent requests are rejected with 429.
+            
+            The response includes rate limit headers for client-side throttling.
+          headers:
+            X-RateLimit-Limit:
+              description: Maximum number of requests allowed per window (per vehicle)
+              schema:
+                type: integer
+              example: 12
+            X-RateLimit-Remaining:
+              description: Number of requests remaining in the current window for this vehicle
+              schema:
+                type: integer
+              example: 0
+            X-RateLimit-Reset:
+              description: Unix timestamp (seconds) when the rate limit window resets for this vehicle
+              schema:
+                type: integer
+              example: 1705324260
+            Retry-After:
+              description: Number of seconds to wait before retrying (informational, same as X-RateLimit-Reset - now)
+              schema:
+                type: integer
+              example: 60
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+              examples:
+                rate_limit_exceeded:
+                  summary: Vehicle has exceeded rate limit
+                  value:
+                    type: "https://api.fleet-platform.com/problems/rate-limit-exceeded"
+                    title: "Rate Limit Exceeded"
+                    status: 429
+                    detail: "Rate limit exceeded for vehicle VH-001: 12 requests per 60 seconds"
+                    instance: "/problems/occurrences/550e8400-e29b-41d4-a716-446655440000"
+                    trace_id: 550e8400-e29b-41d4-a716-446655440000
+        
+        '503':
+          description: |
+            Service Unavailable: Kafka dependency is unreachable (Circuit Breaker is OPEN).
+            
+            Returned when the Kafka broker has been unreachable for a sustained period (5 consecutive failures in 60 seconds),
+            and the Circuit Breaker has transitioned to OPEN state to prevent cascading failures.
+            
+            The server will attempt recovery periodically. Clients should retry after a delay (60-120 seconds recommended).
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+              examples:
+                circuit_breaker_open:
+                  summary: Kafka dependency unavailable (Circuit Breaker open)
+                  value:
+                    type: "https://api.fleet-platform.com/problems/circuit-breaker-open"
+                    title: "Service Unavailable"
+                    status: 503
+                    detail: "Kafka messaging service is currently unavailable. The server is attempting recovery; please retry in 60 seconds."
+                    instance: "/problems/occurrences/550e8400-e29b-41d4-a716-446655440000"
+                    trace_id: 550e8400-e29b-41d4-a716-446655440000
+        
+        '500':
+          description: |
+            Internal Server Error: Unexpected error during processing.
+            
+            Returned for unhandled exceptions or unexpected conditions.
+            Does not expose stack traces, SQL, internal paths, or other sensitive details.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+              examples:
+                internal_error:
+                  summary: Unexpected internal error
+                  value:
+                    type: "https://api.fleet-platform.com/problems/internal-error"
+                    title: "Internal Server Error"
+                    status: 500
+                    detail: "An unexpected error occurred"
+                    instance: "/problems/occurrences/550e8400-e29b-41d4-a716-446655440000"
+                    trace_id: 550e8400-e29b-41d4-a716-446655440000
+
+components:
+  schemas:
+    PositionRequest:
+      type: object
+      title: Position Ingestion Request
+      description: |
+        Represents a single vehicle position record from a client (mobile app, simulator, or external system).
+        
+        The server accepts exactly one position object per request (not an array).
+        Unknown JSON fields are ignored (permissive parsing).
+      required:
+        - vehicle_id
+        - latitude
+        - longitude
+        - captured_at
+      properties:
+        vehicle_id:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: |
+            Unique identifier for the vehicle. Client-provided, not server-generated.
+            Must not be empty. Examples: "VH-001", "VEHICLE-ABC123", "fleet-unit-42"
+          example: VH-001
+        latitude:
+          type: number
+          format: double
+          minimum: -90.0
+          maximum: 90.0
+          description: |
+            Geographic latitude in degrees, WGS84 (World Geodetic System 1984) projection.
+            Valid range: -90.0 (South Pole) to +90.0 (North Pole).
+            IEEE 754 64-bit precision.
+            Example: 40.7128 (New York)
+          example: 40.7128
+        longitude:
+          type: number
+          format: double
+          minimum: -180.0
+          maximum: 180.0
+          description: |
+            Geographic longitude in degrees, WGS84 projection.
+            Valid range: -180.0 (west) to +180.0 (east).
+            IEEE 754 64-bit precision.
+            Example: -74.0060 (New York)
+          example: -74.0060
+        captured_at:
+          type: string
+          format: date-time
+          description: |
+            ISO 8601 UTC timestamp indicating when the position was captured on the device.
+            Format: YYYY-MM-DDTHH:MM:SS.sssZ or YYYY-MM-DDTHH:MM:SS+00:00
+            Timezone: Must be UTC (Z or +00:00)
+            Precision: Milliseconds
+            
+            Validation rules:
+            - Must be a valid ISO 8601 string with millisecond precision
+            - Must have UTC timezone (Z or +00:00)
+            - Cannot be in the future (server time is reference)
+            - Past timestamps of any age are accepted (supports offline capture)
+            
+            Example: "2024-01-15T10:30:00.000Z"
+          example: "2024-01-15T10:30:00.000Z"
+      additionalProperties: false
+    
+    PositionResponse:
+      type: object
+      title: Position Ingestion Response (202 Accepted)
+      description: |
+        Response body for successful position ingestion (HTTP 202 Accepted).
+        Confirms the position was validated and enqueued for Kafka publication.
+        
+        Includes three server-generated timestamps for latency analysis:
+        - received_at: When the HTTP request was fully received
+        - processed_at: When validation completed and event was enqueued
+        - (stored_at is NOT in this response; it's added by the worker when TimescaleDB insert succeeds)
+      required:
+        - event_id
+        - status
+        - timestamp
+        - vehicle_id
+        - trace_id
+        - captured_at
+        - received_at
+        - processed_at
+      properties:
+        event_id:
+          type: string
+          format: uuid
+          description: Unique event ID (UUID v4) generated by the server for this position record.
+          example: 880e8400-e29b-41d4-a716-446655440003
+        status:
+          type: string
+          enum:
+            - accepted
+            - duplicate_in_window
+          description: |
+            Status of the position ingestion:
+            - "accepted": Normal case, position was validated and enqueued
+            - "duplicate_in_window": Position appears to be a duplicate within a recent window (reserved for future deduplication logic)
+          example: accepted
+        timestamp:
+          type: string
+          format: date-time
+          description: Server timestamp when the response was generated (ISO 8601 UTC).
+          example: "2024-01-15T10:30:00.000Z"
+        vehicle_id:
+          type: string
+          description: Echo of the vehicle_id from the request.
+          example: VH-001
+        trace_id:
+          type: string
+          format: uuid
+          description: |
+            Trace ID for this request (UUID v4).
+            Either generated by the server or echoed from X-Trace-ID header if provided.
+            Use this to correlate logs, metrics, and traces across the system.
+          example: 550e8400-e29b-41d4-a716-446655440000
+        captured_at:
+          type: string
+          format: date-time
+          description: Echo of the captured_at timestamp from the request (when device captured the position).
+          example: "2024-01-15T10:30:00.000Z"
+        received_at:
+          type: string
+          format: date-time
+          description: |
+            Server timestamp when the HTTP request was fully received (last byte of body).
+            ISO 8601 UTC format with millisecond precision.
+          example: "2024-01-15T10:30:00.100Z"
+        processed_at:
+          type: string
+          format: date-time
+          description: |
+            Server timestamp when validation completed and the event was enqueued.
+            ISO 8601 UTC format with millisecond precision.
+            Latency between received_at and processed_at indicates validation time.
+          example: "2024-01-15T10:30:00.115Z"
+      additionalProperties: false
+    
+    ProblemDetails:
+      type: object
+      title: Problem Details (RFC 9457)
+      description: |
+        Standard error response format following RFC 9457 - Problem Details for HTTP APIs.
+        All error responses (4xx, 5xx) use this schema.
+        
+        See: https://www.rfc-editor.org/rfc/rfc9457.html
+      required:
+        - type
+        - title
+        - status
+      properties:
+        type:
+          type: string
+          format: uri
+          description: |
+            URI identifying the problem type (not the specific occurrence).
+            The same problem type should have the same type URI across all occurrences.
+            
+            Examples:
+            - "https://api.fleet-platform.com/problems/validation-error"
+            - "https://api.fleet-platform.com/problems/rate-limit-exceeded"
+            - "https://api.fleet-platform.com/problems/service-unavailable"
+            
+            Special case: "about:blank" may be used for generic errors without specific type documentation.
+          example: "https://api.fleet-platform.com/problems/invalid-geo-position"
+        title:
+          type: string
+          description: |
+            Short, stable, human-readable summary of the problem type.
+            Should be the same for all instances of this problem type (does not vary per occurrence).
+            
+            Examples:
+            - "Invalid Geo Position"
+            - "Rate Limit Exceeded"
+            - "Service Unavailable"
+          example: "Invalid Geo Position"
+        status:
+          type: integer
+          description: |
+            HTTP status code for this occurrence. Must be in the 4xx or 5xx range.
+            Should match the actual HTTP response status code.
+          example: 422
+        detail:
+          type: string
+          description: |
+            Human-readable explanation specific to this occurrence.
+            May include details about which field failed validation or why the operation was not permitted.
+            Should not expose sensitive information (stack traces, SQL, internal paths, secrets).
+            
+            Examples:
+            - "latitude must be between -90 and 90, got 120.5"
+            - "Vehicle VH-001 has exceeded 12 requests per 60 seconds"
+            - "Kafka messaging service is currently unavailable"
+          example: "latitude must be between -90 and 90, got 120.5"
+        instance:
+          type: string
+          format: uri
+          description: |
+            URI identifying this specific occurrence of the problem.
+            Useful for linking to log entries, error records, or internal dashboards.
+            Often includes a unique identifier like the request ID or trace ID.
+            
+            Example: "/problems/occurrences/550e8400-e29b-41d4-a716-446655440000"
+          example: "/problems/occurrences/550e8400-e29b-41d4-a716-446655440000"
+        trace_id:
+          type: string
+          format: uuid
+          description: |
+            (Non-standard RFC 9457 extension) Unique trace ID for request correlation across logs and monitoring.
+            Allows operators to find related logs using the trace_id.
+            This field is optional and implementation-specific.
+          example: 550e8400-e29b-41d4-a716-446655440000
+      additionalProperties: false
+
+x-api-docs:
+  - title: Timestamps and Latency Analysis
+    description: |
+      Each position ingestion involves four timestamps:
+      
+      1. **captured_at** (client): When the device captured the position (ISO 8601 UTC)
+         - Client-provided in request
+         - Cannot be in the future
+         - Any past timestamp accepted (supports offline capture)
+      
+      2. **received_at** (server HTTP): When the server received the complete HTTP request
+         - Generated by HTTP server
+         - Included in 202 response
+      
+      3. **processed_at** (server HTTP): When validation completed and event was enqueued
+         - Generated by HTTP server
+         - Included in 202 response
+         - Latency: processed_at - received_at = validation time
+      
+      4. **stored_at** (worker): When TimescaleDB INSERT succeeded (eventual consistency)
+         - Generated by worker/consumer
+         - NOT in HTTP response (added by worker)
+         - Latency: stored_at - processed_at = queue wait + worker processing time
+      
+      Together these timestamps enable end-to-end latency tracking:
+      - Total E2E latency = stored_at - captured_at
+      - Queue/Worker latency = stored_at - processed_at
+  
+  - title: Error Handling Strategy
+    description: |
+      Errors are categorized by HTTP status code and error type:
+      
+      **Validation errors (422 Unprocessable Content)**:
+      - Missing required fields
+      - Values outside valid ranges (lat/lon, future timestamp)
+      - Invalid field types
+      - Malformed timestamps
+      
+      **Format/Protocol errors (400, 415)**:
+      - Malformed JSON syntax
+      - Invalid Content-Type header
+      - Invalid UUID in headers
+      
+      **Client abuse (429 Too Many Requests)**:
+      - Vehicle exceeds rate limit (12 req/min default)
+      - Response includes X-RateLimit-* headers for client-side throttling
+      
+      **Dependency failures (503 Service Unavailable)**:
+      - Kafka broker unreachable (Circuit Breaker OPEN)
+      - Server attempting recovery; client should retry after delay
+      
+      **Internal errors (500)**:
+      - Unexpected exceptions
+      - Never expose stack traces or sensitive details
+  
+  - title: Idempotency and Deduplication
+    description: |
+      The X-Idempotency-Key header is validated but idempotency/deduplication is NOT implemented in this version.
+      
+      **Current behavior**:
+      - X-Idempotency-Key is validated as a valid UUID v4 if provided
+      - Duplicate requests are NOT detected
+      - Each request generates a unique event_id regardless of idempotency key
+      
+      **Future work**:
+      - Implement sliding window deduplication (server-side)
+      - Return "duplicate_in_window" status for repeat requests
+      - Use idempotency_key as cache key for recent requests
+  
+  - title: Rate Limiting Algorithm
+    description: |
+      Rate limiting is implemented per-vehicle_id using a rolling time window (in-memory, no Redis required).
+      
+      **Configuration**:
+      - Window: 60 seconds
+      - Limit per window: 12 requests (based on 5-second capture interval with 20% safety margin)
+      - Per-vehicle tracking: Each vehicle_id has independent quota
+      
+      **Algorithm**:
+      1. Request arrives with vehicle_id
+      2. Check: requests from this vehicle in last 60 seconds
+      3. If count >= 12: reject with 429, include X-RateLimit-* headers
+      4. If count < 12: accept, enqueue, increment counter
+      
+      **Headers returned with 429**:
+      - X-RateLimit-Limit: 12
+      - X-RateLimit-Remaining: 0 (or remaining count if not exceeded)
+      - X-RateLimit-Reset: Unix timestamp when window resets
+      - Retry-After: Seconds to wait before retry
+  
+  - title: Circuit Breaker (Kafka Resilience)
+    description: |
+      Kafka connectivity is protected by a Circuit Breaker to prevent cascading failures.
+      
+      **States**:
+      - CLOSED: Normal operation, requests flow to Kafka
+      - OPEN: Kafka unreachable (5+ consecutive failures in 60s), requests rejected with 503
+      - HALF_OPEN: Recovery attempt in progress, probe request to Kafka
+      
+      **Transitions**:
+      - CLOSED → OPEN: 5 consecutive failures within 60 seconds
+      - OPEN → HALF_OPEN: Automatic after 30 seconds, sends probe message
+      - HALF_OPEN → CLOSED: Probe succeeds, normal operation resumes
+      - HALF_OPEN → OPEN: Probe fails, back to OPEN
+      
+      **Client behavior**:
+      - When 503 received: retry after 60-120 seconds (check Retry-After header)
+      - Do NOT retry aggressively; Circuit Breaker is already protecting the server
+
+x-api-patterns:
+  authentication: none  # MVP: no authentication required
+  pagination: none      # Not applicable; endpoint accepts single position only
+  rate_limiting: per_vehicle_id
+  resilience_patterns:
+    - circuit_breaker:
+        dependency: kafka
+        states: [CLOSED, OPEN, HALF_OPEN]
+        threshold: 5 consecutive failures in 60 seconds
+    - rate_limiter:
+        type: rolling_window
+        window: 60 seconds
+        limit_per_window: 12
+        per_dimension: vehicle_id
+    - retry:
+        kafka_publication: exponential backoff (100ms, 200ms, 400ms)
+        max_attempts: 3
+
+x-conformance:
+  - rfc9457: Errors follow RFC 9457 Problem Details specification
+  - iso8601: All timestamps use ISO 8601 UTC format with millisecond precision
+  - uuid: All UUIDs are RFC 4122 v4 (random)
+  - http_semantics: Methods and status codes follow RFC 9110 HTTP Semantics
+  - clean_architecture: API layer separated from domain and application logic
