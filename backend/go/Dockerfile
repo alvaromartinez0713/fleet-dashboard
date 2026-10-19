@@ -9,7 +9,7 @@
 # ----------------------------------------------------------------------------
 # Stage 1: Base builder with dependencies
 # ----------------------------------------------------------------------------
-FROM golang:1.25-alpine AS builder
+FROM golang:1.26-alpine AS builder
 
 # Install build dependencies
 RUN apk add --no-cache git ca-certificates tzdata
@@ -39,7 +39,14 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
     go build -mod=readonly -ldflags="-w -s" -o /app/worker ./cmd/worker
 
 # ----------------------------------------------------------------------------
-# Stage 4: Ingestion runtime image
+# Stage 4: Build migrate service
+# ----------------------------------------------------------------------------
+FROM builder AS migrate-builder
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
+    go build -mod=readonly -ldflags="-w -s" -o /app/migrate ./cmd/migrate
+
+# ----------------------------------------------------------------------------
+# Stage 5: Ingestion runtime image
 # ----------------------------------------------------------------------------
 FROM alpine:3.19 AS ingestion
 
@@ -64,7 +71,7 @@ EXPOSE 8080
 ENTRYPOINT ["/usr/local/bin/ingestion"]
 
 # ----------------------------------------------------------------------------
-# Stage 5: Worker runtime image
+# Stage 6: Worker runtime image
 # ----------------------------------------------------------------------------
 FROM alpine:3.19 AS worker
 
@@ -80,3 +87,26 @@ USER fleet
 
 # Run the worker service
 ENTRYPOINT ["/usr/local/bin/worker"]
+
+# ----------------------------------------------------------------------------
+# Stage 7: Migrate runtime image
+# ----------------------------------------------------------------------------
+FROM debian:bookworm-slim AS migrate
+
+# Install runtime dependencies for database connectivity
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates && \
+    rm -rf /var/lib/apt/lists/* && \
+    groupadd -r fleet && useradd -r -g fleet fleet
+
+# Copy compiled binary from migrate-builder
+COPY --from=migrate-builder /app/migrate /usr/local/bin/migrate
+
+# Copy migrations directory
+COPY migrations /app/migrations
+
+# Set user
+USER fleet
+
+# Run the migrate service (one-shot, no daemon)
+ENTRYPOINT ["/usr/local/bin/migrate"]
