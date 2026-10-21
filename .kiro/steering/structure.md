@@ -43,7 +43,7 @@ fleet-platform/
 ├── load-tests/
 ├── docs/
 │   └── adr/
-├── docker-compose.yml
+├── infrastructure/docker/docker-compose.yml
 ├── .gitignore
 └── README.md
 ```
