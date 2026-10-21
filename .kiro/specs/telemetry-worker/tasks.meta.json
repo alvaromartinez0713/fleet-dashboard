@@ -1,0 +1,489 @@
+{
+  "pbtResults": {},
+  "executionHistory": {
+    "1. Ajustar el esquema de `positions_table` al contrato del worker": [
+      {
+        "executionId": "0485967c-f043-484b-9652-e9880133e6e5",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792462211794
+      },
+      {
+        "executionId": "0485967c-f043-484b-9652-e9880133e6e5",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792462220057
+      },
+      {
+        "executionId": "0485967c-f043-484b-9652-e9880133e6e5",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792462276031
+      }
+    ],
+    "2.1 Extender `ports/config.go` con la estructura `Config` del diseño": [
+      {
+        "executionId": "0485967c-f043-484b-9652-e9880133e6e5",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792462212044
+      },
+      {
+        "executionId": "0485967c-f043-484b-9652-e9880133e6e5",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792462220206
+      },
+      {
+        "executionId": "0485967c-f043-484b-9652-e9880133e6e5",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792462276690
+      }
+    ],
+    "2.2 Extender el loader de entorno en `config/loader.go`": [
+      {
+        "executionId": "0485967c-f043-484b-9652-e9880133e6e5",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792462212207
+      },
+      {
+        "executionId": "0485967c-f043-484b-9652-e9880133e6e5",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792462281106
+      },
+      {
+        "executionId": "0485967c-f043-484b-9652-e9880133e6e5",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792462445922
+      }
+    ],
+    "2.3 Extender el validator en `config/validator.go`": [
+      {
+        "executionId": "0485967c-f043-484b-9652-e9880133e6e5",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792462212361
+      },
+      {
+        "executionId": "0485967c-f043-484b-9652-e9880133e6e5",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792462281507
+      },
+      {
+        "executionId": "0485967c-f043-484b-9652-e9880133e6e5",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792462446347
+      }
+    ],
+    "3.1 Crear `domain/consumed_event.go`": [
+      {
+        "executionId": "0485967c-f043-484b-9652-e9880133e6e5",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792462212592
+      },
+      {
+        "executionId": "0485967c-f043-484b-9652-e9880133e6e5",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792462281945
+      },
+      {
+        "executionId": "0485967c-f043-484b-9652-e9880133e6e5",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792462446875
+      }
+    ],
+    "3.2 Crear `domain/validation.go`": [
+      {
+        "executionId": "0485967c-f043-484b-9652-e9880133e6e5",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792462212681
+      },
+      {
+        "executionId": "0485967c-f043-484b-9652-e9880133e6e5",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792462452470
+      },
+      {
+        "executionId": "0485967c-f043-484b-9652-e9880133e6e5",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792462647533
+      }
+    ],
+    "3.3 Crear `domain/dead_letter.go`": [
+      {
+        "executionId": "0485967c-f043-484b-9652-e9880133e6e5",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792462212805
+      },
+      {
+        "executionId": "0485967c-f043-484b-9652-e9880133e6e5",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792462282205
+      },
+      {
+        "executionId": "0485967c-f043-484b-9652-e9880133e6e5",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792462447161
+      }
+    ],
+    "4.1 Crear `ports/repository.go`": [
+      {
+        "executionId": "0485967c-f043-484b-9652-e9880133e6e5",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792462212913
+      },
+      {
+        "executionId": "0485967c-f043-484b-9652-e9880133e6e5",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792462453204
+      },
+      {
+        "executionId": "0485967c-f043-484b-9652-e9880133e6e5",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792462647158
+      }
+    ],
+    "4.2 Crear `ports/clock.go`": [
+      {
+        "executionId": "0485967c-f043-484b-9652-e9880133e6e5",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792462213012
+      },
+      {
+        "executionId": "0485967c-f043-484b-9652-e9880133e6e5",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792462452824
+      },
+      {
+        "executionId": "0485967c-f043-484b-9652-e9880133e6e5",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792462646830
+      }
+    ],
+    "4.3 Crear `ports/circuit_breaker.go`": [
+      {
+        "executionId": "0485967c-f043-484b-9652-e9880133e6e5",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792462213143
+      },
+      {
+        "executionId": "0485967c-f043-484b-9652-e9880133e6e5",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792462657502
+      },
+      {
+        "executionId": "0485967c-f043-484b-9652-e9880133e6e5",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792462761714
+      }
+    ],
+    "4.4 Crear `ports/dead_letter_sink.go`": [
+      {
+        "executionId": "0485967c-f043-484b-9652-e9880133e6e5",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792462213263
+      },
+      {
+        "executionId": "0485967c-f043-484b-9652-e9880133e6e5",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792462657838
+      },
+      {
+        "executionId": "0485967c-f043-484b-9652-e9880133e6e5",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792462762063
+      }
+    ],
+    "5.1 Crear `application/usecases/process_position_event.go`": [
+      {
+        "executionId": "0485967c-f043-484b-9652-e9880133e6e5",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792462213389
+      },
+      {
+        "executionId": "0485967c-f043-484b-9652-e9880133e6e5",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792462768045
+      },
+      {
+        "executionId": "0485967c-f043-484b-9652-e9880133e6e5",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792463055946
+      }
+    ],
+    "5.2 Crear fakes en memoria y Object Mothers de soporte en `tests/support/`": [
+      {
+        "executionId": "0485967c-f043-484b-9652-e9880133e6e5",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792462213488
+      },
+      {
+        "executionId": "0485967c-f043-484b-9652-e9880133e6e5",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792463059085
+      },
+      {
+        "executionId": "0485967c-f043-484b-9652-e9880133e6e5",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792463748644
+      }
+    ],
+    "5.3 Escribir pruebas unitarias por ejemplo del caso de uso": [
+      {
+        "executionId": "0485967c-f043-484b-9652-e9880133e6e5",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792462213626
+      },
+      {
+        "executionId": "0485967c-f043-484b-9652-e9880133e6e5",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792463059377
+      },
+      {
+        "executionId": "0485967c-f043-484b-9652-e9880133e6e5",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792463748925
+      }
+    ],
+    "6. Checkpoint del núcleo": [
+      {
+        "executionId": "0485967c-f043-484b-9652-e9880133e6e5",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792462213714
+      },
+      {
+        "executionId": "ce9aac95-31bf-4607-8ce0-3ad0d00fb0f0",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792465467757
+      },
+      {
+        "executionId": "ce9aac95-31bf-4607-8ce0-3ad0d00fb0f0",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792465869349
+      }
+    ],
+    "7.1 Crear `adapters/outbound/infrastructure/clock.go`": [
+      {
+        "executionId": "0485967c-f043-484b-9652-e9880133e6e5",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792462213811
+      },
+      {
+        "executionId": "ce9aac95-31bf-4607-8ce0-3ad0d00fb0f0",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792465893725
+      },
+      {
+        "executionId": "ce9aac95-31bf-4607-8ce0-3ad0d00fb0f0",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792466088489
+      }
+    ],
+    "7.2 Crear `adapters/outbound/resilience/circuit_breaker.go`": [
+      {
+        "executionId": "0485967c-f043-484b-9652-e9880133e6e5",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792462213919
+      },
+      {
+        "executionId": "ce9aac95-31bf-4607-8ce0-3ad0d00fb0f0",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792466113066
+      },
+      {
+        "executionId": "ce9aac95-31bf-4607-8ce0-3ad0d00fb0f0",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792466451792
+      }
+    ],
+    "7.3 Crear `adapters/outbound/deadletter/log_sink.go`": [
+      {
+        "executionId": "0485967c-f043-484b-9652-e9880133e6e5",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792462214021
+      },
+      {
+        "executionId": "ce9aac95-31bf-4607-8ce0-3ad0d00fb0f0",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792466550400
+      },
+      {
+        "executionId": "ce9aac95-31bf-4607-8ce0-3ad0d00fb0f0",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792466713477
+      }
+    ],
+    "7.4 Crear `adapters/outbound/persistence/timescale_repository.go`": [
+      {
+        "executionId": "0485967c-f043-484b-9652-e9880133e6e5",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792462214169
+      },
+      {
+        "executionId": "ce9aac95-31bf-4607-8ce0-3ad0d00fb0f0",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792466742238
+      },
+      {
+        "executionId": "ce9aac95-31bf-4607-8ce0-3ad0d00fb0f0",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792466889189
+      }
+    ],
+    "8.1 Crear `consumer/consumer.go`": [
+      {
+        "executionId": "0485967c-f043-484b-9652-e9880133e6e5",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792462214300
+      },
+      {
+        "executionId": "ce9aac95-31bf-4607-8ce0-3ad0d00fb0f0",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792467003208
+      },
+      {
+        "executionId": "ce9aac95-31bf-4607-8ce0-3ad0d00fb0f0",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792467065850
+      }
+    ],
+    "8.2 Crear `consumer/runner.go`": [
+      {
+        "executionId": "0485967c-f043-484b-9652-e9880133e6e5",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792462214406
+      },
+      {
+        "executionId": "ce9aac95-31bf-4607-8ce0-3ad0d00fb0f0",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792467081070
+      },
+      {
+        "executionId": "ce9aac95-31bf-4607-8ce0-3ad0d00fb0f0",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792467215704
+      }
+    ],
+    "9.1 Extender `config/composer.go` con `ComposeWorker`": [
+      {
+        "executionId": "0485967c-f043-484b-9652-e9880133e6e5",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792462214502
+      },
+      {
+        "executionId": "ce9aac95-31bf-4607-8ce0-3ad0d00fb0f0",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792467300027
+      },
+      {
+        "executionId": "ce9aac95-31bf-4607-8ce0-3ad0d00fb0f0",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792467453824
+      }
+    ],
+    "9.2 Conectar el bucle de consumo en `cmd/worker` (bootstrap/lifecycle/main/signals)": [
+      {
+        "executionId": "0485967c-f043-484b-9652-e9880133e6e5",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792462214606
+      },
+      {
+        "executionId": "ce9aac95-31bf-4607-8ce0-3ad0d00fb0f0",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792467478888
+      },
+      {
+        "executionId": "ce9aac95-31bf-4607-8ce0-3ad0d00fb0f0",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792467919760
+      }
+    ],
+    "10. Prueba de verificación de dependencias (arquitectura)": [
+      {
+        "executionId": "0485967c-f043-484b-9652-e9880133e6e5",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792462214718
+      },
+      {
+        "executionId": "ce9aac95-31bf-4607-8ce0-3ad0d00fb0f0",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792467979933
+      },
+      {
+        "executionId": "ce9aac95-31bf-4607-8ce0-3ad0d00fb0f0",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792468081492
+      }
+    ],
+    "12. Checkpoint final": [
+      {
+        "executionId": "0485967c-f043-484b-9652-e9880133e6e5",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792462214824
+      },
+      {
+        "executionId": "ce9aac95-31bf-4607-8ce0-3ad0d00fb0f0",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792468103075
+      },
+      {
+        "executionId": "ce9aac95-31bf-4607-8ce0-3ad0d00fb0f0",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792469541139
+      }
+    ],
+    "2. Extender la configuración del worker con las nuevas claves `WORKER_*`": [
+      {
+        "executionId": "0485967c-f043-484b-9652-e9880133e6e5",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792462446577
+      }
+    ],
+    "3. Modelo de dominio del evento consumido y validación": [
+      {
+        "executionId": "0485967c-f043-484b-9652-e9880133e6e5",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792462647650
+      }
+    ],
+    "4. Definir los puertos de salida en `ports/`": [
+      {
+        "executionId": "0485967c-f043-484b-9652-e9880133e6e5",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792462762180
+      }
+    ],
+    "5. Implementar el caso de uso `ProcessPositionEvent`": [
+      {
+        "executionId": "0485967c-f043-484b-9652-e9880133e6e5",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792463749198
+      }
+    ],
+    "7. Implementar los adaptadores de salida": [
+      {
+        "executionId": "ce9aac95-31bf-4607-8ce0-3ad0d00fb0f0",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792466889328
+      }
+    ],
+    "8. Implementar el adaptador de entrada Kafka en `consumer/`": [
+      {
+        "executionId": "ce9aac95-31bf-4607-8ce0-3ad0d00fb0f0",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792466947710
+      },
+      {
+        "executionId": "ce9aac95-31bf-4607-8ce0-3ad0d00fb0f0",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792467215932
+      }
+    ],
+    "9. Wiring de composición y `cmd/worker`": [
+      {
+        "executionId": "ce9aac95-31bf-4607-8ce0-3ad0d00fb0f0",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792467284567
+      },
+      {
+        "executionId": "ce9aac95-31bf-4607-8ce0-3ad0d00fb0f0",
+        "chatSessionId": "sess_0101e586-b215-47ab-acb3-226fecab4cbb",
+        "timestamp": 1792467919891
+      }
+    ]
+  }
+}
