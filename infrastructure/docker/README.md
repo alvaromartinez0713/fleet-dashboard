@@ -10,12 +10,21 @@ Este directorio contiene la configuración de Docker Compose para ejecutar local
 - **Health Check**: 4-letter word protocol `ruok`
 - **Volúmenes**: zookeeper-data, zookeeper-logs (persistencia)
 
+### Migrate (Servicio de Migraciones)
+- **Rol**: Ejecuta migraciones SQL versionadas sobre TimescaleDB usando golang-migrate
+- **Ejecución**: Corre una sola vez tras TimescaleDB estar healthy, termina con exit 0
+- **Dependencias**: TimescaleDB (service_healthy)
+- **Migraciones**: Ubicadas en `backend/go/migrations/` (versionadas 000001, 000002, 000003, etc.)
+- **Idempotencia**: Seguro ejecutar múltiples veces; está garantizado por golang-migrate
+- **Startup**: Se inicia automáticamente en `docker compose up`; si falla, ingestion/worker no se inician
+
 ### Kafka
 - **Rol**: Bus de eventos desacoplado para ingesta y procesamiento de telemetría
 - **Puerto interno**: 9092 (PLAINTEXT)
 - **Topic**: `telemetry.positions` (3 particiones, replication factor 1)
 - **Health Check**: `kafka-broker-api-versions`
 - **Volumen**: kafka-data (logs de broker, índices)
+- **Startup**: Se inicia tras Zookeeper (service_healthy)
 
 ### TimescaleDB
 - **Rol**: Base de datos PostgreSQL con extensión TimescaleDB para series temporales
@@ -23,9 +32,16 @@ Este directorio contiene la configuración de Docker Compose para ejecutar local
 - **Puerto host**: Configurable via `TIMESCALEDB_PORT` (.env, default: 5432)
 - **Credentials**: `POSTGRES_USER`, `POSTGRES_PASSWORD` desde .env
 - **Base de datos**: `POSTGRES_DB` desde .env (default: fleet_db)
-- **Inicialización**: Script SQL `init-timescaledb.sql` se ejecuta en primer start
+- **Inicialización**: Manejada por el servicio `migrate` (golang-migrate)
 - **Health Check**: `pg_isready`
 - **Volumen**: timescaledb-data (persistencia de datos)
+
+### Migrate (Servicio de Migraciones)
+- **Rol**: Ejecuta migraciones SQL versionadas sobre TimescaleDB usando golang-migrate
+- **Ejecución**: Corre una sola vez tras TimescaleDB estar healthy, termina con exit 0
+- **Dependencias**: TimescaleDB (service_healthy)
+- **Migraciones**: Ubicadas en `backend/go/migrations/` (versionadas 000001, 000002, etc.)
+- **Idempotencia**: Seguro ejecutar múltiples veces; está garantizado por golang-migrate
 
 ## Quick Start
 
@@ -133,16 +149,7 @@ docker compose down -v
 make clean-hard
 ```
 
-## Scripts
-
-### `init-timescaledb.sql`
-Crea el esquema y tablas en TimescaleDB:
-- Schema: `telemetry`
-- Table: `telemetry.positions` (hypertable particionada por `captured_at`)
-- Índices: vehicle_id, event_id, trace_id
-- Políticas: Compresión a 7 días, retención a 30 días
-
-Se ejecuta automáticamente en el primer start del contenedor.
+## Scripts Auxiliares
 
 ### `create-kafka-topic.sh`
 Crea el topic `telemetry.positions` con:
