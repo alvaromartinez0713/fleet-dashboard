@@ -2,7 +2,7 @@ package domain
 
 import "fmt"
 
-// AppError is the base error type for the api domain layer.
+// AppError is the base error type for the worker domain layer.
 type AppError struct {
 	Code          string
 	Message       string
@@ -16,11 +16,6 @@ func (e *AppError) Error() string {
 		return fmt.Sprintf("%s: %s: %v", e.Code, e.Message, e.Inner)
 	}
 	return fmt.Sprintf("%s: %s", e.Code, e.Message)
-}
-
-// Unwrap returns the wrapped error.
-func (e *AppError) Unwrap() error {
-	return e.Inner
 }
 
 // NewAppError creates a new non-recoverable AppError.

@@ -317,6 +317,41 @@ Si docker-compose se reinicia:
 
 ---
 
+## Nota Operativa: Ajuste del Esquema de `positions_table` (Migración 000002)
+
+### Contexto
+
+La migración `000002` fue editada para alinearse con el contrato del Telemetry_Worker, introduciendo las siguientes modificaciones:
+
+- **Nueva columna**: `event_id UUID NOT NULL` (clave de deduplicación por `event_id`)
+- **Nueva única constraint**: `(captured_at, event_id)` sobre `positions_event_id_key` (exigencia de TimescaleDB para unique indexes sobre hypertables)
+- **Columnas de contrato**: `received_at`, `processed_at`, `stored_at` (timestamps del flujo de procesamiento)
+- **Eliminadas columnas legadas**: `altitude`, `speed`, `heading`, `timestamp`
+- **Dimensión temporal actualizada**: cambio de `timestamp` a `captured_at` como dimensión del hypertable
+
+**Razón**: la aplicación no está en producción y no hay entornos con el esquema anterior ya aplicado. Las bases de datos de prueba siempre se crean desde cero aplicando todas las migraciones, por lo que el ajuste directo de `000002` no requiere una nueva migración hacia adelante.
+
+### Impacto en bases de datos locales existentes
+
+**Caveat importante**: si un desarrollador ya tiene una base de datos local con la versión anterior de `000002` aplicada, `golang-migrate` **no** reaplicará la migración editada (porque `schema_migrations` ya registra la versión como completada).
+
+**Solución**: recrear la base de datos local:
+
+```bash
+# Opción 1: drop de la base de datos completa
+docker-compose down -v  # -v elimina volúmenes
+docker-compose up migrate  # Re-aplica todas las migraciones desde cero
+
+# Opción 2: drop del schema telemetry únicamente (si quiere preservar otros datos)
+docker-compose exec timescaledb psql -U fleet_user -d fleet_telemetry \
+  -c "DROP SCHEMA IF EXISTS telemetry CASCADE;"
+docker-compose up migrate  # Re-aplica 000001, 000002, 000003
+```
+
+**CI y entornos efímeros**: no se ven afectados porque siempre parten de bases de datos vacías.
+
+---
+
 ## Adición de Nuevas Migraciones
 
 Para agregar una nueva migración en el futuro:

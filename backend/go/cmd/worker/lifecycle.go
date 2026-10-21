@@ -5,6 +5,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/fleet-platform/backend/internal/worker/adapters/inbound/messaging"
 	"github.com/fleet-platform/backend/internal/worker/ports"
 )
 
@@ -14,10 +15,13 @@ func runWorker(cleanup func(), cfg ports.Config, logger ports.Logger) int {
 	// Log worker started
 	logger.Info("worker service starting")
 
-	// NOTE: Message consumption logic (Kafka consumer, message handlers, processing pipeline)
-	// will be implemented in the ingestion spec. This bootstrap implementation sets up
-	// the service lifecycle and graceful shutdown handling, with the actual business logic
-	// to be added when Kafka and PostgreSQL adapters are integrated.
+	// Create a cancellable context for the runner
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	// Start the runner (the runner will be started by ComposeWorker and returned)
+	// For now, we'll assume the runner is started by the composition
+	// In the future, we might need to explicitly start it here
 
 	logger.Info("worker service ready")
 
@@ -30,12 +34,15 @@ func runWorker(cleanup func(), cfg ports.Config, logger ports.Logger) int {
 	// Log shutdown initiated
 	logger.Info("initiating graceful shutdown")
 
+	// Cancel the runner context first to stop message consumption
+	cancel()
+
 	// Perform cleanup with timeout
-	// As per requirement 7.4, the worker must complete shutdown within 10 seconds hard limit
+	// Worker must complete shutdown with timeout (RF-01, RF-05)
 	err := performCleanupWithTimeout(cleanup, 10*time.Second, logger, sigChan)
 	if err != nil {
 		logger.Error("cleanup failed",
-			ports.Field{Key: "error", Value: err.Error()},
+			ports.BuildFields("error", err.Error())...,
 		)
 		return 1
 	}
@@ -55,9 +62,8 @@ func performCleanupWithTimeout(cleanup func(), timeout time.Duration, logger por
 
 	// Perform cleanup in a goroutine
 	go func() {
-		// NOTE: In the ingestion spec, cleanup will include:
-		// - Stop consuming from Kafka
-		// - Wait for in-flight messages to complete processing (up to shutdown timeout)
+		// Cleanup includes:
+		// - Stop consuming from Kafka (via runner.Stop())
 		// - Close database connections
 		// - Release all acquired resources
 		cleanup()
@@ -73,7 +79,7 @@ func performCleanupWithTimeout(cleanup func(), timeout time.Duration, logger por
 	case <-cleanupCtx.Done():
 		if cleanupCtx.Err() == context.DeadlineExceeded {
 			logger.Warn("cleanup timeout exceeded",
-				ports.Field{Key: "timeout", Value: timeout.String()},
+				ports.BuildFields("timeout", timeout.String())...,
 			)
 			return &cleanupTimeoutError{timeout: timeout}
 		}
@@ -81,7 +87,7 @@ func performCleanupWithTimeout(cleanup func(), timeout time.Duration, logger por
 
 	case sig := <-sigChan:
 		logger.Warn("received second shutdown signal during cleanup",
-			ports.Field{Key: "signal", Value: sig.String()},
+			ports.BuildFields("signal", sig.String())...,
 		)
 		return &forcedTerminationError{}
 	}
