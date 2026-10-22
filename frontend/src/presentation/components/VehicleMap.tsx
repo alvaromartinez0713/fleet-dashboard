@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useMemo } from 'react';
 import mapboxgl, { Map as MapboxMap } from 'mapbox-gl';
 import { Vehicle } from '../../domain/entities/vehicle';
+import config from '@config/environment';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import './VehicleMap.css';
 
@@ -12,6 +13,9 @@ interface VehicleMapProps {
 
 /**
  * VehicleMap - React component for displaying vehicles on Mapbox GL JS.
+ * 
+ * Configuration: Reads VITE_MAPBOX_TOKEN from window.ENV (injected at runtime)
+ * or from import.meta.env (compile time in dev)
  */
 export const VehicleMap: React.FC<VehicleMapProps> = ({
   vehicles,
@@ -20,7 +24,7 @@ export const VehicleMap: React.FC<VehicleMapProps> = ({
 }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<MapboxMap | null>(null);
-  const mapboxToken = import.meta.env.VITE_MAPBOX_TOKEN;
+  const mapboxToken = config.mapboxToken;
 
   // Madrid center
   const center = useMemo(() => ({ lat: 40.4168, lng: -3.7038 }), []);
@@ -139,3 +143,4 @@ export const VehicleMap: React.FC<VehicleMapProps> = ({
     </div>
   );
 };
+

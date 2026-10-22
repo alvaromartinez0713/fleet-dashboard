@@ -3,7 +3,7 @@
  */
 
 import { http, HttpResponse } from 'msw';
-import { createProblemDetails, ProblemDetailsTemplates } from './problem-details';
+import { ProblemDetailsTemplates } from './problem-details';
 
 // Mock data: vehículos en Madrid con coordenadas variadas
 const MADRID_CENTER = {
@@ -51,7 +51,7 @@ const getVehicleById = http.get('/api/vehicles/:vehicleId', ({ params }) => {
 
   return HttpResponse.json({
     vehicleId,
-    licensePlate: `MAD-${vehicleId.split('-')[1] || '0001'}`,
+    licensePlate: `MAD-${typeof vehicleId === 'string' ? vehicleId.split('-')[1] : '0001'}`,
     status: 'active',
     lastUpdate: new Date().toISOString(),
     latitude: MADRID_CENTER.lat + (Math.random() - 0.5) * 0.05,
@@ -67,7 +67,7 @@ const getVehicleUpdates = http.get('/api/vehicles/updates', () => {
     start(controller) {
       // Enviar eventos iniciales para cada vehículo
       const initialVehicles = generateMockVehicles();
-      initialVehicles.forEach((vehicle, idx) => {
+      initialVehicles.forEach((vehicle) => {
         const initialEvent = {
           vehicleId: vehicle.vehicleId,
           latitude: vehicle.latitude,

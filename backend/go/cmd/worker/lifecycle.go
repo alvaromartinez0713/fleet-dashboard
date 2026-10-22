@@ -5,7 +5,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/fleet-platform/backend/internal/worker/adapters/inbound/messaging"
 	"github.com/fleet-platform/backend/internal/worker/ports"
 )
 
@@ -14,14 +13,6 @@ import (
 func runWorker(cleanup func(), cfg ports.Config, logger ports.Logger) int {
 	// Log worker started
 	logger.Info("worker service starting")
-
-	// Create a cancellable context for the runner
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	// Start the runner (the runner will be started by ComposeWorker and returned)
-	// For now, we'll assume the runner is started by the composition
-	// In the future, we might need to explicitly start it here
 
 	logger.Info("worker service ready")
 
@@ -33,9 +24,6 @@ func runWorker(cleanup func(), cfg ports.Config, logger ports.Logger) int {
 
 	// Log shutdown initiated
 	logger.Info("initiating graceful shutdown")
-
-	// Cancel the runner context first to stop message consumption
-	cancel()
 
 	// Perform cleanup with timeout
 	// Worker must complete shutdown with timeout (RF-01, RF-05)

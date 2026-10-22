@@ -2,6 +2,7 @@ package config
 
 import (
 	"context"
+	"strings"
 
 	"github.com/fleet-platform/backend/internal/ingestion/adapters/outbound/infrastructure"
 	"github.com/fleet-platform/backend/internal/ingestion/adapters/outbound/messaging"
@@ -59,7 +60,8 @@ func (c *DependencyComposer) ComposeAPI() (ports.HTTPServer, error) {
 
 	// ========== STEP 2: Create outbound adapters (messaging & resilience) ==========
 	// Kafka Publisher
-	kafkaPublisher, err := messaging.NewKafkaPublisher([]string{c.cfg.Kafka.Brokers})
+	brokers := strings.Split(c.cfg.Kafka.Brokers, ",")
+	kafkaPublisher, err := messaging.NewKafkaPublisher(brokers)
 	if err != nil {
 		c.logger.Error("failed to create Kafka publisher", ports.Field{Key: "error", Value: err.Error()})
 		return nil, err

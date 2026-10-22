@@ -1,4 +1,4 @@
-import { environment } from '@config/environment';
+import config from '@config/environment';
 
 /**
  * HTTP client for communicating with the backend API.
@@ -18,7 +18,7 @@ export class ApiClient {
   private baseUrl: string;
 
   constructor(baseUrl?: string) {
-    this.baseUrl = baseUrl || environment.apiBaseUrl;
+    this.baseUrl = baseUrl || config.apiBaseUrl;
   }
 
   /**
@@ -61,3 +61,4 @@ export class VehicleLoadError extends Error {
     this.name = 'VehicleLoadError';
   }
 }
+

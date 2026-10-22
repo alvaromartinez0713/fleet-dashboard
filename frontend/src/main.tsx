@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import App from './App.tsx';
+import App from './App';
+import config from '@config/environment';
 
 // Locate the root DOM element where React will mount the application
 const rootElement = document.getElementById('root');
@@ -19,4 +20,6 @@ ReactDOM.createRoot(rootElement).render(
 );
 
 console.log('✅ Fleet Dashboard loaded');
-console.log('📊 Data Mode:', import.meta.env.VITE_DATA_MODE);
+console.log('📊 Data Mode:', config.dataMode);
+console.log('🗺️ Mapbox Token:', config.mapboxToken ? 'Configured' : 'Not configured');
+

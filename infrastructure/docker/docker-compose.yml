@@ -1,6 +1,4 @@
 # ============================================================================
-# Fleet Platform - Docker Compose Configuration
-# ============================================================================
 # This compose file defines the complete local development environment including:
 # - Backend microservices (ingestion API, worker)
 # - Infrastructure services (Zookeeper, Kafka, TimescaleDB)
@@ -114,7 +112,7 @@ services:
   # Executes before ingestion and worker services to ensure schema is ready
   migrate:
     build:
-      context: ./backend/go
+      context: ../../backend/go
       dockerfile: Dockerfile
       target: migrate
     container_name: fleet-migrate
@@ -137,7 +135,7 @@ services:
   # HTTP API that receives telemetry from mobile devices and publishes to Kafka
   ingestion:
     build:
-      context: ./backend/go
+      context: ../../backend/go
       dockerfile: Dockerfile
       target: ingestion
     container_name: fleet-ingestion
@@ -156,8 +154,6 @@ services:
       LOG_LEVEL: ${LOG_LEVEL:-info}
       LOG_FORMAT: ${LOG_FORMAT:-json}
     depends_on:
-      migrate:
-        condition: service_completed_successfully
       kafka:
         condition: service_healthy
     networks:
@@ -176,7 +172,7 @@ services:
   # Kafka consumer that processes telemetry events and persists to TimescaleDB
   worker:
     build:
-      context: ./backend/go
+      context: ../../backend/go
       dockerfile: Dockerfile
       target: worker
     container_name: fleet-worker
@@ -184,22 +180,15 @@ services:
       # Worker-specific configuration
       WORKER_SHUTDOWN_TIMEOUT: ${WORKER_SHUTDOWN_TIMEOUT:-30s}
       # Kafka configuration
-      KAFKA_BROKERS: ${KAFKA_BROKERS:-kafka:9092}
-      KAFKA_TOPIC: ${KAFKA_TOPIC:-telemetry.positions}
-      KAFKA_GROUP_ID: ${KAFKA_GROUP_ID:-fleet-worker-group}
+      WORKER_KAFKA_BROKERS: ${KAFKA_BROKERS:-kafka:9092}
+      WORKER_KAFKA_TOPIC: ${KAFKA_TOPIC:-telemetry.positions}
+      WORKER_KAFKA_GROUP_ID: ${KAFKA_GROUP_ID:-fleet-worker-group}
       # TimescaleDB configuration
-      DB_HOST: ${DB_HOST:-timescaledb}
-      DB_PORT: ${DB_PORT:-5432}
-      DB_USER: ${POSTGRES_USER:-fleet_user}
-      DB_PASSWORD: ${POSTGRES_PASSWORD:-fleet_password}
-      DB_NAME: ${POSTGRES_DB:-fleet_db}
-      DB_SSLMODE: ${DB_SSLMODE:-disable}
+      WORKER_DB_DSN: postgresql://${POSTGRES_USER:-fleet_user}:${POSTGRES_PASSWORD:-fleet_password}@${DB_HOST:-timescaledb}:${DB_PORT:-5432}/${POSTGRES_DB:-fleet_db}?sslmode=${DB_SSLMODE:-prefer}
       # Shared logging configuration
       LOG_LEVEL: ${LOG_LEVEL:-info}
       LOG_FORMAT: ${LOG_FORMAT:-json}
     depends_on:
-      migrate:
-        condition: service_completed_successfully
       kafka:
         condition: service_healthy
       timescaledb:
@@ -208,6 +197,32 @@ services:
       - fleet-network
     restart: unless-stopped
 
+
+  # --------------------------------------------------------------------------
+  # Frontend Service
+  # --------------------------------------------------------------------------
+  # React + Vite dashboard for fleet monitoring portal
+  frontend:
+    build:
+      context: ../../frontend
+      dockerfile: Dockerfile
+      target: prod
+    container_name: fleet-frontend
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    environment:
+      VITE_DATA_MODE: ${VITE_DATA_MODE:-mock}
+      VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8080}
+      VITE_SSE_ENDPOINT: ${VITE_SSE_ENDPOINT:-http://localhost:8080/api/vehicles/updates}
+      VITE_MAPBOX_TOKEN: ${VITE_MAPBOX_TOKEN:-pk.eyJ1IjoiYWx2YXJvbWFydGluZXoiLCJhIjoiY212aXN4aDh4MDVvZDJ6cHljYWw0aHVrdyJ9.v1gPpY7jeIECjj9D9cJmCQ}
+    depends_on:
+      kafka:
+        condition: service_healthy
+      timescaledb:
+        condition: service_healthy
+    networks:
+      - fleet-network
+    restart: unless-stopped
 # ============================================================================
 # Networks
 # ============================================================================

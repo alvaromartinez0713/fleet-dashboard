@@ -1,39 +1,33 @@
 package config
 
-import (
-	"fmt"
-	"os"
-)
+import "os"
 
 // EnvConfigLoader loads configuration from environment variables.
 type EnvConfigLoader struct{}
 
-// NewEnvConfigLoader creates a new environment-based configuration loader.
+// NewEnvConfigLoader creates a new environment configuration loader.
 func NewEnvConfigLoader() *EnvConfigLoader {
 	return &EnvConfigLoader{}
 }
 
-// Load reads configuration from environment variables and returns a Config struct.
-// Returns an error if any required variable is missing.
-func (l *EnvConfigLoader) Load() (Config, error) {
-	var cfg Config
-
-	// Load database configuration from environment variables
-	cfg.Database.Host = os.Getenv("DB_HOST")
-	cfg.Database.Port = os.Getenv("DB_PORT")
-	cfg.Database.User = os.Getenv("DB_USER")
-	cfg.Database.Password = os.Getenv("DB_PASSWORD")
-	cfg.Database.Name = os.Getenv("DB_NAME")
-
-	return cfg, nil
+// Load reads configuration from environment variables.
+func (e *EnvConfigLoader) Load() (Config, error) {
+	return Config{
+		Database: DatabaseConfig{
+			Host:     getEnv("DB_HOST", "timescaledb"),
+			Port:     getEnv("DB_PORT", "5432"),
+			User:     getEnv("DB_USER", "fleet_user"),
+			Password: getEnv("DB_PASSWORD", "fleet_password"),
+			Name:     getEnv("DB_NAME", "fleet_db"),
+			SSLMode:  getEnv("DB_SSLMODE", "prefer"),
+		},
+	}, nil
 }
 
-// getEnvRequired retrieves the value of an environment variable.
-// If the variable is not defined, it returns an error.
-func getEnvRequired(key string) (string, error) {
-	value, exists := os.LookupEnv(key)
-	if !exists {
-		return "", fmt.Errorf("required environment variable %s is not defined", key)
+// getEnv retrieves an environment variable or returns a default value.
+func getEnv(key, defaultVal string) string {
+	if val, exists := os.LookupEnv(key); exists {
+		return val
 	}
-	return value, nil
+	return defaultVal
 }

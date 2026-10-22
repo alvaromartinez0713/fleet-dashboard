@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 
-	"github.com/fleet-platform/backend/internal/worker/domain"
 	"github.com/fleet-platform/backend/internal/worker/ports"
 )
 
@@ -31,7 +30,7 @@ func NewLogSink(logger ports.Logger) *LogSink {
 // or prevent processing of other events. In case of logging failure, the record
 // will be lost, but the offset will still be committed, which aligns with the
 // requirement that dead-letter writes must not block offset commits (RF-06).
-func (s *LogSink) Write(ctx context.Context, record domain.DeadLetterRecord) error {
+func (s *LogSink) Write(ctx context.Context, record ports.DeadLetterRecord) error {
 	// Marshal the record to JSON for structured logging
 	recordJSON, err := json.Marshal(record)
 	if err != nil {

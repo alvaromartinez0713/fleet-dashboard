@@ -1,25 +1,28 @@
 /**
- * Environment configuration for the frontend application.
- * Supports both mock and API modes for development and production.
- *
- * Environment variables:
- * - VITE_DATA_MODE: 'mock' or 'api' (default: 'mock')
- * - VITE_API_BASE_URL: Backend API base URL (default: http://localhost:8080)
- * - VITE_SSE_ENDPOINT: SSE endpoint URL (default: http://localhost:8080/api/vehicles/updates)
+ * Environment configuration loaded from window.ENV at runtime
+ * 
+ * This module reads configuration injected by docker-entrypoint.sh
+ * or from import.meta.env in development
  */
 
-export const environment = {
-  dataMode: (import.meta.env.VITE_DATA_MODE || 'mock') as 'mock' | 'api',
-  apiBaseUrl: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080',
-  sseEndpoint: import.meta.env.VITE_SSE_ENDPOINT || 'http://localhost:8080/api/vehicles/updates',
+declare global {
+  interface Window {
+    ENV?: {
+      VITE_DATA_MODE?: string;
+      VITE_API_BASE_URL?: string;
+      VITE_SSE_ENDPOINT?: string;
+      VITE_MAPBOX_TOKEN?: string;
+    };
+  }
+}
+
+// Read from window.ENV (injected at runtime) with fallbacks
+export const config = {
+  dataMode: (typeof window !== 'undefined' && window.ENV?.VITE_DATA_MODE) || 'mock',
+  apiBaseUrl: (typeof window !== 'undefined' && window.ENV?.VITE_API_BASE_URL) || 'http://localhost:8080',
+  sseEndpoint: (typeof window !== 'undefined' && window.ENV?.VITE_SSE_ENDPOINT) || 'http://localhost:8080/api/vehicles/updates',
+  mapboxToken: (typeof window !== 'undefined' && window.ENV?.VITE_MAPBOX_TOKEN) || '',
 };
 
-/**
- * Check if running in mock mode (development/demo)
- */
-export const isMockMode = (): boolean => environment.dataMode === 'mock';
+export default config;
 
-/**
- * Check if running in API mode (production)
- */
-export const isApiMode = (): boolean => environment.dataMode === 'api';

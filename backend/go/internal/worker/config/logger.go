@@ -98,11 +98,16 @@ func (z *ZapLogger) Panic(msg string, fields ...ports.Field) {
 // The TraceID will be automatically included in all subsequent log entries
 // that use GetTraceID to retrieve it from the context.
 func (z *ZapLogger) WithTraceID(ctx context.Context, tid domain.TraceID) context.Context {
+	return context.WithValue(ctx, "trace_id", tid)
 }
 
 // GetTraceID retrieves the trace identifier from the context.
 // Returns an empty TraceID if not present in the context.
 func (z *ZapLogger) GetTraceID(ctx context.Context) domain.TraceID {
+	tid, ok := ctx.Value("trace_id").(domain.TraceID)
+	if !ok {
+		return domain.TraceID("")
+	}
 	return tid
 }
 

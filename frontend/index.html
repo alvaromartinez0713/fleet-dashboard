@@ -8,6 +8,11 @@
   </head>
   <body>
     <div id="root"></div>
+    <!-- Runtime configuration injected by docker-entrypoint.sh -->
+    <!-- Load config.js before React to set window.ENV -->
+    <script src="/config.js"></script>
+    <!-- Vite will bundle this during build -->
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
+

@@ -6,7 +6,7 @@
  *
  * Grid Structure:
  * ┌─────────────────────────────────┐
- * │       Dashboard Header          │  ← ConnectionStatus + DemoModeBanner
+ * │       Dashboard Header          │  ← ConnectionStatus + DemoModeBanner (ORANGE BAND)
  * ├─────────────────────────────────┤
  * │                                 │
  * │      Dashboard Main             │  ← LoadingSpinner | ErrorAlert | MapContainer
@@ -28,32 +28,63 @@
 }
 
 /* ============================================================================
-   Header Section: ConnectionStatus + DemoModeBanner
+   Header Section: Orange Band with ConnectionStatus + DemoModeBanner
    ============================================================================ */
 
 .dashboard-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 16px;
-  background-color: #ffffff;
-  border-bottom: 1px solid #e0e0e0;
-  gap: 16px;
+  padding: 16px 20px;
+  background: linear-gradient(90deg, #ff9d42 0%, #ffb366 100%);
+  border-bottom: 3px solid #ff8822;
+  gap: 20px;
   z-index: 100;
   flex-shrink: 0;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 12px rgba(255, 140, 66, 0.25);
 }
 
-/* ConnectionStatus positioned on the left */
-.dashboard-header > :first-child {
-  flex: 0 0 auto;
+.dashboard-header h1 {
+  margin: 0;
+  color: #1a1a1a;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
 }
 
-/* DemoModeBanner stretches to fill available space */
-.dashboard-header > :last-child {
-  flex: 1 1 auto;
+.header-title {
   display: flex;
-  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  flex: 0 1 auto;
+}
+
+.demo-badge {
+  background-color: rgba(255, 255, 255, 0.4);
+  color: #1a1a1a;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  border: 1.5px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.header-connection-status {
+  flex: 0 0 auto;
+  color: #1a1a1a;
+  font-size: 13px;
+  font-weight: 600;
+  background-color: rgba(255, 255, 255, 0.3);
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 1.5px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
 }
 
 /* ============================================================================
@@ -78,17 +109,48 @@
   flex: 1 1 auto;
   background-color: #ffffff;
   z-index: 10;
+  color: #333333;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.dashboard-loading p {
+  margin: 0;
 }
 
 /* Error State */
 .dashboard-error {
   flex: 0 0 auto;
-  padding: 12px 16px;
+  padding: 16px 20px;
   background-color: #fee2e2;
+  border-left: 4px solid #dc2626;
   border-bottom: 1px solid #fecaca;
   z-index: 20;
   max-height: 200px;
   overflow-y: auto;
+}
+
+.dashboard-error p {
+  margin: 0 0 12px 0;
+  color: #991b1b;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.dashboard-error button {
+  background-color: #dc2626;
+  color: #ffffff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background-color 0.2s ease;
+}
+
+.dashboard-error button:hover {
+  background-color: #b91c1c;
 }
 
 /* Map Container */
@@ -107,10 +169,10 @@
   justify-content: center;
   flex: 1 1 auto;
   color: #999999;
-  font-size: 16px;
+  font-size: 18px;
   text-align: center;
-  padding: 20px;
-  background-color: #f9f9f9;
+  padding: 40px 20px;
+  background: linear-gradient(135deg, #f9f9f9 0%, #f5f5f5 100%);
   position: absolute;
   width: 100%;
   height: 100%;
@@ -122,6 +184,7 @@
   margin: 0;
   font-weight: 500;
   color: #666666;
+  font-size: 16px;
 }
 
 /* ============================================================================
@@ -149,8 +212,13 @@
 
   .dashboard-header {
     flex-direction: column;
-    padding: 8px 12px;
-    gap: 8px;
+    padding: 12px 16px;
+    gap: 12px;
+    background: linear-gradient(90deg, #ff9d42 0%, #ffb366 100%);
+  }
+
+  .dashboard-header h1 {
+    font-size: 24px;
   }
 
   .dashboard-main {
@@ -159,7 +227,7 @@
   }
 
   .dashboard-error {
-    padding: 8px 12px;
+    padding: 12px 16px;
   }
 
   .dashboard-map-container {
@@ -174,7 +242,12 @@
   }
 
   .dashboard-header {
-    padding: 12px;
+    padding: 14px 18px;
+    background: linear-gradient(90deg, #ff9d42 0%, #ffb366 100%);
+  }
+
+  .dashboard-header h1 {
+    font-size: 26px;
   }
 
   .dashboard-main {
@@ -190,7 +263,12 @@
   }
 
   .dashboard-header {
-    padding: 16px 20px;
+    padding: 16px 24px;
+    background: linear-gradient(90deg, #ff9d42 0%, #ffb366 100%);
+  }
+
+  .dashboard-header h1 {
+    font-size: 28px;
   }
 
   .dashboard-main {
@@ -204,7 +282,7 @@
 
 /* Focus visible for keyboard navigation */
 .vehicle-dashboard:focus-visible {
-  outline: 2px solid #0066cc;
+  outline: 2px solid #ff9d42;
   outline-offset: 2px;
 }
 
@@ -222,13 +300,24 @@
 /* High contrast mode */
 @media (prefers-contrast: more) {
   .dashboard-header {
-    border-bottom-width: 2px;
+    background: #ff9d42;
+    border-bottom-width: 4px;
     border-bottom-color: #000000;
   }
 
+  .dashboard-header h1 {
+    color: #000000;
+  }
+
+  .header-connection-status {
+    color: #000000;
+    border-width: 2px;
+    border-color: #000000;
+  }
+
   .dashboard-error {
-    border-bottom-width: 2px;
-    border-bottom-color: #cc0000;
+    border-left-width: 4px;
+    border-left-color: #cc0000;
   }
 
   .dashboard-footer {
