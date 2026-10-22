@@ -1,0 +1,116 @@
+/**
+ * Vehicle Tooltip Styling
+ * Styles for VehicleTooltip component displayed in Leaflet popups
+ */
+
+.vehicle-tooltip {
+  min-width: 280px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #333;
+}
+
+.tooltip-section {
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.tooltip-section:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.tooltip-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+  align-items: center;
+}
+
+.tooltip-row:last-child {
+  margin-bottom: 0;
+}
+
+.tooltip-label {
+  font-weight: 600;
+  color: #4b5563;
+  flex-shrink: 0;
+  min-width: 120px;
+}
+
+.tooltip-value {
+  flex-grow: 1;
+  text-align: right;
+  color: #1f2937;
+  word-break: break-word;
+  font-family: 'Monaco', 'Courier New', monospace;
+  font-size: 12px;
+}
+
+/* Styling for stale position indicator */
+.tooltip-row.stale .tooltip-value {
+  color: #d97706;
+  font-weight: 600;
+}
+
+.tooltip-warning {
+  background-color: #fef3c7;
+  border-left: 3px solid #f59e0b;
+  padding: 6px 8px;
+  margin-top: 6px;
+  border-radius: 2px;
+  font-size: 12px;
+  color: #92400e;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 600px) {
+  .vehicle-tooltip {
+    min-width: 200px;
+    font-size: 12px;
+  }
+
+  .tooltip-label {
+    min-width: 90px;
+  }
+}
+
+/* Print styles */
+@media print {
+  .vehicle-tooltip {
+    page-break-inside: avoid;
+  }
+}
+
+/* Dark mode support (optional) */
+@media (prefers-color-scheme: dark) {
+  .vehicle-tooltip {
+    color: #e5e7eb;
+  }
+
+  .tooltip-section {
+    border-bottom-color: #374151;
+  }
+
+  .tooltip-label {
+    color: #9ca3af;
+  }
+
+  .tooltip-value {
+    color: #f3f4f6;
+  }
+
+  .tooltip-warning {
+    background-color: #78350f;
+    color: #fef3c7;
+    border-left-color: #f59e0b;
+  }
+}
