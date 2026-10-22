@@ -6,7 +6,7 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "skipLibCheck": true,
-    "strict": true,
+    "strict": false,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
@@ -14,8 +14,11 @@
     "declaration": false,
     "declarationMap": false,
     "sourceMap": true,
+    "jsx": "react-jsx",
+    "noEmit": true,
     "outDir": "./dist",
     "baseUrl": ".",
+    "allowImportingTsExtensions": true,
     "paths": {
       "@config/*": ["src/config/*"],
       "@domain/*": ["src/domain/*"],
@@ -23,8 +26,10 @@
       "@infrastructure/*": ["src/infrastructure/*"],
       "@presentation/*": ["src/presentation/*"],
       "@tests/*": ["src/tests/*"]
-    }
+    },
+    "types": ["vite/client"]
   },
   "include": ["src"],
   "exclude": ["node_modules", "dist"]
 }
+

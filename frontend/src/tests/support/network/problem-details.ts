@@ -17,7 +17,7 @@ export function createProblemDetails(
   status: number,
   detail: string,
   type?: string
-): HttpResponse {
+): HttpResponse<ProblemDetails> {
   const problemDetails: ProblemDetails = {
     type: type || `https://api.fleet-dashboard.local/problems/error`,
     title,

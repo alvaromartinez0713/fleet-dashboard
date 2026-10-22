@@ -170,6 +170,7 @@ export const ConnectionStatus: React.FC<ConnectionStatusProps> = ({
    */
   const renderIndicator = () => (
     <div
+        title={error.message}
       style={{
         display: 'inline-block',
         width: '12px',
@@ -189,6 +190,7 @@ export const ConnectionStatus: React.FC<ConnectionStatusProps> = ({
 
   return (
     <div
+        title={error.message}
       style={{
         display: 'flex',
         alignItems: 'center',
@@ -245,6 +247,7 @@ export const ConnectionStatus: React.FC<ConnectionStatusProps> = ({
 
       {/* Status label and countdown */}
       <div
+        title={error.message}
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -296,11 +299,12 @@ export const ConnectionStatus: React.FC<ConnectionStatusProps> = ({
       {/* Error message */}
       {error && (
         <div
+        title={error.message}
           style={{
             marginLeft: 'auto',
             fontSize: '12px',
             color: '#dc2626', // red-600
-            title: error.message,
+            
           }}
           data-testid="connection-status-error-message"
         >
