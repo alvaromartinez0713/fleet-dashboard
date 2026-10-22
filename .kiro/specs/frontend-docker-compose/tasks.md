@@ -6,8 +6,8 @@ Este plan integra el frontend (React + TypeScript + Vite) en la orquestación lo
 
 ## Tareas
 
-- [ ] 1. Crear frontend/Dockerfile (multietapa, sin HEALTHCHECK)
-  - [-] 1.1 Crear archivo frontend/Dockerfile con stages dev y prod
+- [x] 1. Crear frontend/Dockerfile (multietapa, sin HEALTHCHECK)
+  - [x] 1.1 Crear archivo frontend/Dockerfile con stages dev y prod
     - Crear archivo frontend/Dockerfile
     - Stage builder: Instala deps con npm ci en /app
     - Stage dev: Expone puerto 3000, NO healthcheck, CMD = npm run dev --host 0.0.0.0
@@ -16,15 +16,15 @@ Este plan integra el frontend (React + TypeScript + Vite) en la orquestación lo
     - Agregar comentarios en línea documentando cada stage
     - _Requisitos: 1, 3, 12_
 
-  - [~] 1.2 Verificar que el Dockerfile dev target compila sin error
+  - [x] 1.2 Verificar que el Dockerfile dev target compila sin error
     - Ejecutar: docker build -t fleet-frontend:dev --target dev ./frontend
     - Verificar: Imagen creada exitosamente (sin errores)
     - Hecho cuando: docker build completa sin error y devuelve SHA de imagen
 
 ---
 
-- [ ] 2. Crear frontend/.env.example (documentación de variables)
-  - [~] 2.1 Crear archivo frontend/.env.example
+- [x] 2. Crear frontend/.env.example (documentación de variables)
+  - [x] 2.1 Crear archivo frontend/.env.example
     - Crear archivo frontend/.env.example
     - Documentar VITE_DATA_MODE (con explicación: mock o api)
     - Documentar VITE_API_BASE_URL (con explicación y ejemplos para dev/prod)
@@ -34,30 +34,30 @@ Este plan integra el frontend (React + TypeScript + Vite) en la orquestación lo
     - Agregar encabezado indicando propósito del archivo
     - _Requisitos: 4, 9_
 
-  - [~] 2.2 Verificar que frontend/.env.example es válido
+  - [x] 2.2 Verificar que frontend/.env.example es válido
     - Verificar: Archivo contiene todas 4 variables VITE_*
     - Verificar: Comentarios claros y en inglés
     - Hecho cuando: Archivo existe con formato correcto, puede ser leído sin errores
 
 ---
 
-- [ ] 3. Verificar frontend/.gitignore
-  - [~] 3.1 Revisar contenido de frontend/.gitignore
+- [x] 3. Verificar frontend/.gitignore
+  - [x] 3.1 Revisar contenido de frontend/.gitignore
     - Revisar: ¿Está presente .env.local? (variable local NO commiteada)
     - Revisar: ¿Está presente dist/? (artefactos de build NO commiteados)
     - Revisar: ¿Está presente node_modules/? (dependencias NO commiteadas)
     - Si faltan líneas: Agregar las entradas faltantes
     - _Requisitos: 9_
 
-  - [~] 3.2 Validar que .gitignore es correcto
+  - [x] 3.2 Validar que .gitignore es correcto
     - Ejecutar: cat frontend/.gitignore | grep -E "(\.env\.local|dist|node_modules)"
     - Verificar: Comando devuelve 3+ coincidencias
     - Hecho cuando: grep devuelve todas las entradas esperadas
 
 ---
 
-- [ ] 4. Actualizar frontend/vite.config.ts
-  - [~] 4.1 Revisar y actualizar vite.config.ts
+- [x] 4. Actualizar frontend/vite.config.ts
+  - [x] 4.1 Revisar y actualizar vite.config.ts
     - Verificar: server.host = '0.0.0.0' (permite conexiones desde Docker)
     - Verificar: server.port = 3000
     - Verificar: HMR config con host: 'localhost', port: 3000 (para hot reload en Docker)
@@ -65,15 +65,15 @@ Este plan integra el frontend (React + TypeScript + Vite) en la orquestación lo
     - Agregar comentarios en línea documentando propósito de cada sección
     - _Requisitos: 4_
 
-  - [~] 4.2 Validar que vite.config.ts es correcto
+  - [x] 4.2 Validar que vite.config.ts es correcto
     - Ejecutar: npm run dev desde frontend/ y verificar que inicia sin error
     - Verificar: Mensaje de éxito "VITE v... ready in ... ms"
     - Hecho cuando: npm run dev inicia sin errores y acepta conexiones en puerto 3000
 
 ---
 
-- [ ] 5. Actualizar infrastructure/docker/.env (agregar VITE_*)
-  - [~] 5.1 Editar infrastructure/docker/.env
+- [x] 5. Actualizar infrastructure/docker/.env (agregar VITE_*)
+  - [x] 5.1 Editar infrastructure/docker/.env
     - Editar: infrastructure/docker/.env existente
     - Mantener: Todas variables backend existentes (NO borrar)
     - Agregar al final sección # === Frontend Service ===
@@ -85,7 +85,7 @@ Este plan integra el frontend (React + TypeScript + Vite) en la orquestación lo
     - Agregar comentarios explicativos para cada variable
     - _Requisitos: 2, 4, 5_
 
-  - [~] 5.2 Validar que infrastructure/docker/.env es válido
+  - [x] 5.2 Validar que infrastructure/docker/.env es válido
     - Ejecutar: docker compose config 2>&1 | grep -i error
     - Verificar: Comando devuelve vacío (sin errores de sintaxis)
     - Verificar: Archivo tiene ambas secciones (Backend Services y Frontend Service)
@@ -94,8 +94,8 @@ Este plan integra el frontend (React + TypeScript + Vite) en la orquestación lo
 
 ---
 
-- [ ] 6. Actualizar infrastructure/docker/docker-compose.yml (agregar frontend service)
-  - [~] 6.1 Agregar sección frontend bajo services
+- [x] 6. Actualizar infrastructure/docker/docker-compose.yml (agregar frontend service)
+  - [x] 6.1 Agregar sección frontend bajo services
     - Editar: infrastructure/docker/docker-compose.yml
     - Insertar nuevo bloque frontend: (después de worker o ingestion)
     - Contenido del bloque:
@@ -110,7 +110,7 @@ Este plan integra el frontend (React + TypeScript + Vite) en la orquestación lo
     - SIN healthcheck, SIN labels, patrón simple
     - _Requisitos: 2, 5, 10, 12_
 
-  - [~] 6.2 Validar que docker-compose.yml es correcto
+  - [x] 6.2 Validar que docker-compose.yml es correcto
     - Ejecutar: docker compose -f infrastructure/docker/docker-compose.yml config 2>&1 | tail -20
     - Verificar: docker compose config no devuelve errores
     - Verificar: Sección frontend: aparece en output con todas claves correctas
@@ -119,8 +119,8 @@ Este plan integra el frontend (React + TypeScript + Vite) en la orquestación lo
 
 ---
 
-- [ ] 7. Agregar Makefile target: build-frontend
-  - [~] 7.1 Agregar target build-frontend al Makefile
+- [x] 7. Agregar Makefile target: build-frontend
+  - [x] 7.1 Agregar target build-frontend al Makefile
     - Editar: Makefile en raíz
     - Agregar: .PHONY: build-frontend
     - Agregar target con:
@@ -131,7 +131,7 @@ Este plan integra el frontend (React + TypeScript + Vite) en la orquestación lo
     - Agregar comentarios en línea
     - _Requisitos: 6_
 
-  - [~] 7.2 Validar que make build-frontend funciona
+  - [x] 7.2 Validar que make build-frontend funciona
     - Ejecutar: make build-frontend
     - Verificar: docker build completa sin error
     - Verificar: Imagen fleet-frontend:dev se crea exitosamente
@@ -139,8 +139,8 @@ Este plan integra el frontend (React + TypeScript + Vite) en la orquestación lo
 
 ---
 
-- [ ] 8. Agregar Makefile target: logs-frontend
-  - [~] 8.1 Agregar target logs-frontend al Makefile
+- [x] 8. Agregar Makefile target: logs-frontend
+  - [x] 8.1 Agregar target logs-frontend al Makefile
     - Editar: Makefile en raíz
     - Agregar: .PHONY: logs-frontend
     - Agregar target con:
@@ -150,7 +150,7 @@ Este plan integra el frontend (React + TypeScript + Vite) en la orquestación lo
     - Ubicación: Agregar después de otros targets de logs (cerca de logs-timescaledb, etc.)
     - _Requisitos: 6_
 
-  - [~] 8.2 Validar que make logs-frontend funciona
+  - [x] 8.2 Validar que make logs-frontend funciona
     - Ejecutar: make up (esperar ~30s para que frontend inicie)
     - Ejecutar: make logs-frontend
     - Verificar: Muestra logs de Vite en tiempo real sin error
@@ -159,8 +159,8 @@ Este plan integra el frontend (React + TypeScript + Vite) en la orquestación lo
 
 ---
 
-- [ ] 9. Agregar Makefile targets: frontend-test, frontend-lint, frontend-format, frontend-build
-  - [~] 9.1 Agregar target frontend-test
+- [x] 9. Agregar Makefile targets: frontend-test, frontend-lint, frontend-format, frontend-build
+  - [x] 9.1 Agregar target frontend-test
     - Editar: Makefile en raíz
     - Agregar: .PHONY: frontend-test
     - Contenido:
@@ -169,7 +169,7 @@ Este plan integra el frontend (React + TypeScript + Vite) en la orquestación lo
       - echo "✓ Frontend tests completed"
     - _Requisitos: 7_
 
-  - [~] 9.2 Agregar target frontend-lint
+  - [x] 9.2 Agregar target frontend-lint
     - Editar: Makefile en raíz
     - Agregar: .PHONY: frontend-lint
     - Contenido:
@@ -178,7 +178,7 @@ Este plan integra el frontend (React + TypeScript + Vite) en la orquestación lo
       - echo "✓ Frontend linting completed"
     - _Requisitos: 7_
 
-  - [~] 9.3 Agregar target frontend-format
+  - [x] 9.3 Agregar target frontend-format
     - Editar: Makefile en raíz
     - Agregar: .PHONY: frontend-format
     - Contenido:
@@ -187,7 +187,7 @@ Este plan integra el frontend (React + TypeScript + Vite) en la orquestación lo
       - echo "✓ Frontend formatting completed"
     - _Requisitos: 7_
 
-  - [~] 9.4 Agregar target frontend-build
+  - [x] 9.4 Agregar target frontend-build
     - Editar: Makefile en raíz
     - Agregar: .PHONY: frontend-build
     - Contenido:
@@ -197,7 +197,7 @@ Este plan integra el frontend (React + TypeScript + Vite) en la orquestación lo
     - Ubicación: Agregar en sección Frontend (nueva)
     - _Requisitos: 7_
 
-  - [~] 9.5 Validar que Makefile targets funcionan
+  - [x] 9.5 Validar que Makefile targets funcionan
     - Ejecutar: make frontend-lint
     - Verificar: Ejecuta sin error (o reporta errores válidos de código)
     - Ejecutar: make frontend-build
@@ -206,8 +206,8 @@ Este plan integra el frontend (React + TypeScript + Vite) en la orquestación lo
 
 ---
 
-- [ ] 10. Agregar Makefile target: frontend-dev
-  - [~] 10.1 Agregar target frontend-dev al Makefile
+- [x] 10. Agregar Makefile target: frontend-dev
+  - [x] 10.1 Agregar target frontend-dev al Makefile
     - Editar: Makefile en raíz
     - Agregar: .PHONY: frontend-dev
     - Contenido:
@@ -218,7 +218,7 @@ Este plan integra el frontend (React + TypeScript + Vite) en la orquestación lo
     - Ubicación: Agregar en sección Frontend (nueva)
     - _Requisitos: 7_
 
-  - [~] 10.2 Validar que make frontend-dev funciona
+  - [x] 10.2 Validar que make frontend-dev funciona
     - Ejecutar: make frontend-dev
     - Verificar: Inicia servidor Vite en http://localhost:3000
     - Presionar Ctrl+C para detener
@@ -226,8 +226,8 @@ Este plan integra el frontend (React + TypeScript + Vite) en la orquestación lo
 
 ---
 
-- [ ] 11. Actualizar Makefile target: help
-  - [~] 11.1 Actualizar target help en Makefile
+- [x] 11. Actualizar Makefile target: help
+  - [x] 11.1 Actualizar target help en Makefile
     - Editar: target help en Makefile
     - Agregar antes de final del target help:
       - Sección "Frontend Development:" con make frontend-dev, logs-frontend, build-frontend
@@ -235,7 +235,7 @@ Este plan integra el frontend (React + TypeScript + Vite) en la orquestación lo
     - Agregar comentarios explicativos para cada target
     - _Requisitos: 6_
 
-  - [~] 11.2 Validar que make help muestra nuevas secciones
+  - [x] 11.2 Validar que make help muestra nuevas secciones
     - Ejecutar: make help
     - Verificar: Muestra nuevas secciones Frontend Development y Frontend Build & Test
     - Verificar: Todos targets listados correctamente
@@ -243,13 +243,13 @@ Este plan integra el frontend (React + TypeScript + Vite) en la orquestación lo
 
 ---
 
-- [ ] 12. Validar hot reload funciona (<3 segundos)
-  - [~] 12.1 Iniciar stack con Docker Compose
+- [x] 12. Validar hot reload funciona (<3 segundos)
+  - [x] 12.1 Iniciar stack con Docker Compose
     - Ejecutar: make up
     - Esperar: ~30 segundos para que frontend esté "Up"
     - _Requisitos: 2, 8_
 
-  - [~] 12.2 Verificar hot reload en navegador
+  - [x] 12.2 Verificar hot reload en navegador
     - Abrir: http://localhost:3000 en navegador
     - Editar: archivo frontend/src/App.tsx (cambiar texto visible)
     - Guardar: archivo
@@ -259,30 +259,30 @@ Este plan integra el frontend (React + TypeScript + Vite) en la orquestación lo
 
 ---
 
-- [ ] 13. Validar integración Docker Compose
-  - [~] 13.1 Verificar que all services inician correctamente
+- [x] 13. Validar integración Docker Compose
+  - [x] 13.1 Verificar que all services inician correctamente
     - Ejecutar: make up
     - Verificar: Todos servicios inician sin errores (~30s)
     - _Requisitos: 2, 5, 6_
 
-  - [~] 13.2 Verificar que frontend aparece en docker compose ps
+  - [x] 13.2 Verificar que frontend aparece en docker compose ps
     - Ejecutar: docker compose ps
     - Verificar: Frontend aparece en lista con estado "Up"
     - Verificar: Puerto 3000 mapeado correctamente
     - _Requisitos: 2, 5_
 
-  - [~] 13.3 Verificar acceso HTTP a frontend
+  - [x] 13.3 Verificar acceso HTTP a frontend
     - Ejecutar: curl http://localhost:3000/
     - Verificar: Devuelve HTML (no error)
     - _Requisitos: 2_
 
-  - [~] 13.4 Verificar logs-frontend funciona
+  - [x] 13.4 Verificar logs-frontend funciona
     - Ejecutar: make logs-frontend
     - Verificar: Muestra logs de Vite normalmente
     - Presionar: Ctrl+C para salir
     - _Requisitos: 6_
 
-  - [~] 13.5 Detener servicios cleanly
+  - [x] 13.5 Detener servicios cleanly
     - Ejecutar: make down
     - Verificar: Todos servicios se detienen sin error
     - Ejecutar: docker ps
@@ -291,8 +291,8 @@ Este plan integra el frontend (React + TypeScript + Vite) en la orquestación lo
 
 ---
 
-- [ ] 14. Validar variables de entorno inyectadas en container
-  - [~] 14.1 Verificar variables VITE_* en container
+- [x] 14. Validar variables de entorno inyectadas en container
+  - [x] 14.1 Verificar variables VITE_* en container
     - Ejecutar: make up
     - Ejecutar: docker exec fleet-frontend env | grep VITE_
     - Verificar: Devuelve exactamente estas líneas:
@@ -302,14 +302,14 @@ Este plan integra el frontend (React + TypeScript + Vite) en la orquestación lo
       - VITE_MAPBOX_TOKEN= (vacío o no aparece)
     - _Requisitos: 4, 5_
 
-  - [~] 14.2 Validar que variables son correctas
+  - [x] 14.2 Validar que variables son correctas
     - Verificar: 4 variables presentes y con valores correctos de .env
     - Hecho cuando: docker exec devuelve todas variables esperadas con valores correctos
 
 ---
 
-- [ ] 15. Actualizar README.md (Getting Started)
-  - [~] 15.1 Agregar sección Getting Started - Local Development
+- [x] 15. Actualizar README.md (Getting Started)
+  - [x] 15.1 Agregar sección Getting Started - Local Development
     - Editar: README.md en raíz
     - Agregar sección "## Getting Started - Local Development" después de introducción
     - Incluir subsección "Prerequisites" con Docker Desktop, Node.js
@@ -329,7 +329,7 @@ Este plan integra el frontend (React + TypeScript + Vite) en la orquestación lo
     - Agregar referencias a .kiro/steering/ docs
     - _Requisitos: 11_
 
-  - [~] 15.2 Validar que README.md es correcto
+  - [x] 15.2 Validar que README.md es correcto
     - Verificar: Archivo tiene sección "Getting Started - Local Development"
     - Verificar: Todos subsecciones presentes
     - Verificar: Comandos documentados con ejemplos
@@ -337,8 +337,8 @@ Este plan integra el frontend (React + TypeScript + Vite) en la orquestación lo
 
 ---
 
-- [ ] 16. Validación final integrada
-  - [~] 16.1 Ejecutar secuencia completa de validación
+- [x] 16. Validación final integrada
+  - [x] 16.1 Ejecutar secuencia completa de validación
     1. Ejecutar: make up → inicia todos servicios sin error (~30s)
     2. Ejecutar: make status → muestra frontend "Up" junto a otros servicios
     3. Ejecutar: make logs → muestra logs de todos servicios, incluyendo frontend
@@ -352,12 +352,12 @@ Este plan integra el frontend (React + TypeScript + Vite) en la orquestación lo
     11. Ejecutar: make help → muestra todos targets incluyendo frontend
     - _Requisitos: 1-12_
 
-  - [~] 16.2 Verificar no hay secrets en logs/console
+  - [x] 16.2 Verificar no hay secrets en logs/console
     - Verificar: Make logs NO exponen variables sensibles
     - Verificar: Console del navegador NO tiene errores críticos
     - _Requisitos: 1-12_
 
-  - [~] 16.3 Checkpoint final - Validación completa
+  - [x] 16.3 Checkpoint final - Validación completa
     - Verificar: Todos los comandos ejecutan sin error
     - Verificar: Frontend accesible en http://localhost:3000
     - Verificar: Hot reload funciona <3s
