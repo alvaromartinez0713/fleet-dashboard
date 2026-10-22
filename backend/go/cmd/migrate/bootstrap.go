@@ -48,11 +48,12 @@ func Run() int {
 // Note: Password is included in the connection string; ensure this string is never logged.
 func buildConnectionString(cfg config.Config) string {
 	return fmt.Sprintf(
-		"postgres://%s:%s@%s:%s/%s",
+		"postgres://%s:%s@%s:%s/%s?sslmode=%s",
 		cfg.Database.User,
 		cfg.Database.Password,
 		cfg.Database.Host,
 		cfg.Database.Port,
 		cfg.Database.Name,
+		cfg.Database.SSLMode,
 	)
 }

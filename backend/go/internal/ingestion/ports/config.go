@@ -34,8 +34,15 @@ type Config struct {
 		// Default: "json"
 		Format string
 	}
-	// Note: Kafka and PostgreSQL configuration fields are not included in this bootstrap spec.
-	// They will be added in the ingestion spec when the adapters are implemented.
+	Kafka struct {
+		// Brokers is a comma-separated list of Kafka broker addresses (env: KAFKA_BROKERS)
+		// Example: "kafka:9092" or "kafka1:9092,kafka2:9092"
+		Brokers string
+
+		// Topic is the Kafka topic for telemetry events (env: KAFKA_TOPIC)
+		// Default: "telemetry.positions"
+		Topic string
+	}
 }
 
 // ConfigLoader loads configuration from environment variables.

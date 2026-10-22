@@ -1,7 +1,5 @@
 package config
 
-import "time"
-
 // Config holds the configuration for the migrate service.
 // This configuration is loaded from environment variables at startup
 // and validated before migrations are executed.
