@@ -85,10 +85,10 @@ func (cb *CircuitBreaker) IsOpen() bool {
 	return elapsed < cb.recoveryInterval
 }
 
-func (cb *CircuitBreaker) State() string {
+func (cb *CircuitBreaker) State() ports.CircuitBreakerState {
 	cb.mu.RLock()
 	defer cb.mu.RUnlock()
-	return string(cb.state)
+	return ports.CircuitBreakerState(cb.state)
 }
 
 func (cb *CircuitBreaker) RecordFailure(err error) {

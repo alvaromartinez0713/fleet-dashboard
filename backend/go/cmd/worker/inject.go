@@ -59,13 +59,8 @@ func InjectDependencies(cfg ports.Config, logger ports.Logger) (*WorkerStack, er
 	)
 
 	// Infrastructure: repository (base + decorated with retries)
-	baseRepo, err := persistence.NewTimescaleRepository(dbConn)
-	if err != nil {
-		kafkaQueue.Close()
-		dbConn.Close()
-		return nil, err
-	}
-
+	baseRepo := dbConn
+	
 	repository := persistence.NewResilientRepository(
 		baseRepo,
 		circuitBreaker,
