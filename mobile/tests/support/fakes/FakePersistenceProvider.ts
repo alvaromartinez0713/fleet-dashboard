@@ -2,130 +2,32 @@ import { IPersistenceProvider } from '../../../src/application/ports/IPersistenc
 import { Position, PositionStatus } from '../../../src/domain/models/Position';
 
 /**
- * FakePersistenceProvider
- *
- * In-memory implementation of IPersistenceProvider for testing.
- * Stores positions in a Map and supports all query operations.
- *
- * Characteristics:
- * - No persistence to disk
- * - Fully deterministic behavior
- * - Supports event listeners for reactive testing
- * - Can be reset for test isolation
+ * Fake in-memory persistence for testing.
+ * No database, pure memory storage.
  */
 export class FakePersistenceProvider implements IPersistenceProvider {
   private positions: Map<string, Position> = new Map();
-  private positionCapturedListeners: Array<(position: Position) => void> = [];
-  private positionStatusChangedListeners: Array<(position: Position) => void> = [];
+  private capturedListeners: Array<(position: Position) => void> = [];
+  private statusChangedListeners: Array<(position: Position) => void> = [];
 
-  // ============================================================================
-  // CRUD Operations
-  // ============================================================================
+  async initialize(): Promise<void> {}
+  async close(): Promise<void> {}
 
   async savePosition(position: Position): Promise<void> {
-    if (!position.eventId) {
-      throw new Error('Cannot save position without eventId');
-    }
     this.positions.set(position.eventId, position);
-    // Fire event for captured position
-    this.positionCapturedListeners.forEach(listener => listener(position));
-  }
-
-  async updatePosition(position: Position): Promise<void> {
-    if (!position.eventId) {
-      throw new Error('Cannot update position without eventId');
-    }
-    if (!this.positions.has(position.eventId)) {
-      throw new Error(`Position with eventId ${position.eventId} not found`);
-    }
-    this.positions.set(position.eventId, position);
-    // Fire event for status changed
-    this.positionStatusChangedListeners.forEach(listener => listener(position));
+    this.capturedListeners.forEach(l => l(position));
   }
 
   async getAllPositions(): Promise<Position[]> {
-    const positionsArray = Array.from(this.positions.values());
-    // Sort by capturedAt descending (newest first)
-    return positionsArray.sort(
-      (a, b) => b.capturedAt.getTime() - a.capturedAt.getTime()
-    );
-  }
-
-  async getPositionById(eventId: string): Promise<Position | undefined> {
-    return this.positions.get(eventId);
-  }
-
-  async deletePosition(eventId: string): Promise<void> {
-    this.positions.delete(eventId);
-  }
-
-  async deleteAllPositions(): Promise<void> {
-    this.positions.clear();
-  }
-
-  // ============================================================================
-  // Filter Operations
-  // ============================================================================
-
-  async getPositionsByVehicle(vehicleId: string): Promise<Position[]> {
-    const filtered = Array.from(this.positions.values()).filter(
-      p => p.vehicleId === vehicleId
-    );
-    return filtered.sort(
+    return Array.from(this.positions.values()).sort(
       (a, b) => b.capturedAt.getTime() - a.capturedAt.getTime()
     );
   }
 
   async getPositionsByStatus(status: PositionStatus): Promise<Position[]> {
-    const filtered = Array.from(this.positions.values()).filter(
-      p => p.status === status
-    );
-    return filtered.sort(
-      (a, b) => b.capturedAt.getTime() - a.capturedAt.getTime()
-    );
-  }
-
-  // ============================================================================
-  // Backoff-Aware Queries
-  // ============================================================================
-
-  async getPositionsPendingRetry(now?: Date): Promise<Position[]> {
-    const currentTime = now || new Date();
-
-    const pending = Array.from(this.positions.values()).filter(position => {
-      // Include 'pending' status
-      if (position.status === 'pending') {
-        return true;
-      }
-
-      // Include 'error' status if nextRetryAt <= now
-      if (position.status === 'error' && position.nextRetryAt) {
-        return currentTime >= position.nextRetryAt;
-      }
-
-      return false;
-    });
-
-    // Sort by nextRetryAt ascending (retry soonest first)
-    return pending.sort((a, b) => {
-      const aRetry = a.nextRetryAt?.getTime() ?? 0;
-      const bRetry = b.nextRetryAt?.getTime() ?? 0;
-      return aRetry - bRetry;
-    });
-  }
-
-  // ============================================================================
-  // Aggregation Queries
-  // ============================================================================
-
-  async getPositionCount(): Promise<number> {
-    return this.positions.size;
-  }
-
-  async getPositionCountByStatus(status: PositionStatus): Promise<number> {
-    return Array.from(this.positions.values()).filter(
-      p => p.status === status
-    ).length;
+    return Array.from(this.positions.values())
+      .filter(p => p.status === status)
+      .sort((a, b) => b.capturedAt.getTime() - a.capturedAt.getTime());
   }
 
   async getPositionCountsByAllStatus(): Promise<Record<PositionStatus, number>> {
@@ -135,66 +37,38 @@ export class FakePersistenceProvider implements IPersistenceProvider {
       error: 0,
       validation_error: 0,
     };
-
-    for (const position of this.positions.values()) {
-      counts[position.status]++;
-    }
-
+    this.positions.forEach(p => counts[p.status]++);
     return counts;
   }
 
-  // ============================================================================
-  // Event Listeners
-  // ============================================================================
+  async updatePositionStatus(eventId: string, status: PositionStatus): Promise<void> {
+    const pos = this.positions.get(eventId);
+    if (pos) {
+      pos.status = status;
+      pos.updatedAt = new Date();
+      this.statusChangedListeners.forEach(l => l(pos));
+    }
+  }
 
-  onPositionCaptured(
-    callback: (position: Position) => void
-  ): () => void {
-    this.positionCapturedListeners.push(callback);
-    // Return unsubscribe function
+  async getPositionByEventId(eventId: string): Promise<Position | null> {
+    return this.positions.get(eventId) || null;
+  }
+
+  async deleteAllPositions(): Promise<void> {
+    this.positions.clear();
+  }
+
+  onPositionCaptured(listener: (position: Position) => void): () => void {
+    this.capturedListeners.push(listener);
     return () => {
-      this.positionCapturedListeners = this.positionCapturedListeners.filter(
-        listener => listener !== callback
-      );
+      this.capturedListeners = this.capturedListeners.filter(l => l !== listener);
     };
   }
 
-  onPositionStatusChanged(
-    callback: (position: Position) => void
-  ): () => void {
-    this.positionStatusChangedListeners.push(callback);
-    // Return unsubscribe function
+  onPositionStatusChanged(listener: (position: Position) => void): () => void {
+    this.statusChangedListeners.push(listener);
     return () => {
-      this.positionStatusChangedListeners = this.positionStatusChangedListeners.filter(
-        listener => listener !== callback
-      );
+      this.statusChangedListeners = this.statusChangedListeners.filter(l => l !== listener);
     };
-  }
-
-  // ============================================================================
-  // Lifecycle
-  // ============================================================================
-
-  async initialize(): Promise<void> {
-    // No-op for fake implementation
-  }
-
-  async close(): Promise<void> {
-    this.positions.clear();
-    this.positionCapturedListeners = [];
-    this.positionStatusChangedListeners = [];
-  }
-
-  // ============================================================================
-  // Test Helpers
-  // ============================================================================
-
-  /**
-   * Reset the fake provider for test isolation.
-   */
-  reset(): void {
-    this.positions.clear();
-    this.positionCapturedListeners = [];
-    this.positionStatusChangedListeners = [];
   }
 }

@@ -1,27 +1,25 @@
 module.exports = {
-  preset: 'ts-jest',
   testEnvironment: 'node',
-  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
-  testMatch: ['**/__tests__/**/*.test.ts?(x)', '**/tests/**/*.test.ts?(x)', '**/?(*.)+(spec|test).ts?(x)'],
-  moduleNameMapper: {
-    '^@domain/(.*)$': '<rootDir>/src/domain/$1',
-    '^@application/(.*)$': '<rootDir>/src/application/$1',
-    '^@infrastructure/(.*)$': '<rootDir>/src/infrastructure/$1',
-    '^@presentation/(.*)$': '<rootDir>/src/presentation/$1',
-    '^@services/(.*)$': '<rootDir>/src/services/$1',
-    '^@config/(.*)$': '<rootDir>/src/config/$1',
-    '^@tests/(.*)$': '<rootDir>/tests/$1',
-  },
+  testPathIgnorePatterns: ['/node_modules/', '/.expo/'],
   transform: {
     '^.+\\.tsx?$': ['ts-jest', {
       tsconfig: {
-        jsx: 'react-jsx',
+        jsx: 'react',
+        esModuleInterop: true,
+        allowSyntheticDefaultImports: true,
       },
     }],
   },
-  collectCoverageFrom: [
-    'src/**/*.{ts,tsx}',
-    '!src/**/*.d.ts',
-    '!src/**/index.ts',
+  transformIgnorePatterns: [
+    'node_modules/(?!(react-native|expo|@react-native|@expo|@unimodules|unimodules|react-native-screens|react-native-gesture-handler|react-native-vector-icons|react-native-web)/)',
   ],
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
+  setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
+  testMatch: ['<rootDir>/tests/**/*.test.ts'],
+  collectCoverageFrom: ['src/**/*.{ts,tsx}', '!src/**/*.d.ts'],
+  globals: {
+    'ts-jest': {
+      isolatedModules: true,
+    },
+  },
 };

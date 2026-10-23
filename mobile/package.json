@@ -3,7 +3,11 @@
   "version": "1.0.0",
   "scripts": {
     "start": "expo start",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "test": "npm run testing",
+    "test:watch": "npm run testing -- --watch",
+    "test:coverage": "npm run testing -- --coverage",
+    "testing": "node node_modules/.bin/jest"
   },
   "dependencies": {
     "@expo/metro-runtime": "~3.2.3",
@@ -25,6 +29,11 @@
     "uuid": "^14.0.3"
   },
   "devDependencies": {
-    "@types/react-native": "^0.72.8"
+    "@testing-library/jest-native": "^5.4.3",
+    "@testing-library/react-native": "^14.1.0",
+    "@types/jest": "^30.0.0",
+    "@types/react-native": "^0.72.8",
+    "jest": "^30.5.2",
+    "ts-jest": "^29.4.15"
   }
 }

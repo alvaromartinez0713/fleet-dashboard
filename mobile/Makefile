@@ -36,15 +36,15 @@ android: emulator start
 
 test:
 	@echo "Ejecutando tests..."
-	npm test -- --run
+	node ./node_modules/.bin/jest --passWithNoTests
 
 test-watch:
 	@echo "Ejecutando tests en modo watch..."
-	npm test -- --watch
+	node ./node_modules/.bin/jest --watch --passWithNoTests
 
 test-coverage:
 	@echo "Ejecutando tests con cobertura..."
-	npm test -- --coverage --run
+	node ./node_modules/.bin/jest --coverage --passWithNoTests
 
 type-check:
 	@echo "Verificando tipos TypeScript..."
