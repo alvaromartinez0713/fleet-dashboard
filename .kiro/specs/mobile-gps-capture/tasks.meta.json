@@ -1,0 +1,615 @@
+{
+  "pbtResults": {},
+  "executionHistory": {
+    "1. Set up project structure and domain layer foundation": [
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792705589610
+      },
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792705608299
+      },
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792706047467
+      }
+    ],
+    "2.1 Create Position class with status ('pending' | 'sent' | 'error' | 'validation_error')": [
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792705589756
+      },
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792706050669
+      },
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792706369574
+      }
+    ],
+    "2.2 Implement markAsSent() method": [
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792705589961
+      },
+      {
+        "executionId": "037f6498-fffc-404a-8735-1d433048e2b2",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792706534270
+      }
+    ],
+    "2.3 Implement markAsError() method with exponential backoff calculation": [
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792705590086
+      },
+      {
+        "executionId": "037f6498-fffc-404a-8735-1d433048e2b2",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792706534666
+      }
+    ],
+    "2.6 Implement canBeSynced() method": [
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792705590263
+      },
+      {
+        "executionId": "037f6498-fffc-404a-8735-1d433048e2b2",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792706535087
+      }
+    ],
+    "3.1 Implement EventId, VehicleId, TraceId value objects": [
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792705590448
+      },
+      {
+        "executionId": "037f6498-fffc-404a-8735-1d433048e2b2",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792706535655
+      }
+    ],
+    "3.2 Implement Position helper methods for UI": [
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792705590584
+      },
+      {
+        "executionId": "037f6498-fffc-404a-8735-1d433048e2b2",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792706536068
+      }
+    ],
+    "4.1 Create ILocationProvider interface": [
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792705590714
+      },
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792706051188
+      },
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792706367743
+      }
+    ],
+    "4.2 Create IPersistenceProvider interface (extended with backoff support)": [
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792705590842
+      },
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792706051520
+      },
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792706368294
+      }
+    ],
+    "4.3 Create IConnectivityProvider interface": [
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792705591127
+      },
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792706051748
+      },
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792706369082
+      }
+    ],
+    "4.4 Create IApiClient interface": [
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792705591278
+      },
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792706052022
+      },
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792706369415
+      }
+    ],
+    "4.5 Create IClock interface": [
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792705591401
+      },
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792706372704
+      },
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792706454437
+      }
+    ],
+    "4.6 Create IIDGenerator interface": [
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792705591500
+      },
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792706373184
+      },
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792706455072
+      }
+    ],
+    "5.1 Implement CapturePositionUseCase": [
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792705591739
+      },
+      {
+        "executionId": "037f6498-fffc-404a-8735-1d433048e2b2",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792706539670
+      },
+      {
+        "executionId": "037f6498-fffc-404a-8735-1d433048e2b2",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792707251776
+      }
+    ],
+    "5.2 Implement GetCapturedPositionsUseCase": [
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792705591903
+      },
+      {
+        "executionId": "037f6498-fffc-404a-8735-1d433048e2b2",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792706540077
+      },
+      {
+        "executionId": "037f6498-fffc-404a-8735-1d433048e2b2",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792707252760
+      }
+    ],
+    "5.3 Implement StartCaptureUseCase": [
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792705592048
+      },
+      {
+        "executionId": "037f6498-fffc-404a-8735-1d433048e2b2",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792706540374
+      },
+      {
+        "executionId": "037f6498-fffc-404a-8735-1d433048e2b2",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792707253030
+      }
+    ],
+    "5.4 Implement StopCaptureUseCase": [
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792705592181
+      },
+      {
+        "executionId": "037f6498-fffc-404a-8735-1d433048e2b2",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792706540845
+      },
+      {
+        "executionId": "037f6498-fffc-404a-8735-1d433048e2b2",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792707252217
+      }
+    ],
+    "5.5 Implement GetConnectivityStatusUseCase": [
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792705592303
+      },
+      {
+        "executionId": "037f6498-fffc-404a-8735-1d433048e2b2",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792706541024
+      },
+      {
+        "executionId": "037f6498-fffc-404a-8735-1d433048e2b2",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792707253435
+      }
+    ],
+    "6.1 Create SyncPositionUseCase class": [
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792705592439
+      }
+    ],
+    "6.2 Handle 202/200/201 Accepted responses": [
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792705592563
+      }
+    ],
+    "6.3 Differentiate 4xx vs 5xx errors for smart retry decisions": [
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792705592680
+      }
+    ],
+    "6.4 Handle network errors and timeouts as transient errors": [
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792705592828
+      }
+    ],
+    "7.1 Create SyncPendingPositionsUseCase class": [
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792705592948
+      }
+    ],
+    "7.2 Implement concurrent sync with concurrency limit": [
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792705593092
+      }
+    ],
+    "7.3 Return updated positions after sync attempt": [
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792705593215
+      }
+    ],
+    "8.1 Create RetryFailedSyncUseCase as alias/wrapper": [
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792705593343
+      }
+    ],
+    "9.1 Create CaptureAndSyncPositionUseCase": [
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792705593567
+      }
+    ],
+    "10.1 Create SQLite schema migration": [
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792705593754
+      }
+    ],
+    "10.2 Create indexes for query optimization": [
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792705593915
+      }
+    ],
+    "10.3 Create migration runner": [
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792705594050
+      }
+    ],
+    "11.1 Create in-memory FakePersistenceProvider": [
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792705594176
+      }
+    ],
+    "11.2 Implement backoff-aware filtering": [
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792705594327
+      }
+    ],
+    "12.1 Create SQLitePersistenceProvider class": [
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792705594442
+      }
+    ],
+    "12.2 Implement savePosition() and updatePosition() methods": [
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792705594563
+      }
+    ],
+    "12.3 Implement getPositionsPendingRetry() query": [
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792705594683
+      }
+    ],
+    "12.4 Implement getPositionCountsByAllStatus() optimized query": [
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792705594817
+      }
+    ],
+    "12.5 Implement event listener system": [
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792705594951
+      }
+    ],
+    "13.1 Implement RealApiClient": [
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792705595105
+      }
+    ],
+    "13.2 Implement FakeApiClient for testing": [
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792705595248
+      }
+    ],
+    "13.3 Implement RealConnectivityProvider": [
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792705595403
+      }
+    ],
+    "13.4 Implement FakeConnectivityProvider for testing": [
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792705595550
+      }
+    ],
+    "13.5 Implement RealClock and RealIDGenerator": [
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792705595703
+      }
+    ],
+    "14.1 Create PositionItem component": [
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792705595854
+      }
+    ],
+    "14.2 Create \"Sincronizar\" button for PositionItem": [
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792705596005
+      }
+    ],
+    "14.3 Create PositionListHeader component": [
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792705596161
+      }
+    ],
+    "14.4 Create PositionsList component": [
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792705596309
+      }
+    ],
+    "15.1 Create useAutoSync hook": [
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792705596476
+      }
+    ],
+    "15.3 Create useSyncOnReconnect hook": [
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792705596704
+      }
+    ],
+    "15.5 Create usePositionsList hook": [
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792705597037
+      }
+    ],
+    "15.6 Create useConnectivity hook": [
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792705597383
+      }
+    ],
+    "15.7 Create useLocationPermissions hook": [
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792705597614
+      }
+    ],
+    "16.1 Create ServiceFactory": [
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792705597839
+      }
+    ],
+    "16.2 Create DependencyContainer": [
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792705598061
+      }
+    ],
+    "17.1 Create App component": [
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792705598305
+      }
+    ],
+    "17.2 Create CaptureScreen": [
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792705598516
+      }
+    ],
+    "18. Checkpoint - Ensure all unit tests pass": [
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792705598742
+      }
+    ],
+    "19.1 Write capture + immediate sync flow test": [
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792705598907
+      }
+    ],
+    "19.2 Write offline capture + reconnect sync flow test": [
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792705599063
+      }
+    ],
+    "19.3 Write backoff retry flow test": [
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792705599204
+      }
+    ],
+    "19.4 Write 4xx validation error flow test": [
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792705599384
+      }
+    ],
+    "20. Final checkpoint - Ensure all tests pass": [
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792705599685
+      }
+    ],
+    "4. Implement application layer ports (infrastructure abstractions)": [
+      {
+        "executionId": "291328bf-3f63-4288-ad6f-7ef6b2413e36",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792706455405
+      }
+    ],
+    "2. Implement extended Position entity with exponential backoff": [
+      {
+        "executionId": "037f6498-fffc-404a-8735-1d433048e2b2",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792706535221
+      }
+    ],
+    "3. Create domain utilities and helper methods": [
+      {
+        "executionId": "037f6498-fffc-404a-8735-1d433048e2b2",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792706536248
+      }
+    ],
+    "5. Implement core use cases": [
+      {
+        "executionId": "037f6498-fffc-404a-8735-1d433048e2b2",
+        "chatSessionId": "sess_5528332d-54d1-486c-ab4e-68a0ffa3dcc0",
+        "timestamp": 1792707253795
+      }
+    ]
+  }
+}
