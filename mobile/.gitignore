@@ -1,0 +1,95 @@
+# ============================================================================
+# Fleet Mobile - Mobile App .gitignore
+# ============================================================================
+
+# Dependencies
+node_modules/
+/.pnp
+.pnp.js
+
+# Testing
+/coverage
+/.nyc_output
+
+# Production
+/build
+/dist
+/lib
+
+# Misc
+.DS_Store
+*.pem
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# React Native
+.gradle
+.m2
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+web-build/
+
+# Watchman
+.watchmanconfig
+
+# NPM Configuration with tokens
+# .npmrc may contain authentication tokens for private registries
+# Never commit .npmrc files with real credentials
+.npmrc
+.npmrc.local
+
+# Expo Cache and Local Configuration
+# .expo/ contains local Expo configuration and cache
+# This is machine-specific and should not be committed
+.expo/
+.expo-shared/
+
+# EAS Build
+# eas-build/ contains local build artifacts
+eas-build/
+
+# Temporary files
+*.tmp
+*.temp
+tmp/
+temp/
+
+# Platform-specific
+*.apk
+*.aab
+*.ipa

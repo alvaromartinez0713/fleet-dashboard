@@ -120,3 +120,15 @@ node_modules/
 # Backend Go - Environment files for production
 backend/go/.env.prod
 backend/go/.env.local
+
+# NPM Configuration with tokens
+# .npmrc may contain authentication tokens for private registries
+# Never commit .npmrc files with real credentials
+.npmrc
+.npmrc.local
+
+# Expo Cache and Local Configuration
+# .expo/ contains local Expo configuration and cache
+# This is machine-specific and should not be committed
+.expo/
+.expo-shared/
